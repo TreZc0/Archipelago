@@ -1,21 +1,11 @@
-import asyncio
-import Utils
-import websockets
-import functools
-from copy import deepcopy
-from typing import List, Any, Iterable
-from NetUtils import decode, encode, JSONtoTextParser, JSONMessagePart, NetworkItem, NetworkPlayer
-from MultiServer import Endpoint
-from CommonClient import CommonContext, gui_enabled, ClientCommandProcessor, logger, get_base_parser
+from CommonClient import CommonContext, ClientCommandProcessor, logger
 # Python standard libraries
-
 import asyncio
 import json
 import logging
 import os
 import subprocess
 import sys
-
 
 from asyncio import Task
 from datetime import datetime
@@ -36,42 +26,59 @@ from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui
 from NetUtils import ClientStatus
 
 
-
-import logging
-
-logger = logging.getLogger("UnlockerClient")
-
-class UnlockerClient(CommonClient):
+class UnlockerClient(CommonContext):
     game = "Unlocker"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+    async def server_auth(self, password_requested: bool = False):
+        if password_requested and not self.password:
+            await super(TextContext, self).server_auth(password_requested)
+        await self.get_username()
+        await self.send_connect(game="unlocker")
+
+    async def on_package(self, cmd: str, args: dict):
+        # Handle custom server commands for Unlocker
+        if cmd == "ReceivedItems":
+            await self.on_items_received(args["items"])
+        else:
+            await super().on_package(cmd, args)
 
     async def on_items_received(self, items):
-        """
-        Called when items are received from the server.
-        `items` is a list of dicts with keys: item, location, player, flags.
-        """
         for item in items:
             item_name = self.item_id_to_name(item["item"])
-            logger.info(f"Item received: {item_name}")
-            self.unlock_item(item_name)
-            await self.send_item(item_name)
+            logger.info(f"Received item: {item_name}")
+            #check the location with the same id as the item
+            location = self.locations.get(item["location"])
+            self.check_locations(location)
 
     def unlock_item(self, item_name: str):
+        # Implement actual unlock logic here
         logger.info(f"Unlocking item: {item_name}")
-        # ...actual unlock logic...
-
-    async def send_item(self, item_name: str):
-        logger.info(f"Sending item: {item_name}")
-        # Example: send a custom message to the server
-        await self.send_msgs([{
-            "cmd": "Bounce",
-            "tags": ["Unlocker", "ItemSend"],
-            "data": {"item_name": item_name, "player": self.slot}
-        }])
 
     def item_id_to_name(self, item_id):
-        # Implement this mapping based on your item table
-        # For now, just return str(item_id)
-        return str(item_id)
+        # Map item_id to item name using your data package
+        return self.item_names.lookup_in_game(item_id, self.game)
+
+
+
+
+
+async def main():
+    Utils.init_logging("UnlockerClient", exception_logger="Client")
+
+    ctx = UnlockerClient(None, None)
+
+
+    if gui_enabled:
+        ctx.run_gui()
+    ctx.run_cli()
+
+    await ctx.exit_event.wait()
+    await ctx.shutdown()
+
+
+def launch():
+    # use colorama to display colored text highlighting
+    colorama.just_fix_windows_console()
+    asyncio.run(main())
+    colorama.deinit()
