@@ -38,7 +38,7 @@ def generate_player_item_table(item_names, location_name_to_id):
             player_items[name] = {
                 "name": name,
                 "id": location_name_to_id.get(name),
-                "classification": ItemClassification.progression
+#                "classification": ItemClassification.progression   # we need to serialize this, because we put it in the slot data
             }
     return player_items
 
@@ -54,7 +54,6 @@ def generate_player_location_table(player_items, location_name_to_id, item_name_
             "loc_id": location_name_to_id.get(location_name),
             "name": location_name,
             "game": "Unlocker",
-            "classification": ItemClassification.progression,
         }
     return player_locations
 
@@ -85,6 +84,12 @@ class Unlocker(World):
 
     def get_all_unlocker_items(players_dir="Players"):
         unique_items = {}
+        # Ensure the players directory exists
+        if not os.path.exists(players_dir):
+            players_dir = "../" + players_dir  # Adjust path if needed
+        if not os.path.exists(players_dir):
+            players_dir = "../" + players_dir  # twice if we are running from the client in unlocker.
+        yaml_files = os.listdir(players_dir)
         for filename in os.listdir(players_dir):
             if filename.endswith(".yaml"):
                 with open(os.path.join(players_dir, filename), "r", encoding="utf-8") as f:
@@ -125,9 +130,9 @@ class Unlocker(World):
 
     def generate_early(self) -> None:
         items = self.options.item_list.value
+        self.player_item_table = generate_player_item_table(items, self.item_name_to_id)
         self.player_location_table = generate_player_location_table(items, self.location_name_to_id,
                                                                     self.item_name_to_unlocker_location)
-        self.player_item_table = generate_player_item_table(items, self.item_name_to_id)
 
     # Every region in Unlocker is unlocked by an item, the item and the location are tightly coupled.
     def create_regions(self):
@@ -149,8 +154,8 @@ class Unlocker(World):
         items = self.options.item_list.value
         logger.info(f"Creating Unlocker items: {items}")
         for i, (name, data) in enumerate(self.player_item_table.items()):
-            item = UnlockerItem(name, data["classification"], data["id"], self.player)
-            self.multiworld.itempool.append(item)
+            new_item = UnlockerItem(name, ItemClassification.progression, data["id"], self.player) # TODO classification
+            self.multiworld.itempool.append(new_item)
 
     def set_rules(self):
         # completion condition - player wins when they collect all items
@@ -163,12 +168,14 @@ class Unlocker(World):
         self.multiworld.completion_condition[self.player] = completion_rule
 
     def fill_slot_data(self):
-        items = self.options.item_list.value
-        item_to_location_unlock = {
-            item: f"Unlock Slot {i+1}" for i, item in enumerate(items)
-        }
+        location_table = self.player_location_table
+        # make a table of item id to location name
+        item_id_to_location_name = {data["id"]: name for name, data in self.player_location_table.items()}
         return {
-            "item_to_location_unlock": item_to_location_unlock,
+            "item_name_to_unlocker_location": self.item_name_to_unlocker_location,
+            "player_location_table": self.player_location_table,
+            "player_item_table": self.player_item_table,
+            "item_id_to_location_name": item_id_to_location_name,
         }
 
     def generate_output(self, output_directory: str):
