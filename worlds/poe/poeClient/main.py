@@ -73,7 +73,7 @@ def on_press(key):
             print(f"Error executing function for key {key}: {e}")
 
 last_ran_validate_char = 0
-def validate_char(ctx: PathOfExileContext = context):
+def validate_char(ctx: "PathOfExileContext" = context):
     
     # add a debounce timer to the validate_char function. I want this function to run at most every 5 seconds
     global last_ran_validate_char
@@ -138,7 +138,7 @@ def run():
     except KeyboardInterrupt:
         print("Main Loop stopped by user.")
 
-def client_start(ctx: PathOfExileContext):
+def client_start(ctx: "PathOfExileContext"):
     global context
     context = ctx
     run()

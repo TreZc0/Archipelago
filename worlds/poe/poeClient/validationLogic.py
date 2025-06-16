@@ -1,4 +1,5 @@
 import asyncio
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
@@ -37,7 +38,7 @@ async def when_enter_new_zone(line: str):
     await asyncio.sleep(0.5)  # Allow some time for the filter to update
     await inputHelper.send_poe_text("/itemfilter __ap")
 
-async def validate_and_update(character_name: str = character_name, ctx: PathOfExileContext = None) -> bool:   
+async def validate_and_update(character_name: str = character_name, ctx: "PathOfExileContext" = None) -> bool:
     if ctx is None:
         # something is wrong, are we not connected?
         print("Context is None, cannot validate character.")
@@ -71,7 +72,7 @@ async def validate_and_update(character_name: str = character_name, ctx: PathOfE
 
 
 
-async def validate_char(character: gggAPI.Character, ctx: PathOfExileContext) -> bool:
+async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") -> bool:
     # Perform validation logic here
 
     if character is None:
@@ -91,7 +92,7 @@ async def validate_char(character: gggAPI.Character, ctx: PathOfExileContext) ->
 
     return True
 
-async def update_filter(ctx: PathOfExileContext) -> bool:
+async def update_filter(ctx: "PathOfExileContext") -> bool:
     item_filter_string = ""
     missing_location_ids = ctx.missing_locations
     for base_item_location_id in missing_location_ids:
