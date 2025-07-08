@@ -14,7 +14,7 @@ import asyncio
 import colorama
 import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui_enabled
-
+from .poeClient import main as poe_main
 
 
 
@@ -24,6 +24,12 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
     def _cmd_force(self, difficulty: str = "") -> bool:
         self.unlock_all_available_items()
 
+    def _cmd_poe(self, *args) -> bool:
+        """
+        Command to handle Path of Exile specific commands.
+        """
+
+        poe_main.run()
 
 
 class PathOfExileContext(CommonContext):

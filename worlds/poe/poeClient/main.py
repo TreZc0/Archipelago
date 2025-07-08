@@ -1,13 +1,12 @@
 import asyncio
 import os
-from collections import deque
-import fileHelper
-import itemFilter
-import tts
-import baseItemTypes
-import inputHelper
-import validationLogic
-import gggAPI
+from . import fileHelper
+from . import itemFilter
+from . import baseItemTypes
+from . import inputHelper
+from . import validationLogic
+from . import gggAPI
+from . import tts
 from pynput import keyboard
 from pathlib import Path
 
@@ -109,8 +108,7 @@ async def timer_loop():
         validate_char()
         await inputHelper.send_poe_text("/itemfilter __ap")
         await asyncio.sleep(loop_timer)  # Adjust the sleep time as needed
-
-if __name__ == '__main__':
+def run():
     import time
 
     try:
@@ -126,9 +124,8 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Main Loop stopped by user.")
 
-
-
-
+if __name__ == '__main__':
+    run()
 
 
 

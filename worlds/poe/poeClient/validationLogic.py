@@ -1,13 +1,10 @@
 import asyncio
-import os
 
-from win32trace import write
 import itemFilter
 import baseItemTypes
 import gggAPI
 import fileHelper
 import inputHelper
-from pathlib import Path
 
 character_name = "DefaultCharacter"
 found_items_dict = {}

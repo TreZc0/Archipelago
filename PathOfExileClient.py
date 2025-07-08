@@ -3,7 +3,7 @@ from __future__ import annotations
 import ModuleUpdate
 ModuleUpdate.update()
 
-from worlds.unlocker.client import launch
+from worlds.poe.Client import launch
 import Utils
 
 if __name__ == "__main__":

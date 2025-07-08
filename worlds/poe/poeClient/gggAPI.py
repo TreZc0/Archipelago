@@ -5,7 +5,7 @@ import gggOAuth
 import os
 import fileHelper
 
-from typing import List, Optional, Dict, Any, get_origin, Coroutine
+from typing import List, Optional, Dict, Any
 from pathlib import Path
 from dataclasses import dataclass, field
 # if gggOAuth.access_token does not exist, run get_access_token to set it
@@ -461,7 +461,7 @@ async def async_get_access_token():
             if _debug:
                 print("[DEBUG] Using existing valid access token from gggOAuth.")
             return gggOAuth.access_token
-        if gggOAuth.access_token and ( gggOAuth.token_expire_time == None or gggOAuth.token_expire_time < time.time() ):
+        if gggOAuth.access_token and (gggOAuth.token_expire_time == None or gggOAuth.token_expire_time < time.time()):
             if _debug:
                 print("[DEBUG] Existing access token is expired, lets request a new one.")
             return await request_new_access_token()
