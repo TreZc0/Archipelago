@@ -11,7 +11,7 @@ logger = logging.getLogger("poe")
 
 def launch_client():
     from . import Client
-    launch_subprocess(client.launch, name="poeClient", )
+    launch_subprocess(Client.launch, name="poeClient", )
 
 components.append(Component("Path of Exile Client",
                             func=launch_client,

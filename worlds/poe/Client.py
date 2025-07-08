@@ -1,7 +1,21 @@
+
+import os
+import sys
+
+# Add local wheels to sys.path
+vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
+for subdir in os.listdir(vendor_dir):
+    full_path = os.path.join(vendor_dir, subdir)
+    if os.path.isdir(full_path):
+        sys.path.insert(0, full_path)
+
+
 import asyncio
 import colorama
 import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui_enabled
+
+
 
 
 class PathOfExileCommandProcessor(ClientCommandProcessor):
