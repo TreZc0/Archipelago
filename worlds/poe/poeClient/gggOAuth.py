@@ -7,7 +7,14 @@ import hashlib
 import os
 import requests
 import asyncio
-import httpx
+
+import sys
+vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
+for subdir in os.listdir(vendor_dir):
+    full_path = os.path.join(vendor_dir, subdir)
+    if os.path.isdir(full_path):
+        sys.path.insert(0, full_path)
+from vendor import httpx
 import time
 
 # === CONFIG ===
