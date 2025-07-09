@@ -1,20 +1,19 @@
+# Do the vendor imports
+import os
+import sys
+vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
+if vendor_dir not in sys.path:
+    sys.path.insert(0, vendor_dir)
+
 import http.server
 import socketserver
 import urllib.parse
 import webbrowser
 import base64
 import hashlib
-import os
 import requests
 import asyncio
-
-import sys
-vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
-for subdir in os.listdir(vendor_dir):
-    full_path = os.path.join(vendor_dir, subdir)
-    if os.path.isdir(full_path):
-        sys.path.insert(0, full_path)
-from vendor import httpx
+import httpx
 import time
 
 # === CONFIG ===

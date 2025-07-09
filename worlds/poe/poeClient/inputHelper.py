@@ -10,7 +10,7 @@ import os
 
 # Now safe to import
 import asyncio
-from ../ import pygetwindow as gw
+import pygetwindow as gw
 import tkinter as tk
 import time
 from pynput.keyboard import Controller, Key

@@ -1,12 +1,17 @@
-import asyncio
+# Do the vendor imports
 import os
-from . import fileHelper
-from . import itemFilter
-from . import baseItemTypes
-from . import inputHelper
-from . import validationLogic
-from . import gggAPI
-from . import tts
+import sys
+vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
+if vendor_dir not in sys.path:
+    sys.path.insert(0, vendor_dir)
+import asyncio
+import fileHelper
+import itemFilter
+import baseItemTypes
+import inputHelper
+import validationLogic
+import gggAPI
+import tts
 from pynput import keyboard
 from pathlib import Path
 
