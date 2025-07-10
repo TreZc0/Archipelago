@@ -5,17 +5,17 @@ vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
 if vendor_dir not in sys.path:
     sys.path.insert(0, vendor_dir)
 import asyncio
-import fileHelper
-import itemFilter
-import baseItemTypes
-import inputHelper
-import validationLogic
-import gggAPI
-import tts
+from . import fileHelper
+from . import itemFilter
+from . import baseItemTypes
+from . import inputHelper
+from . import validationLogic
+from . import gggAPI
+from . import tts
 from pynput import keyboard
 from pathlib import Path
 
-character_name = "merc_MY_FIREEE"
+character_name = None
 _generate_wav = False  # Set to True if you want to generate the wav files
 validate_char_debounce_time = 5  # seconds
 loop_timer = 60  # Time in seconds to wait before reloading the item filter
@@ -114,22 +114,35 @@ async def timer_loop():
         await inputHelper.send_poe_text("/itemfilter __ap")
         await asyncio.sleep(loop_timer)  # Adjust the sleep time as needed
 def run():
+    try:
+        if asyncio.get_event_loop().is_running():
+            # If already in an event loop, schedule as a task
+            asyncio.create_task(main_async())
+        else:
+            asyncio.run(main_async())
+    except KeyboardInterrupt:
+        print("Main Loop stopped by user.")
+
+async def main_async():
     import time
 
     try:
         start_time = time.time()
-        asyncio.run(load_async())
+        await load_async()
 
         elapsed_time = time.time() - start_time
         print(f"Generated item filter and TTS files in {elapsed_time:.2f} seconds.")
         print(f"Starting polling, watching for changes at {path_to_client_txt}...")
-        asyncio.run(fileHelper.callback_on_zone_change(path_to_client_txt, validationLogic.when_enter_new_zone))
+        await fileHelper.callback_on_zone_change(path_to_client_txt, validationLogic.when_enter_new_zone)
         print(f"Starting Main Loop...")
-        asyncio.run(timer_loop())
+        await timer_loop()
     except KeyboardInterrupt:
         print("Main Loop stopped by user.")
 
 if __name__ == '__main__':
+    # Set the character name here or pass it as an argument
+    character_name = "merc_MY_FIREEE"  # Replace with your character name
+
     run()
 
 

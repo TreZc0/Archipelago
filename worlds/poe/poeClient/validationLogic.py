@@ -1,10 +1,10 @@
 import asyncio
 
-import itemFilter
-import baseItemTypes
-import gggAPI
-import fileHelper
-import inputHelper
+from . import itemFilter
+from . import baseItemTypes
+from . import gggAPI
+from . import fileHelper
+from . import inputHelper
 
 character_name = "DefaultCharacter"
 found_items_dict = {}

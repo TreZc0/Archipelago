@@ -1,9 +1,10 @@
 import httpx
 import asyncio
 import time
-import gggOAuth
 import os
-import fileHelper
+
+from . import gggOAuth
+from . import fileHelper
 
 from typing import List, Optional, Dict, Any
 from pathlib import Path
@@ -88,7 +89,6 @@ async def _rate_limited_request(method, url, **kwargs):
             access_token = await async_get_access_token()
 
     return response
-
 
 async def _rate_limited_access_request(method, url, **kwargs):
     await rate_limiter.acquire()

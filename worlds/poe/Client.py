@@ -1,42 +1,62 @@
-
-import os
-import sys
-
-# Add local wheels to sys.path
-vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
-for subdir in os.listdir(vendor_dir):
-    full_path = os.path.join(vendor_dir, subdir)
-    if os.path.isdir(full_path):
-        sys.path.insert(0, full_path)
-
-
 import asyncio
 import colorama
 import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui_enabled
 from .poeClient import main as poe_main
+from .poeClient import gggAPI
 
 
+def sync_run_async(coroutine):
+    """Run an async coroutine in a synchronous context.
+    If an event loop is already running, it creates a task and returns a Future.
+    If no event loop is running, it uses asyncio.run to execute the coroutine.
+    """
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No event loop running, safe to use asyncio.run
+        return asyncio.run(coroutine)
+    else:
+        # Already in an event loop, create a task and return a Future
+        return asyncio.create_task(coroutine)
 
 class PathOfExileCommandProcessor(ClientCommandProcessor):
 
 
-    def _cmd_force(self, difficulty: str = "") -> bool:
-        self.unlock_all_available_items()
+    def _cmd_testing(self) -> bool:
+        """A test command to check if the command processor is working."""
+        return True
 
-    def _cmd_poe(self, *args) -> bool:
-        """
-        Command to handle Path of Exile specific commands.
-        """
+    def _cmd_poe_auth(self) -> bool:
+        """Authenticate with Path of Exile's OAuth2 service."""
+        sync_run_async(gggAPI.request_new_access_token())
 
+
+
+    def _cmd_poe_char_name(self, character_name: str = "") -> bool:
+        """Set the character name for the Path of Exile client."""
+        poe_main.character_name = character_name
+        if not character_name:
+            self.output("ERROR: Please provide a character name.")
+            return False
+        else:
+            self.output(f"Character name set to: {character_name}")
+
+    def _cmd_start_poe(self) -> bool:
+        """Start the Path of Exile client."""
+        if not poe_main.character_name:
+            self.output("ERROR: Please set your character name first using 'poe_char_name <name>'.")
+            return False
+        self.output(f"Starting Path of Exile client for character: {poe_main.character_name}")
         poe_main.run()
+        return True
 
 
 class PathOfExileContext(CommonContext):
     game = "Path of Exile"
     command_processor = PathOfExileCommandProcessor
     items_handling = 0b111
-    __debug = True  # Enable debug mode for Unlocker client
+    _debug = True  # Enable debug mode for poe client
 
     item_name_to_unlocker_location = {} # remove this I think?
     required_for_finish_player_location_table = {}
@@ -46,7 +66,7 @@ class PathOfExileContext(CommonContext):
         if password_requested and not self.password:
             await super(TextContext, self).server_auth(password_requested)
         await self.get_username()
-        await self.send_connect(game="Unlocker")
+        await self.send_connect(game="Path of Exile")
 
     def on_package(self, cmd: str, args: dict):
         if cmd == 'Connected':
@@ -58,6 +78,9 @@ class PathOfExileContext(CommonContext):
 
     def run_gui(self) -> None:
         #from .ClientGui import start_gui # custom UI
+
+        #
+
         #start_gui(self)
         super().run_gui()
 
