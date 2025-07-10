@@ -4,6 +4,12 @@ import sys
 vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
 if vendor_dir not in sys.path:
     sys.path.insert(0, vendor_dir)
+for subdir in os.listdir(vendor_dir):
+    full_path = os.path.join(vendor_dir, subdir)
+    if os.path.isdir(full_path):
+        sys.path.insert(0, full_path)
+    print("Adding vendor directory to sys.path:", full_path)
+
 import asyncio
 from . import fileHelper
 from . import itemFilter
@@ -15,7 +21,7 @@ from . import tts
 from pynput import keyboard
 from pathlib import Path
 
-character_name = None
+character_name = "merc_MY_FIREEE"
 _generate_wav = False  # Set to True if you want to generate the wav files
 validate_char_debounce_time = 5  # seconds
 loop_timer = 60  # Time in seconds to wait before reloading the item filter

@@ -202,3 +202,4 @@ Thumbs.db
 /worlds/poe/poeClient/vendor/comtypes/gen/
 /access_token.txt
 /found_items.txt
+/worlds/poe/poeClient/vendor/pyttsx3/comtypes/gen/
