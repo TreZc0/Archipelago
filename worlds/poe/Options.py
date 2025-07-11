@@ -6,19 +6,38 @@ from worlds.AutoWorld import World
 
 
 
-class GearUpgrades(Toggle):
+class GearUpgrades(Choice):
     """
     Specifies if gear should be restricted to a certain rarity, unlockable through items found in the multiworld.
     """
-    display_name = "Gear Upgrades"
-    default = True
+    display_name = "Gear Unlocks"
+    NoRestrictionOnAnyGear = 0
+    NoRestrictionOnUniqueGear = 1
+    UnlockableRestrictionOnAllGear = 2
+    default = 2
 
 class FlaskSlotUpgrades(Toggle):
     """
-    Specifies if number of flask slots should be restricted, unlockable through items found in the multiworld.
+    Specifies if the number of flask slots should be restricted, unlockable through items found in the multiworld.
     """
     display_name = "Flask Slot Upgrades"
     default = True
+
+class SupportGemSlotUpgrades(Toggle):
+    """
+    Specifies if the number support gem slots should be restricted, unlockable through items found in the multiworld.
+    """
+    display_name = "Support Gem Slot Upgrades"
+    default = True
+
+class GucciHoboMode(Toggle):
+    """
+    Specifies if the world should be in Gucci Hobo Mode, this restricts use of any non-unique equipment to only 1 slot.
+    (this will probobly be very difficult to play with)
+    """
+    display_name = "Gucci Hobo Mode"
+    default = False
+
 
 class GearUpgradesPerAct(Range):
     """
@@ -41,6 +60,15 @@ class FlaskSlotsPerAct(Range):
     range_end = 5
     default = 1
 
+class SupportGemSlotsPerAct(Range):
+    """
+    Specifies a minimum number of available support gem slots per act. (there are 19 total)
+    This will be ignored if the "Support Gem Slot Upgrades" option is turned off.
+    """
+    display_name = "Support Gem Slots Per Act"
+    range_start = 0
+    range_end = 19
+    default = 2
 
 class AscendanciesAvailablePerClass(Range):
     """
