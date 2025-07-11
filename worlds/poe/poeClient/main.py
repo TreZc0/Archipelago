@@ -6,9 +6,9 @@ if vendor_dir not in sys.path:
     sys.path.insert(0, vendor_dir)
 for subdir in os.listdir(vendor_dir):
     full_path = os.path.join(vendor_dir, subdir)
-    if os.path.isdir(full_path):
-        sys.path.insert(0, full_path)
-    print("Adding vendor directory to sys.path:", full_path)
+    if full_path not in sys.path:
+        if os.path.isdir(full_path):
+            sys.path.insert(0, full_path)
 
 import asyncio
 from . import fileHelper

@@ -192,6 +192,23 @@ class Win32Window(BaseWindow):
         https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-getwindowrect
         """
         rect = RECT()
+
+        import inspect
+        import platform
+        import sys
+        print("================================================")
+        print("RECT type:", type(rect))
+        print("RECT module:", inspect.getmodule(type(rect)))
+        print("RECT bases:", type(rect).__bases__)
+        print("sys.path:", sys.path)
+        for k in sys.modules:
+            if "pygetwindow" in k:
+                print(k, sys.modules[k])
+        print("Python executable:", sys.executable)
+        print("Python version:", sys.version)
+        print("Architecture:", platform.architecture())
+        print("================================================")
+
         result = ctypes.windll.user32.GetWindowRect(self._hWnd, ctypes.byref(rect))
         if result != 0:
             return Rect(rect.left, rect.top, rect.right, rect.bottom)
