@@ -1,5 +1,5 @@
 import ctypes
-from ctypes import wintypes # We can't use ctypes.wintypes, we must import wintypes this way.
+from ctypes import wintypes  # We can't use ctypes.wintypes, we must import wintypes this way.
 
 from pygetwindow import PyGetWindowException, pointInRect, BaseWindow, Rect, Point, Size
 
@@ -40,16 +40,15 @@ getWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
 isWindowVisible = ctypes.windll.user32.IsWindowVisible
 
 
-class RECT(ctypes.Structure):
-    """A nice wrapper of the RECT structure.
+# Use the RECT structure from ctypes.wintypes to ensure compatibility with
+# other libraries (such as Kivy) that may set argtypes for GetWindowRect.
+RECT = wintypes.RECT
 
-    Microsoft Documentation:
-    https://msdn.microsoft.com/en-us/library/windows/desktop/dd162897(v=vs.85).aspx
-    """
-    _fields_ = [('left', ctypes.c_long),
-                ('top', ctypes.c_long),
-                ('right', ctypes.c_long),
-                ('bottom', ctypes.c_long)]
+# Prepare the GetWindowRect function with explicit argtypes using wintypes.RECT
+GetWindowRect = ctypes.windll.user32.GetWindowRect
+GetWindowRect.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.RECT)]
+GetWindowRect.restype = wintypes.BOOL
+
 
 
 def _getAllTitles():
@@ -193,23 +192,7 @@ class Win32Window(BaseWindow):
         """
         rect = RECT()
 
-        import inspect
-        import platform
-        import sys
-        print("================================================")
-        print("RECT type:", type(rect))
-        print("RECT module:", inspect.getmodule(type(rect)))
-        print("RECT bases:", type(rect).__bases__)
-        print("sys.path:", sys.path)
-        for k in sys.modules:
-            if "pygetwindow" in k:
-                print(k, sys.modules[k])
-        print("Python executable:", sys.executable)
-        print("Python version:", sys.version)
-        print("Architecture:", platform.architecture())
-        print("================================================")
-
-        result = ctypes.windll.user32.GetWindowRect(self._hWnd, ctypes.byref(rect))
+        result = GetWindowRect(self._hWnd, ctypes.byref(rect))
         if result != 0:
             return Rect(rect.left, rect.top, rect.right, rect.bottom)
         else:
