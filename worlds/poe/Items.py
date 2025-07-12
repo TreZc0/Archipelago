@@ -4,6 +4,7 @@ from typing import TypedDict, Dict, Set
 class ItemDict(TypedDict, total=False): 
     classification: ItemClassification 
     count: int | None
+    id : int
     name: str 
     category: list[str]
     reqLevel: int | None
@@ -24,56 +25,11 @@ class PathOfExileItem(Item):
 #    """
 #    return items
 
-def get_flask_items() -> Set[ItemDict]:
-    """
-    Returns a set of all flask items available in the Path of Exile world.
-    """
-    return {item for item in item_table.values() if "Flask" in item["category"]}
 
-def get_character_class_items() -> Set[ItemDict]:
-    """
-    Returns a set of all character class items available in the Path of Exile world.
-    """
-    return {item for item in item_table.values() if "Character Class" in item["category"]}
-
-def get_ascendancy_items() -> Set[ItemDict]:
-    """
-    Returns a set of all ascendancy items available in the Path of Exile world.
-    """
-    return {item for item in item_table.values() if "Ascendancy" in item["category"]}
-
-def get_ascendancy_class_items(class_name: str) -> Set[ItemDict]:
-    """
-    Returns a set of all ascendancy items available for a specific class in the Path of Exile world.
-    """
-    return {item for item in item_table.values() if "Ascendancy" in item["category"] and class_name in item["category"]}
-
-def get_main_skill_gem_items() -> Set[ItemDict]:
-    """
-    Returns a set of all main skill gem items available in the Path of Exile world.
-    """
-    return {item for item in item_table.values() if "MainSkillGem" in item["category"]}
-
-def get_main_skill_gem_items_under_level(level: int) -> Set[ItemDict]:
-    """
-    Returns a set of all Main skill gem items available under a specific level in the Path of Exile world.
-    """
-    return {item for item in item_table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is None or item["reqLevel"] < level)}
-
-def get_gear_items() -> Set[ItemDict]:
-    """
-    Returns a set of all gear items available in the Path of Exile world.
-    """
-    return {item for item in item_table.values() if "Gear" in item["category"]}
-
-def get_max_links_items() -> Set[ItemDict]:
-    """
-    Returns a set of all max links items available in the Path of Exile world.
-    """
-    return {item for item in item_table.values() if "max links" in item["category"]}
 
 item_table: Dict[int, ItemDict] = {
    1: {
+    "id": 1,
     "category": [
       "Flask",
       "Normal"
@@ -82,6 +38,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Normal Flask in Slot 1"
   },
    2: {
+    "id": 2,
     "category": [
       "Flask",
       "Normal"
@@ -90,6 +47,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Normal Flask in Slot 2"
   },
    3: {
+    "id": 3,
     "category": [
       "Flask",
       "Normal"
@@ -98,6 +56,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Normal Flask in Slot 3"
   },
    4: {
+    "id": 4,
     "category": [
       "Flask",
       "Normal"
@@ -106,6 +65,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Normal Flask in Slot 4"
   },
    5: {
+    "id": 5,
     "category": [
       "Flask",
       "Normal"
@@ -114,6 +74,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Normal Flask in Slot 5"
   },
    6: {
+    "id": 6,
     "category": [
       "Flask",
       "Magic"
@@ -122,6 +83,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Flask in Slot 1"
   },
    7: {
+    "id": 7,
     "category": [
       "Flask",
       "Magic"
@@ -130,6 +92,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Flask in Slot 2"
   },
    8: {
+    "id": 8,
     "category": [
       "Flask",
       "Magic"
@@ -138,6 +101,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Flask in Slot 3"
   },
    9: {
+    "id": 9,
     "category": [
       "Flask",
       "Magic"
@@ -146,6 +110,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Flask in Slot 4"
   },
    10: {
+    "id": 10,
     "category": [
       "Flask",
       "Magic"
@@ -154,6 +119,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Flask in Slot 5"
   },
    11: {
+    "id": 11,
     "category": [
       "Character Class",
       "Base Class"
@@ -162,6 +128,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Scion"
   },
    12: {
+    "id": 12,
     "category": [
       "Character Class",
       "Base Class"
@@ -170,6 +137,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Marauder"
   },
    13: {
+    "id": 13,
     "category": [
       "Character Class",
       "Base Class"
@@ -178,6 +146,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Duelist"
   },
    14: {
+    "id": 14,
     "category": [
       "Character Class",
       "Base Class"
@@ -186,6 +155,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ranger"
   },
    15: {
+    "id": 15,
     "category": [
       "Character Class",
       "Base Class"
@@ -194,6 +164,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Shadow"
   },
    16: {
+    "id": 16,
     "category": [
       "Character Class",
       "Base Class"
@@ -202,6 +173,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Witch"
   },
    17: {
+    "id": 17,
     "category": [
       "Character Class",
       "Base Class"
@@ -210,6 +182,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Templar"
   },
    18: {
+    "id": 18,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -219,6 +192,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ascendant"
   },
    19: {
+    "id": 19,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -228,6 +202,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Berserker"
   },
    20: {
+    "id": 20,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -237,6 +212,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Chieftain"
   },
    21: {
+    "id": 21,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -246,6 +222,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Juggernaut"
   },
    22: {
+    "id": 22,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -255,6 +232,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Champion"
   },
    23: {
+    "id": 23,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -264,6 +242,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Gladiator"
   },
    24: {
+    "id": 24,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -273,6 +252,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Slayer"
   },
    25: {
+    "id": 25,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -282,6 +262,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Deadeye"
   },
    26: {
+    "id": 26,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -291,6 +272,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Pathfinder"
   },
    27: {
+    "id": 27,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -300,6 +282,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Warden"
   },
    28: {
+    "id": 28,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -309,6 +292,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Assassin"
   },
    29: {
+    "id": 29,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -318,6 +302,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Saboteur"
   },
    30: {
+    "id": 30,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -327,6 +312,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Trickster"
   },
    31: {
+    "id": 31,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -336,6 +322,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Elementalist"
   },
    32: {
+    "id": 32,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -345,6 +332,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Necromancer"
   },
    33: {
+    "id": 33,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -354,6 +342,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Occultist"
   },
    34: {
+    "id": 34,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -363,6 +352,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Guardian"
   },
    35: {
+    "id": 35,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -372,6 +362,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Hierophant"
   },
    36: {
+    "id": 36,
     "category": [
       "Character Class",
       "Ascendancy",
@@ -381,6 +372,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Inquisitor"
   },
    37: {
+    "id": 37,
     "category": [
       "Gear",
       "Normal"
@@ -389,6 +381,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Axes"
   },
    38: {
+    "id": 38,
     "category": [
       "Gear",
       "Normal"
@@ -397,6 +390,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Bows"
   },
    39: {
+    "id": 39,
     "category": [
       "Gear",
       "Normal"
@@ -405,6 +399,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Claws"
   },
    40: {
+    "id": 40,
     "category": [
       "Gear",
       "Normal"
@@ -413,6 +408,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Daggers"
   },
    41: {
+    "id": 41,
     "category": [
       "Gear",
       "Normal"
@@ -421,6 +417,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Maces"
   },
    42: {
+    "id": 42,
     "category": [
       "Gear",
       "Normal"
@@ -429,6 +426,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Sceptres"
   },
    43: {
+    "id": 43,
     "category": [
       "Gear",
       "Normal"
@@ -437,6 +435,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Staves"
   },
    44: {
+    "id": 44,
     "category": [
       "Gear",
       "Normal"
@@ -445,6 +444,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Swords"
   },
    45: {
+    "id": 45,
     "category": [
       "Gear",
       "Normal"
@@ -453,6 +453,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Wands"
   },
    46: {
+    "id": 46,
     "category": [
       "Gear",
       "Normal"
@@ -461,6 +462,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Body Armour"
   },
    47: {
+    "id": 47,
     "category": [
       "Gear",
       "Normal"
@@ -469,6 +471,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Boots"
   },
    48: {
+    "id": 48,
     "category": [
       "Gear",
       "Normal"
@@ -477,6 +480,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Gloves"
   },
    49: {
+    "id": 49,
     "category": [
       "Gear",
       "Normal"
@@ -485,6 +489,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Helmet"
   },
    50: {
+    "id": 50,
     "category": [
       "Gear",
       "Normal"
@@ -493,6 +498,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Amulet"
   },
    51: {
+    "id": 51,
     "category": [
       "Gear",
       "Normal"
@@ -501,6 +507,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Belt"
   },
    52: {
+    "id": 52,
     "category": [
       "Gear",
       "Normal"
@@ -509,6 +516,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Ring (left)"
   },
    53: {
+    "id": 53,
     "category": [
       "Gear",
       "Normal"
@@ -517,6 +525,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Ring (right)"
   },
    54: {
+    "id": 54,
     "category": [
       "Gear",
       "Normal"
@@ -525,6 +534,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Quiver"
   },
    55: {
+    "id": 55,
     "category": [
       "Gear",
       "Normal"
@@ -533,6 +543,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Magic Shield"
   },
    56: {
+    "id": 56,
     "category": [
       "Gear",
       "Rare"
@@ -541,6 +552,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Axes"
   },
    57: {
+    "id": 57,
     "category": [
       "Gear",
       "Rare"
@@ -549,6 +561,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Bows"
   },
    58: {
+    "id": 58,
     "category": [
       "Gear",
       "Rare"
@@ -557,6 +570,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Claws"
   },
    59: {
+    "id": 59,
     "category": [
       "Gear",
       "Rare"
@@ -565,6 +579,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Daggers"
   },
    60: {
+    "id": 60,
     "category": [
       "Gear",
       "Rare"
@@ -573,6 +588,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Maces"
   },
    61: {
+    "id": 61,
     "category": [
       "Gear",
       "Rare"
@@ -581,6 +597,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Sceptres"
   },
    62: {
+    "id": 62,
     "category": [
       "Gear",
       "Rare"
@@ -589,6 +606,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Staves"
   },
    63: {
+    "id": 63,
     "category": [
       "Gear",
       "Rare"
@@ -597,6 +615,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Swords"
   },
    64: {
+    "id": 64,
     "category": [
       "Gear",
       "Rare"
@@ -605,6 +624,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Wands"
   },
    65: {
+    "id": 65,
     "category": [
       "Gear",
       "Rare"
@@ -613,6 +633,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Body Armour"
   },
    66: {
+    "id": 66,
     "category": [
       "Gear",
       "Rare"
@@ -621,6 +642,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Boots"
   },
    67: {
+    "id": 67,
     "category": [
       "Gear",
       "Rare"
@@ -629,6 +651,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Gloves"
   },
    68: {
+    "id": 68,
     "category": [
       "Gear",
       "Rare"
@@ -637,6 +660,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Helmet"
   },
    69: {
+    "id": 69,
     "category": [
       "Gear",
       "Rare"
@@ -645,6 +669,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Amulet"
   },
    70: {
+    "id": 70,
     "category": [
       "Gear",
       "Rare"
@@ -653,6 +678,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Belt"
   },
    71: {
+    "id": 71,
     "category": [
       "Gear",
       "Rare"
@@ -661,6 +687,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Ring (left)"
   },
    72: {
+    "id": 72,
     "category": [
       "Gear",
       "Rare"
@@ -669,6 +696,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Ring (right)"
   },
    73: {
+    "id": 73,
     "category": [
       "Gear",
       "Rare"
@@ -677,6 +705,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Quiver"
   },
    74: {
+    "id": 74,
     "category": [
       "Gear",
       "Rare"
@@ -685,6 +714,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rare Shield"
   },
    75: {
+    "id": 75,
     "category": [
       "Gear",
       "Unique"
@@ -693,6 +723,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Axes"
   },
    76: {
+    "id": 76,
     "category": [
       "Gear",
       "Unique"
@@ -701,6 +732,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Bows"
   },
    77: {
+    "id": 77,
     "category": [
       "Gear",
       "Unique"
@@ -709,6 +741,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Claws"
   },
    78: {
+    "id": 78,
     "category": [
       "Gear",
       "Unique"
@@ -717,6 +750,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Daggers"
   },
    79: {
+    "id": 79,
     "category": [
       "Gear",
       "Unique"
@@ -725,6 +759,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Maces"
   },
    80: {
+    "id": 80,
     "category": [
       "Gear",
       "Unique"
@@ -733,6 +768,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Sceptres"
   },
    81: {
+    "id": 81,
     "category": [
       "Gear",
       "Unique"
@@ -741,6 +777,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Staves"
   },
    82: {
+    "id": 82,
     "category": [
       "Gear",
       "Unique"
@@ -749,6 +786,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Swords"
   },
    83: {
+    "id": 83,
     "category": [
       "Gear",
       "Unique"
@@ -757,6 +795,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Wands"
   },
    84: {
+    "id": 84,
     "category": [
       "Gear",
       "Unique"
@@ -765,6 +804,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Body Armour"
   },
    85: {
+    "id": 85,
     "category": [
       "Gear",
       "Unique"
@@ -773,6 +813,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Boots"
   },
    86: {
+    "id": 86,
     "category": [
       "Gear",
       "Unique"
@@ -781,6 +822,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Gloves"
   },
    87: {
+    "id": 87,
     "category": [
       "Gear",
       "Unique"
@@ -789,6 +831,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Helmet"
   },
    88: {
+    "id": 88,
     "category": [
       "Gear",
       "Unique"
@@ -797,6 +840,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Amulet"
   },
    89: {
+    "id": 89,
     "category": [
       "Gear",
       "Unique"
@@ -805,6 +849,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Belt"
   },
    90: {
+    "id": 90,
     "category": [
       "Gear",
       "Unique"
@@ -813,6 +858,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Ring (left)"
   },
    91: {
+    "id": 91,
     "category": [
       "Gear",
       "Unique"
@@ -821,6 +867,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Ring (right)"
   },
    92: {
+    "id": 92,
     "category": [
       "Gear",
       "Unique"
@@ -829,6 +876,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Quiver"
   },
    93: {
+    "id": 93,
     "category": [
       "Gear",
       "Unique"
@@ -837,6 +885,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unique Shield"
   },
    94: {
+    "id": 94,
     "category": [
       "max links"
     ],
@@ -845,6 +894,7 @@ item_table: Dict[int, ItemDict] = {
     "count": 3,
   },
    95: {
+    "id": 95,
     "category": [
       "max links"
     ],
@@ -853,6 +903,7 @@ item_table: Dict[int, ItemDict] = {
     "count": 3,
   },
    96: {
+    "id": 96,
     "category": [
       "max links"
     ],
@@ -861,6 +912,7 @@ item_table: Dict[int, ItemDict] = {
     "count": 3,
   },
    97: {
+    "id": 97,
     "category": [
       "max links"
     ],
@@ -869,6 +921,7 @@ item_table: Dict[int, ItemDict] = {
     "count": 5,
   },
    98: {
+    "id": 98,
     "category": [
       "max links"
     ],
@@ -877,6 +930,7 @@ item_table: Dict[int, ItemDict] = {
     "count": 5,
   },
    99: {
+    "id": 99,
     "category": [
       "max links"
     ],
@@ -885,6 +939,7 @@ item_table: Dict[int, ItemDict] = {
     "count": 3,
   },
    100: {
+    "id": 100,
     "category": [
       "SupportGem"
     ],
@@ -893,6 +948,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Focused Channelling Support"
   },
    101: {
+    "id": 101,
     "category": [
       "MainSkillGem"
     ],
@@ -901,6 +957,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Crushing Fist"
   },
    102: {
+    "id": 102,
     "category": [
       "UtilSkillGem"
     ],
@@ -909,6 +966,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vengeful Cry"
   },
    103: {
+    "id": 103,
     "category": [
       "MainSkillGem"
     ],
@@ -917,6 +975,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Eviscerate"
   },
    104: {
+    "id": 104,
     "category": [
       "MainSkillGem"
     ],
@@ -925,6 +984,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Swordstorm"
   },
    105: {
+    "id": 105,
     "category": [
       "MainSkillGem"
     ],
@@ -933,6 +993,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Glacial Shield Swipe"
   },
    106: {
+    "id": 106,
     "category": [
       "MainSkillGem"
     ],
@@ -941,6 +1002,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Divine Retribution"
   },
    107: {
+    "id": 107,
     "category": [
       "SupportGem"
     ],
@@ -949,6 +1011,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Overexertion Support"
   },
    108: {
+    "id": 108,
     "category": [
       "SupportGem"
     ],
@@ -957,6 +1020,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Expert Retaliation Support"
   },
    109: {
+    "id": 109,
     "category": [
       "SupportGem"
     ],
@@ -965,6 +1029,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rupture Support"
   },
    110: {
+    "id": 110,
     "category": [
       "MainSkillGem"
     ],
@@ -973,6 +1038,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Animate Weapon"
   },
    111: {
+    "id": 111,
     "category": [
       "MainSkillGem"
     ],
@@ -981,6 +1047,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Artillery Ballista"
   },
    112: {
+    "id": 112,
     "category": [
       "MainSkillGem"
     ],
@@ -989,6 +1056,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Barrage"
   },
    113: {
+    "id": 113,
     "category": [
       "MainSkillGem"
     ],
@@ -997,6 +1065,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bear Trap"
   },
    114: {
+    "id": 114,
     "category": [
       "MainSkillGem"
     ],
@@ -1005,6 +1074,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blade Blast"
   },
    115: {
+    "id": 115,
     "category": [
       "MainSkillGem"
     ],
@@ -1013,6 +1083,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blade Flurry"
   },
    116: {
+    "id": 116,
     "category": [
       "MainSkillGem"
     ],
@@ -1021,6 +1092,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blade Trap"
   },
    117: {
+    "id": 117,
     "category": [
       "MainSkillGem"
     ],
@@ -1029,6 +1101,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blade Vortex"
   },
    118: {
+    "id": 118,
     "category": [
       "MainSkillGem"
     ],
@@ -1037,6 +1110,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bladefall"
   },
    119: {
+    "id": 119,
     "category": [
       "MainSkillGem"
     ],
@@ -1045,6 +1119,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blast Rain"
   },
    120: {
+    "id": 120,
     "category": [
       "MainSkillGem"
     ],
@@ -1053,6 +1128,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Burning Arrow"
   },
    121: {
+    "id": 121,
     "category": [
       "MainSkillGem"
     ],
@@ -1061,6 +1137,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Caustic Arrow"
   },
    122: {
+    "id": 122,
     "category": [
       "MainSkillGem"
     ],
@@ -1069,6 +1146,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Charged Dash"
   },
    123: {
+    "id": 123,
     "category": [
       "MainSkillGem"
     ],
@@ -1077,6 +1155,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cobra Lash"
   },
    124: {
+    "id": 124,
     "category": [
       "MainSkillGem"
     ],
@@ -1085,6 +1164,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cremation"
   },
    125: {
+    "id": 125,
     "category": [
       "MainSkillGem"
     ],
@@ -1093,6 +1173,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cyclone"
   },
    126: {
+    "id": 126,
     "category": [
       "MainSkillGem"
     ],
@@ -1101,6 +1182,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Detonate Dead"
   },
    127: {
+    "id": 127,
     "category": [
       "MainSkillGem"
     ],
@@ -1109,6 +1191,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Double Strike"
   },
    128: {
+    "id": 128,
     "category": [
       "MainSkillGem"
     ],
@@ -1117,6 +1200,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Dual Strike"
   },
    129: {
+    "id": 129,
     "category": [
       "MainSkillGem"
     ],
@@ -1125,6 +1209,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Elemental Hit"
   },
    130: {
+    "id": 130,
     "category": [
       "MainSkillGem"
     ],
@@ -1133,6 +1218,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ensnaring Arrow"
   },
    131: {
+    "id": 131,
     "category": [
       "MainSkillGem"
     ],
@@ -1141,6 +1227,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ethereal Knives"
   },
    132: {
+    "id": 132,
     "category": [
       "MainSkillGem"
     ],
@@ -1149,6 +1236,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Explosive Arrow"
   },
    133: {
+    "id": 133,
     "category": [
       "MainSkillGem"
     ],
@@ -1157,6 +1245,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Explosive Concoction"
   },
    134: {
+    "id": 134,
     "category": [
       "MainSkillGem"
     ],
@@ -1165,6 +1254,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Explosive Trap"
   },
    135: {
+    "id": 135,
     "category": [
       "MainSkillGem"
     ],
@@ -1173,6 +1263,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Fire Trap"
   },
    136: {
+    "id": 136,
     "category": [
       "MainSkillGem"
     ],
@@ -1181,6 +1272,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flamethrower Trap"
   },
    137: {
+    "id": 137,
     "category": [
       "MainSkillGem"
     ],
@@ -1189,6 +1281,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flicker Strike"
   },
    138: {
+    "id": 138,
     "category": [
       "MainSkillGem"
     ],
@@ -1197,6 +1290,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frenzy"
   },
    139: {
+    "id": 139,
     "category": [
       "MainSkillGem"
     ],
@@ -1205,6 +1299,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frost Blades"
   },
    140: {
+    "id": 140,
     "category": [
       "MainSkillGem"
     ],
@@ -1213,6 +1308,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Galvanic Arrow"
   },
    141: {
+    "id": 141,
     "category": [
       "MainSkillGem"
     ],
@@ -1221,6 +1317,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ice Shot"
   },
    142: {
+    "id": 142,
     "category": [
       "MainSkillGem"
     ],
@@ -1229,6 +1326,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ice Trap"
   },
    143: {
+    "id": 143,
     "category": [
       "MainSkillGem"
     ],
@@ -1237,6 +1335,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lacerate"
   },
    144: {
+    "id": 144,
     "category": [
       "MainSkillGem"
     ],
@@ -1245,6 +1344,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lancing Steel"
   },
    145: {
+    "id": 145,
     "category": [
       "MainSkillGem"
     ],
@@ -1253,6 +1353,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lightning Arrow"
   },
    146: {
+    "id": 146,
     "category": [
       "MainSkillGem"
     ],
@@ -1261,6 +1362,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lightning Strike"
   },
    147: {
+    "id": 147,
     "category": [
       "MainSkillGem"
     ],
@@ -1269,6 +1371,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Pestilent Strike"
   },
    148: {
+    "id": 148,
     "category": [
       "MainSkillGem"
     ],
@@ -1277,6 +1380,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Poisonous Concoction"
   },
    149: {
+    "id": 149,
     "category": [
       "MainSkillGem"
     ],
@@ -1285,6 +1389,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Puncture"
   },
    150: {
+    "id": 150,
     "category": [
       "MainSkillGem"
     ],
@@ -1293,6 +1398,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rain of Arrows"
   },
    151: {
+    "id": 151,
     "category": [
       "MainSkillGem"
     ],
@@ -1301,6 +1407,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Reave"
   },
    152: {
+    "id": 152,
     "category": [
       "MainSkillGem"
     ],
@@ -1309,6 +1416,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Scourge Arrow"
   },
    153: {
+    "id": 153,
     "category": [
       "MainSkillGem"
     ],
@@ -1317,6 +1425,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Seismic Trap"
   },
    154: {
+    "id": 154,
     "category": [
       "MainSkillGem"
     ],
@@ -1325,6 +1434,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Shattering Steel"
   },
    155: {
+    "id": 155,
     "category": [
       "MainSkillGem"
     ],
@@ -1333,6 +1443,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Shrapnel Ballista"
   },
    156: {
+    "id": 156,
     "category": [
       "MainSkillGem"
     ],
@@ -1341,6 +1452,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Siege Ballista"
   },
    157: {
+    "id": 157,
     "category": [
       "MainSkillGem"
     ],
@@ -1349,6 +1461,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Snipe"
   },
    158: {
+    "id": 158,
     "category": [
       "MainSkillGem"
     ],
@@ -1357,6 +1470,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spectral Helix"
   },
    159: {
+    "id": 159,
     "category": [
       "MainSkillGem"
     ],
@@ -1365,6 +1479,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spectral Shield Throw"
   },
    160: {
+    "id": 160,
     "category": [
       "MainSkillGem"
     ],
@@ -1373,6 +1488,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spectral Throw"
   },
    161: {
+    "id": 161,
     "category": [
       "MainSkillGem"
     ],
@@ -1381,6 +1497,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Split Arrow"
   },
    162: {
+    "id": 162,
     "category": [
       "MainSkillGem"
     ],
@@ -1389,6 +1506,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Splitting Steel"
   },
    163: {
+    "id": 163,
     "category": [
       "MainSkillGem"
     ],
@@ -1397,6 +1515,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Storm Rain"
   },
    164: {
+    "id": 164,
     "category": [
       "MainSkillGem"
     ],
@@ -1405,6 +1524,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Tornado"
   },
    165: {
+    "id": 165,
     "category": [
       "MainSkillGem"
     ],
@@ -1413,6 +1533,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Tornado Shot"
   },
    166: {
+    "id": 166,
     "category": [
       "MainSkillGem"
     ],
@@ -1421,6 +1542,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Toxic Rain"
   },
    167: {
+    "id": 167,
     "category": [
       "MainSkillGem"
     ],
@@ -1429,6 +1551,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unearth"
   },
    168: {
+    "id": 168,
     "category": [
       "MainSkillGem"
     ],
@@ -1437,6 +1560,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Venom Gyre"
   },
    169: {
+    "id": 169,
     "category": [
       "MainSkillGem"
     ],
@@ -1445,6 +1569,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Viper Strike"
   },
    170: {
+    "id": 170,
     "category": [
       "MainSkillGem"
     ],
@@ -1453,6 +1578,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Volatile Dead"
   },
    171: {
+    "id": 171,
     "category": [
       "MainSkillGem"
     ],
@@ -1461,6 +1587,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Whirling Blades"
   },
    172: {
+    "id": 172,
     "category": [
       "MainSkillGem"
     ],
@@ -1469,6 +1596,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Wild Strike"
   },
    173: {
+    "id": 173,
     "category": [
       "MainSkillGem"
     ],
@@ -1477,6 +1605,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Arc"
   },
    174: {
+    "id": 174,
     "category": [
       "MainSkillGem"
     ],
@@ -1485,6 +1614,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Arcanist Brand"
   },
    175: {
+    "id": 175,
     "category": [
       "MainSkillGem"
     ],
@@ -1493,6 +1623,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Armageddon Brand"
   },
    176: {
+    "id": 176,
     "category": [
       "MainSkillGem"
     ],
@@ -1501,6 +1632,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ball Lightning"
   },
    177: {
+    "id": 177,
     "category": [
       "MainSkillGem"
     ],
@@ -1509,6 +1641,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bane"
   },
    178: {
+    "id": 178,
     "category": [
       "MainSkillGem"
     ],
@@ -1517,6 +1650,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blazing Salvo"
   },
    179: {
+    "id": 179,
     "category": [
       "MainSkillGem"
     ],
@@ -1525,6 +1659,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blight"
   },
    180: {
+    "id": 180,
     "category": [
       "MainSkillGem"
     ],
@@ -1533,6 +1668,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bodyswap"
   },
    181: {
+    "id": 181,
     "category": [
       "MainSkillGem"
     ],
@@ -1541,6 +1677,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bone Offering"
   },
    182: {
+    "id": 182,
     "category": [
       "MainSkillGem"
     ],
@@ -1549,6 +1686,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cold Snap"
   },
    183: {
+    "id": 183,
     "category": [
       "MainSkillGem"
     ],
@@ -1557,6 +1695,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Contagion"
   },
    184: {
+    "id": 184,
     "category": [
       "MainSkillGem"
     ],
@@ -1565,6 +1704,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Conversion Trap"
   },
    185: {
+    "id": 185,
     "category": [
       "MainSkillGem"
     ],
@@ -1573,6 +1713,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Crackling Lance"
   },
    186: {
+    "id": 186,
     "category": [
       "MainSkillGem"
     ],
@@ -1581,6 +1722,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Creeping Frost"
   },
    187: {
+    "id": 187,
     "category": [
       "MainSkillGem"
     ],
@@ -1589,6 +1731,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Divine Ire"
   },
    188: {
+    "id": 188,
     "category": [
       "MainSkillGem"
     ],
@@ -1597,6 +1740,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Energy Blade"
   },
    189: {
+    "id": 189,
     "category": [
       "MainSkillGem"
     ],
@@ -1605,6 +1749,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Essence Drain"
   },
    190: {
+    "id": 190,
     "category": [
       "MainSkillGem"
     ],
@@ -1613,6 +1758,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Eye of Winter"
   },
    191: {
+    "id": 191,
     "category": [
       "MainSkillGem"
     ],
@@ -1621,6 +1767,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Fireball"
   },
    192: {
+    "id": 192,
     "category": [
       "MainSkillGem"
     ],
@@ -1629,6 +1776,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Firestorm"
   },
    193: {
+    "id": 193,
     "category": [
       "MainSkillGem"
     ],
@@ -1637,6 +1785,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flame Surge"
   },
    194: {
+    "id": 194,
     "category": [
       "MainSkillGem"
     ],
@@ -1645,6 +1794,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flame Wall"
   },
    195: {
+    "id": 195,
     "category": [
       "MainSkillGem"
     ],
@@ -1653,6 +1803,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flameblast"
   },
    196: {
+    "id": 196,
     "category": [
       "MainSkillGem"
     ],
@@ -1661,6 +1812,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Forbidden Rite"
   },
    197: {
+    "id": 197,
     "category": [
       "MainSkillGem"
     ],
@@ -1669,6 +1821,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Freezing Pulse"
   },
    198: {
+    "id": 198,
     "category": [
       "MainSkillGem"
     ],
@@ -1677,6 +1830,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frost Bomb"
   },
    199: {
+    "id": 199,
     "category": [
       "MainSkillGem"
     ],
@@ -1685,6 +1839,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frostbolt"
   },
    200: {
+    "id": 200,
     "category": [
       "MainSkillGem"
     ],
@@ -1693,6 +1848,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Galvanic Field"
   },
    201: {
+    "id": 201,
     "category": [
       "MainSkillGem"
     ],
@@ -1701,6 +1857,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Glacial Cascade"
   },
    202: {
+    "id": 202,
     "category": [
       "MainSkillGem"
     ],
@@ -1709,6 +1866,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Hydrosphere"
   },
    203: {
+    "id": 203,
     "category": [
       "MainSkillGem"
     ],
@@ -1717,6 +1875,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ice Nova"
   },
    204: {
+    "id": 204,
     "category": [
       "MainSkillGem"
     ],
@@ -1725,6 +1884,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ice Spear"
   },
    205: {
+    "id": 205,
     "category": [
       "MainSkillGem"
     ],
@@ -1733,6 +1893,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Icicle Mine"
   },
    206: {
+    "id": 206,
     "category": [
       "MainSkillGem"
     ],
@@ -1741,6 +1902,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Incinerate"
   },
    207: {
+    "id": 207,
     "category": [
       "MainSkillGem"
     ],
@@ -1749,6 +1911,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Kinetic Blast"
   },
    208: {
+    "id": 208,
     "category": [
       "MainSkillGem"
     ],
@@ -1757,6 +1920,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Kinetic Bolt"
   },
    209: {
+    "id": 209,
     "category": [
       "MainSkillGem"
     ],
@@ -1765,6 +1929,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lightning Conduit"
   },
    210: {
+    "id": 210,
     "category": [
       "MainSkillGem"
     ],
@@ -1773,6 +1938,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lightning Spire Trap"
   },
    211: {
+    "id": 211,
     "category": [
       "MainSkillGem"
     ],
@@ -1781,6 +1947,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lightning Tendrils"
   },
    212: {
+    "id": 212,
     "category": [
       "MainSkillGem"
     ],
@@ -1789,6 +1956,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lightning Trap"
   },
    213: {
+    "id": 213,
     "category": [
       "MainSkillGem"
     ],
@@ -1797,6 +1965,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Manabond"
   },
    214: {
+    "id": 214,
     "category": [
       "MainSkillGem"
     ],
@@ -1805,6 +1974,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Orb of Storms"
   },
    215: {
+    "id": 215,
     "category": [
       "MainSkillGem"
     ],
@@ -1813,6 +1983,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Penance Brand"
   },
    216: {
+    "id": 216,
     "category": [
       "MainSkillGem"
     ],
@@ -1821,6 +1992,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Power Siphon"
   },
    217: {
+    "id": 217,
     "category": [
       "MainSkillGem"
     ],
@@ -1829,6 +2001,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Purifying Flame"
   },
    218: {
+    "id": 218,
     "category": [
       "MainSkillGem"
     ],
@@ -1837,6 +2010,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Pyroclast Mine"
   },
    219: {
+    "id": 219,
     "category": [
       "MainSkillGem"
     ],
@@ -1845,6 +2019,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Raise Spectre"
   },
    220: {
+    "id": 220,
     "category": [
       "MainSkillGem"
     ],
@@ -1853,6 +2028,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Raise Zombie"
   },
    221: {
+    "id": 221,
     "category": [
       "MainSkillGem"
     ],
@@ -1861,6 +2037,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Righteous Fire"
   },
    222: {
+    "id": 222,
     "category": [
       "MainSkillGem"
     ],
@@ -1869,6 +2046,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rolling Magma"
   },
    223: {
+    "id": 223,
     "category": [
       "MainSkillGem"
     ],
@@ -1877,6 +2055,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Scorching Ray"
   },
    224: {
+    "id": 224,
     "category": [
       "MainSkillGem"
     ],
@@ -1885,6 +2064,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Shock Nova"
   },
    225: {
+    "id": 225,
     "category": [
       "MainSkillGem"
     ],
@@ -1893,6 +2073,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Soulrend"
   },
    226: {
+    "id": 226,
     "category": [
       "MainSkillGem"
     ],
@@ -1901,6 +2082,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spark"
   },
    227: {
+    "id": 227,
     "category": [
       "MainSkillGem"
     ],
@@ -1909,6 +2091,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spellslinger"
   },
    228: {
+    "id": 228,
     "category": [
       "MainSkillGem"
     ],
@@ -1917,6 +2100,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Storm Brand"
   },
    229: {
+    "id": 229,
     "category": [
       "MainSkillGem"
     ],
@@ -1925,6 +2109,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Storm Burst"
   },
    230: {
+    "id": 230,
     "category": [
       "MainSkillGem"
     ],
@@ -1933,6 +2118,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Storm Call"
   },
    231: {
+    "id": 231,
     "category": [
       "MainSkillGem"
     ],
@@ -1941,6 +2127,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Stormbind"
   },
    232: {
+    "id": 232,
     "category": [
       "MainSkillGem"
     ],
@@ -1949,6 +2136,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Stormblast Mine"
   },
    233: {
+    "id": 233,
     "category": [
       "MainSkillGem"
     ],
@@ -1957,6 +2145,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Carrion Golem"
   },
    234: {
+    "id": 234,
     "category": [
       "MainSkillGem"
     ],
@@ -1965,6 +2154,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Chaos Golem"
   },
    235: {
+    "id": 235,
     "category": [
       "MainSkillGem"
     ],
@@ -1973,6 +2163,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Lightning Golem"
   },
    236: {
+    "id": 236,
     "category": [
       "MainSkillGem"
     ],
@@ -1981,6 +2172,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Raging Spirit"
   },
    237: {
+    "id": 237,
     "category": [
       "MainSkillGem"
     ],
@@ -1989,6 +2181,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Reaper"
   },
    238: {
+    "id": 238,
     "category": [
       "MainSkillGem"
     ],
@@ -1997,6 +2190,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Skeletons"
   },
    239: {
+    "id": 239,
     "category": [
       "MainSkillGem"
     ],
@@ -2005,6 +2199,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Skitterbots"
   },
    240: {
+    "id": 240,
     "category": [
       "MainSkillGem"
     ],
@@ -2013,6 +2208,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Void Sphere"
   },
    241: {
+    "id": 241,
     "category": [
       "MainSkillGem"
     ],
@@ -2021,6 +2217,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Voltaxic Burst"
   },
    242: {
+    "id": 242,
     "category": [
       "MainSkillGem"
     ],
@@ -2029,6 +2226,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vortex"
   },
    243: {
+    "id": 243,
     "category": [
       "MainSkillGem"
     ],
@@ -2037,6 +2235,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Wave of Conviction"
   },
    244: {
+    "id": 244,
     "category": [
       "MainSkillGem"
     ],
@@ -2045,6 +2244,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Winter Orb"
   },
    245: {
+    "id": 245,
     "category": [
       "MainSkillGem"
     ],
@@ -2053,6 +2253,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Wintertide Brand"
   },
    246: {
+    "id": 246,
     "category": [
       "MainSkillGem"
     ],
@@ -2061,6 +2262,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Absolution"
   },
    247: {
+    "id": 247,
     "category": [
       "MainSkillGem"
     ],
@@ -2069,6 +2271,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ancestral Protector"
   },
    248: {
+    "id": 248,
     "category": [
       "MainSkillGem"
     ],
@@ -2077,6 +2280,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ancestral Warchief"
   },
    249: {
+    "id": 249,
     "category": [
       "MainSkillGem"
     ],
@@ -2085,6 +2289,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Animate Guardian"
   },
    250: {
+    "id": 250,
     "category": [
       "MainSkillGem"
     ],
@@ -2093,6 +2298,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bladestorm"
   },
    251: {
+    "id": 251,
     "category": [
       "MainSkillGem"
     ],
@@ -2101,6 +2307,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Boneshatter"
   },
    252: {
+    "id": 252,
     "category": [
       "MainSkillGem"
     ],
@@ -2109,6 +2316,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Chain Hook"
   },
    253: {
+    "id": 253,
     "category": [
       "MainSkillGem"
     ],
@@ -2117,6 +2325,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cleave"
   },
    254: {
+    "id": 254,
     "category": [
       "MainSkillGem"
     ],
@@ -2125,6 +2334,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Consecrated Path"
   },
    255: {
+    "id": 255,
     "category": [
       "MainSkillGem"
     ],
@@ -2133,6 +2343,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Dominating Blow"
   },
    256: {
+    "id": 256,
     "category": [
       "MainSkillGem"
     ],
@@ -2141,6 +2352,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Earthquake"
   },
    257: {
+    "id": 257,
     "category": [
       "MainSkillGem"
     ],
@@ -2149,6 +2361,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Earthshatter"
   },
    258: {
+    "id": 258,
     "category": [
       "MainSkillGem"
     ],
@@ -2157,6 +2370,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Exsanguinate"
   },
    259: {
+    "id": 259,
     "category": [
       "MainSkillGem"
     ],
@@ -2165,6 +2379,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frozen Legion"
   },
    260: {
+    "id": 260,
     "category": [
       "MainSkillGem"
     ],
@@ -2173,6 +2388,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Glacial Hammer"
   },
    261: {
+    "id": 261,
     "category": [
       "MainSkillGem"
     ],
@@ -2181,6 +2397,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ground Slam"
   },
    262: {
+    "id": 262,
     "category": [
       "MainSkillGem"
     ],
@@ -2189,6 +2406,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Heavy Strike"
   },
    263: {
+    "id": 263,
     "category": [
       "MainSkillGem"
     ],
@@ -2197,6 +2415,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Holy Flame Totem"
   },
    264: {
+    "id": 264,
     "category": [
       "MainSkillGem"
     ],
@@ -2205,6 +2424,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ice Crash"
   },
    265: {
+    "id": 265,
     "category": [
       "MainSkillGem"
     ],
@@ -2213,6 +2433,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Infernal Blow"
   },
    266: {
+    "id": 266,
     "category": [
       "MainSkillGem"
     ],
@@ -2221,6 +2442,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Infernal Cry"
   },
    267: {
+    "id": 267,
     "category": [
       "MainSkillGem"
     ],
@@ -2229,6 +2451,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Molten Strike"
   },
    268: {
+    "id": 268,
     "category": [
       "MainSkillGem"
     ],
@@ -2237,6 +2460,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Perforate"
   },
    269: {
+    "id": 269,
     "category": [
       "MainSkillGem"
     ],
@@ -2245,6 +2469,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rage Vortex"
   },
    270: {
+    "id": 270,
     "category": [
       "MainSkillGem"
     ],
@@ -2253,6 +2478,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Reap"
   },
    271: {
+    "id": 271,
     "category": [
       "MainSkillGem"
     ],
@@ -2261,6 +2487,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Searing Bond"
   },
    272: {
+    "id": 272,
     "category": [
       "MainSkillGem"
     ],
@@ -2269,6 +2496,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Shield Crush"
   },
    273: {
+    "id": 273,
     "category": [
       "MainSkillGem"
     ],
@@ -2277,6 +2505,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Shockwave Totem"
   },
    274: {
+    "id": 274,
     "category": [
       "MainSkillGem"
     ],
@@ -2285,6 +2514,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Smite"
   },
    275: {
+    "id": 275,
     "category": [
       "MainSkillGem"
     ],
@@ -2293,6 +2523,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Static Strike"
   },
    276: {
+    "id": 276,
     "category": [
       "MainSkillGem"
     ],
@@ -2301,6 +2532,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Flame Golem"
   },
    277: {
+    "id": 277,
     "category": [
       "MainSkillGem"
     ],
@@ -2309,6 +2541,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Stone Golem"
   },
    278: {
+    "id": 278,
     "category": [
       "MainSkillGem"
     ],
@@ -2317,6 +2550,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Sunder"
   },
    279: {
+    "id": 279,
     "category": [
       "MainSkillGem"
     ],
@@ -2325,6 +2559,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Sweep"
   },
    280: {
+    "id": 280,
     "category": [
       "MainSkillGem"
     ],
@@ -2333,6 +2568,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Tectonic Slam"
   },
    281: {
+    "id": 281,
     "category": [
       "MainSkillGem"
     ],
@@ -2341,6 +2577,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vengeance"
   },
    282: {
+    "id": 282,
     "category": [
       "MainSkillGem"
     ],
@@ -2349,6 +2586,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vigilant Strike"
   },
    283: {
+    "id": 283,
     "category": [
       "MainSkillGem"
     ],
@@ -2357,6 +2595,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Volcanic Fissure"
   },
    284: {
+    "id": 284,
     "category": [
       "UtilSkillGem"
     ],
@@ -2365,6 +2604,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Alchemist's Mark"
   },
    285: {
+    "id": 285,
     "category": [
       "UtilSkillGem"
     ],
@@ -2373,6 +2613,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ambush"
   },
    286: {
+    "id": 286,
     "category": [
       "UtilSkillGem"
     ],
@@ -2381,6 +2622,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Autoexertion"
   },
    287: {
+    "id": 287,
     "category": [
       "UtilSkillGem"
     ],
@@ -2389,6 +2631,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Automation"
   },
    288: {
+    "id": 288,
     "category": [
       "UtilSkillGem"
     ],
@@ -2397,6 +2640,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Arctic Armour"
   },
    289: {
+    "id": 289,
     "category": [
       "UtilSkillGem"
     ],
@@ -2405,6 +2649,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blink Arrow"
   },
    290: {
+    "id": 290,
     "category": [
       "UtilSkillGem"
     ],
@@ -2413,6 +2658,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blood Rage"
   },
    291: {
+    "id": 291,
     "category": [
       "UtilSkillGem"
     ],
@@ -2421,6 +2667,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Dash"
   },
    292: {
+    "id": 292,
     "category": [
       "UtilSkillGem"
     ],
@@ -2429,6 +2676,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Desecrate"
   },
    293: {
+    "id": 293,
     "category": [
       "UtilSkillGem"
     ],
@@ -2437,6 +2685,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Grace"
   },
    294: {
+    "id": 294,
     "category": [
       "UtilSkillGem"
     ],
@@ -2445,6 +2694,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Haste"
   },
    295: {
+    "id": 295,
     "category": [
       "UtilSkillGem"
     ],
@@ -2453,6 +2703,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Hatred"
   },
    296: {
+    "id": 296,
     "category": [
       "UtilSkillGem"
     ],
@@ -2461,6 +2712,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Herald of Agony"
   },
    297: {
+    "id": 297,
     "category": [
       "UtilSkillGem"
     ],
@@ -2469,6 +2721,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Herald of Ice"
   },
    298: {
+    "id": 298,
     "category": [
       "UtilSkillGem"
     ],
@@ -2477,6 +2730,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Intuitive Link"
   },
    299: {
+    "id": 299,
     "category": [
       "UtilSkillGem"
     ],
@@ -2485,6 +2739,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Mirror Arrow"
   },
    300: {
+    "id": 300,
     "category": [
       "UtilSkillGem"
     ],
@@ -2493,6 +2748,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Phase Run"
   },
    301: {
+    "id": 301,
     "category": [
       "UtilSkillGem"
     ],
@@ -2501,6 +2757,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Plague Bearer"
   },
    302: {
+    "id": 302,
     "category": [
       "UtilSkillGem"
     ],
@@ -2509,6 +2766,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Poacher's Mark"
   },
    303: {
+    "id": 303,
     "category": [
       "UtilSkillGem"
     ],
@@ -2517,6 +2775,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Precision"
   },
    304: {
+    "id": 304,
     "category": [
       "UtilSkillGem"
     ],
@@ -2525,6 +2784,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Purity of Ice"
   },
    305: {
+    "id": 305,
     "category": [
       "UtilSkillGem"
     ],
@@ -2533,6 +2793,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Riposte"
   },
    306: {
+    "id": 306,
     "category": [
       "UtilSkillGem"
     ],
@@ -2541,6 +2802,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Smoke Mine"
   },
    307: {
+    "id": 307,
     "category": [
       "UtilSkillGem"
     ],
@@ -2549,6 +2811,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Sniper's Mark"
   },
    308: {
+    "id": 308,
     "category": [
       "UtilSkillGem"
     ],
@@ -2557,6 +2820,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Ice Golem"
   },
    309: {
+    "id": 309,
     "category": [
       "UtilSkillGem"
     ],
@@ -2565,6 +2829,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Temporal Chains"
   },
    310: {
+    "id": 310,
     "category": [
       "UtilSkillGem"
     ],
@@ -2573,6 +2838,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Temporal Rift"
   },
    311: {
+    "id": 311,
     "category": [
       "UtilSkillGem"
     ],
@@ -2581,6 +2847,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vampiric Link"
   },
    312: {
+    "id": 312,
     "category": [
       "UtilSkillGem"
     ],
@@ -2589,6 +2856,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Withering Step"
   },
    313: {
+    "id": 313,
     "category": [
       "UtilSkillGem"
     ],
@@ -2597,6 +2865,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Arcane Cloak"
   },
    314: {
+    "id": 314,
     "category": [
       "UtilSkillGem"
     ],
@@ -2605,6 +2874,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Assassin's Mark"
   },
    315: {
+    "id": 315,
     "category": [
       "UtilSkillGem"
     ],
@@ -2613,6 +2883,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Brand Recall"
   },
    316: {
+    "id": 316,
     "category": [
       "UtilSkillGem"
     ],
@@ -2621,6 +2892,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Clarity"
   },
    317: {
+    "id": 317,
     "category": [
       "UtilSkillGem"
     ],
@@ -2629,6 +2901,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Conductivity"
   },
    318: {
+    "id": 318,
     "category": [
       "UtilSkillGem"
     ],
@@ -2637,6 +2910,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Convocation"
   },
    319: {
+    "id": 319,
     "category": [
       "UtilSkillGem"
     ],
@@ -2645,6 +2919,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Dark Pact"
   },
    320: {
+    "id": 320,
     "category": [
       "UtilSkillGem"
     ],
@@ -2653,6 +2928,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Despair"
   },
    321: {
+    "id": 321,
     "category": [
       "UtilSkillGem"
     ],
@@ -2661,6 +2937,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Destructive Link"
   },
    322: {
+    "id": 322,
     "category": [
       "UtilSkillGem"
     ],
@@ -2669,6 +2946,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Discharge"
   },
    323: {
+    "id": 323,
     "category": [
       "UtilSkillGem"
     ],
@@ -2677,6 +2955,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Discipline"
   },
    324: {
+    "id": 324,
     "category": [
       "UtilSkillGem"
     ],
@@ -2685,6 +2964,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Elemental Weakness"
   },
    325: {
+    "id": 325,
     "category": [
       "UtilSkillGem"
     ],
@@ -2693,6 +2973,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Enfeeble"
   },
    326: {
+    "id": 326,
     "category": [
       "UtilSkillGem"
     ],
@@ -2701,6 +2982,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flame Dash"
   },
    327: {
+    "id": 327,
     "category": [
       "UtilSkillGem"
     ],
@@ -2709,6 +2991,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flammability"
   },
    328: {
+    "id": 328,
     "category": [
       "UtilSkillGem"
     ],
@@ -2717,6 +3000,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flesh Offering"
   },
    329: {
+    "id": 329,
     "category": [
       "UtilSkillGem"
     ],
@@ -2725,6 +3009,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frost Shield"
   },
    330: {
+    "id": 330,
     "category": [
       "UtilSkillGem"
     ],
@@ -2733,6 +3018,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frost Wall"
   },
    331: {
+    "id": 331,
     "category": [
       "UtilSkillGem"
     ],
@@ -2741,6 +3027,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frostbite"
   },
    332: {
+    "id": 332,
     "category": [
       "UtilSkillGem"
     ],
@@ -2749,6 +3036,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frostblink"
   },
    333: {
+    "id": 333,
     "category": [
       "UtilSkillGem"
     ],
@@ -2757,6 +3045,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Herald of Thunder"
   },
    334: {
+    "id": 334,
     "category": [
       "UtilSkillGem"
     ],
@@ -2765,6 +3054,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Hexblast"
   },
    335: {
+    "id": 335,
     "category": [
       "UtilSkillGem"
     ],
@@ -2773,6 +3063,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lightning Warp"
   },
    336: {
+    "id": 336,
     "category": [
       "UtilSkillGem"
     ],
@@ -2781,6 +3072,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Malevolence"
   },
    337: {
+    "id": 337,
     "category": [
       "UtilSkillGem"
     ],
@@ -2789,6 +3081,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Purity of Elements"
   },
    338: {
+    "id": 338,
     "category": [
       "UtilSkillGem"
     ],
@@ -2797,6 +3090,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Purity of Lightning"
   },
    339: {
+    "id": 339,
     "category": [
       "UtilSkillGem"
     ],
@@ -2805,6 +3099,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Sigil of Power"
   },
    340: {
+    "id": 340,
     "category": [
       "UtilSkillGem"
     ],
@@ -2813,6 +3108,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Siphoning Trap"
   },
    341: {
+    "id": 341,
     "category": [
       "UtilSkillGem"
     ],
@@ -2821,6 +3117,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Soul Link"
   },
    342: {
+    "id": 342,
     "category": [
       "UtilSkillGem"
     ],
@@ -2829,6 +3126,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spirit Offering"
   },
    343: {
+    "id": 343,
     "category": [
       "UtilSkillGem"
     ],
@@ -2837,6 +3135,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Holy Relic"
   },
    344: {
+    "id": 344,
     "category": [
       "UtilSkillGem"
     ],
@@ -2845,6 +3144,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Tempest Shield"
   },
    345: {
+    "id": 345,
     "category": [
       "UtilSkillGem"
     ],
@@ -2853,6 +3153,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Wrath"
   },
    346: {
+    "id": 346,
     "category": [
       "UtilSkillGem"
     ],
@@ -2861,6 +3162,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Zealotry"
   },
    347: {
+    "id": 347,
     "category": [
       "UtilSkillGem"
     ],
@@ -2869,6 +3171,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Detonate Mines"
   },
    348: {
+    "id": 348,
     "category": [
       "UtilSkillGem"
     ],
@@ -2877,6 +3180,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Portal"
   },
    349: {
+    "id": 349,
     "category": [
       "UtilSkillGem"
     ],
@@ -2885,6 +3189,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ancestral Cry"
   },
    350: {
+    "id": 350,
     "category": [
       "UtilSkillGem"
     ],
@@ -2893,6 +3198,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Anger"
   },
    351: {
+    "id": 351,
     "category": [
       "UtilSkillGem"
     ],
@@ -2901,6 +3207,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Battlemage's Cry"
   },
    352: {
+    "id": 352,
     "category": [
       "UtilSkillGem"
     ],
@@ -2909,6 +3216,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Berserk"
   },
    353: {
+    "id": 353,
     "category": [
       "UtilSkillGem"
     ],
@@ -2917,6 +3225,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blood and Sand"
   },
    354: {
+    "id": 354,
     "category": [
       "UtilSkillGem"
     ],
@@ -2925,6 +3234,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Corrupting Fever"
   },
    355: {
+    "id": 355,
     "category": [
       "UtilSkillGem"
     ],
@@ -2933,6 +3243,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Decoy Totem"
   },
    356: {
+    "id": 356,
     "category": [
       "UtilSkillGem"
     ],
@@ -2941,6 +3252,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Defiance Banner"
   },
    357: {
+    "id": 357,
     "category": [
       "UtilSkillGem"
     ],
@@ -2949,6 +3261,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Determination"
   },
    358: {
+    "id": 358,
     "category": [
       "UtilSkillGem"
     ],
@@ -2957,6 +3270,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Devouring Totem"
   },
    359: {
+    "id": 359,
     "category": [
       "UtilSkillGem"
     ],
@@ -2965,6 +3279,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Dread Banner"
   },
    360: {
+    "id": 360,
     "category": [
       "UtilSkillGem"
     ],
@@ -2973,6 +3288,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Enduring Cry"
   },
    361: {
+    "id": 361,
     "category": [
       "UtilSkillGem"
     ],
@@ -2981,6 +3297,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flame Link"
   },
    362: {
+    "id": 362,
     "category": [
       "UtilSkillGem"
     ],
@@ -2989,6 +3306,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flesh and Stone"
   },
    363: {
+    "id": 363,
     "category": [
       "UtilSkillGem"
     ],
@@ -2997,6 +3315,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "General's Cry"
   },
    364: {
+    "id": 364,
     "category": [
       "UtilSkillGem"
     ],
@@ -3005,6 +3324,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Herald of Ash"
   },
    365: {
+    "id": 365,
     "category": [
       "UtilSkillGem"
     ],
@@ -3013,6 +3333,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Herald of Purity"
   },
    366: {
+    "id": 366,
     "category": [
       "UtilSkillGem"
     ],
@@ -3021,6 +3342,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Immortal Call"
   },
    367: {
+    "id": 367,
     "category": [
       "UtilSkillGem"
     ],
@@ -3029,6 +3351,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Intimidating Cry"
   },
    368: {
+    "id": 368,
     "category": [
       "UtilSkillGem"
     ],
@@ -3037,6 +3360,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Leap Slam"
   },
    369: {
+    "id": 369,
     "category": [
       "UtilSkillGem"
     ],
@@ -3045,6 +3369,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Molten Shell"
   },
    370: {
+    "id": 370,
     "category": [
       "UtilSkillGem"
     ],
@@ -3053,6 +3378,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Petrified Blood"
   },
    371: {
+    "id": 371,
     "category": [
       "UtilSkillGem"
     ],
@@ -3061,6 +3387,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Pride"
   },
    372: {
+    "id": 372,
     "category": [
       "UtilSkillGem"
     ],
@@ -3069,6 +3396,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Protective Link"
   },
    373: {
+    "id": 373,
     "category": [
       "UtilSkillGem"
     ],
@@ -3077,6 +3405,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Punishment"
   },
    374: {
+    "id": 374,
     "category": [
       "UtilSkillGem"
     ],
@@ -3085,6 +3414,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Purity of Fire"
   },
    375: {
+    "id": 375,
     "category": [
       "UtilSkillGem"
     ],
@@ -3093,6 +3423,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rallying Cry"
   },
    376: {
+    "id": 376,
     "category": [
       "UtilSkillGem"
     ],
@@ -3101,6 +3432,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Reckoning"
   },
    377: {
+    "id": 377,
     "category": [
       "UtilSkillGem"
     ],
@@ -3109,6 +3441,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rejuvenation Totem"
   },
    378: {
+    "id": 378,
     "category": [
       "UtilSkillGem"
     ],
@@ -3117,6 +3450,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Seismic Cry"
   },
    379: {
+    "id": 379,
     "category": [
       "UtilSkillGem"
     ],
@@ -3125,6 +3459,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Shield Charge"
   },
    380: {
+    "id": 380,
     "category": [
       "UtilSkillGem"
     ],
@@ -3133,6 +3468,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Steelskin"
   },
    381: {
+    "id": 381,
     "category": [
       "UtilSkillGem"
     ],
@@ -3141,6 +3477,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vitality"
   },
    382: {
+    "id": 382,
     "category": [
       "UtilSkillGem"
     ],
@@ -3149,6 +3486,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vulnerability"
   },
    383: {
+    "id": 383,
     "category": [
       "UtilSkillGem"
     ],
@@ -3157,6 +3495,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "War Banner"
   },
    384: {
+    "id": 384,
     "category": [
       "UtilSkillGem"
     ],
@@ -3165,6 +3504,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Warlord's Mark"
   },
    385: {
+    "id": 385,
     "category": [
       "SupportGem"
     ],
@@ -3181,6 +3521,7 @@ item_table: Dict[int, ItemDict] = {
 #    "name": "Empower Support"
 #  },
    387: {
+    "id": 387,
     "category": [
       "SupportGem"
     ],
@@ -3189,6 +3530,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ruthless Support"
   },
    388: {
+    "id": 388,
     "category": [
       "SupportGem"
     ],
@@ -3197,6 +3539,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ancestral Call Support"
   },
    389: {
+    "id": 389,
     "category": [
       "SupportGem"
     ],
@@ -3205,6 +3548,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Added Fire Damage Support"
   },
    390: {
+    "id": 390,
     "category": [
       "SupportGem"
     ],
@@ -3213,6 +3557,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ballista Totem Support"
   },
    391: {
+    "id": 391,
     "category": [
       "SupportGem"
     ],
@@ -3221,6 +3566,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Earthbreaker Support"
   },
    392: {
+    "id": 392,
     "category": [
       "SupportGem"
     ],
@@ -3229,6 +3575,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Flamewood Support"
   },
    393: {
+    "id": 393,
     "category": [
       "SupportGem"
     ],
@@ -3237,6 +3584,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Knockback Support"
   },
    394: {
+    "id": 394,
     "category": [
       "SupportGem"
     ],
@@ -3245,6 +3593,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Life Gain on Hit Support"
   },
    395: {
+    "id": 395,
     "category": [
       "SupportGem"
     ],
@@ -3253,6 +3602,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lifetap Support"
   },
    396: {
+    "id": 396,
     "category": [
       "SupportGem"
     ],
@@ -3261,6 +3611,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Maim Support"
   },
    397: {
+    "id": 397,
     "category": [
       "SupportGem"
     ],
@@ -3269,6 +3620,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Melee Splash Support"
   },
    398: {
+    "id": 398,
     "category": [
       "SupportGem"
     ],
@@ -3277,6 +3629,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spell Totem Support"
   },
    399: {
+    "id": 399,
     "category": [
       "SupportGem"
     ],
@@ -3285,6 +3638,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Stun Support"
   },
    400: {
+    "id": 400,
     "category": [
       "SupportGem"
     ],
@@ -3293,6 +3647,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bloodlust Support"
   },
    401: {
+    "id": 401,
     "category": [
       "SupportGem"
     ],
@@ -3301,6 +3656,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cold to Fire Support"
   },
    402: {
+    "id": 402,
     "category": [
       "SupportGem"
     ],
@@ -3309,6 +3665,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cruelty Support"
   },
    403: {
+    "id": 403,
     "category": [
       "SupportGem"
     ],
@@ -3317,6 +3674,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Damage on Full Life Support"
   },
    404: {
+    "id": 404,
     "category": [
       "SupportGem"
     ],
@@ -3325,6 +3683,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Elemental Damage with Attacks Support"
   },
    405: {
+    "id": 405,
     "category": [
       "SupportGem"
     ],
@@ -3333,6 +3692,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Endurance Charge on Melee Stun Support"
   },
    406: {
+    "id": 406,
     "category": [
       "SupportGem"
     ],
@@ -3341,6 +3701,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Iron Grip Support"
   },
    407: {
+    "id": 407,
     "category": [
       "SupportGem"
     ],
@@ -3349,6 +3710,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Iron Will Support"
   },
    408: {
+    "id": 408,
     "category": [
       "SupportGem"
     ],
@@ -3357,6 +3719,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Melee Physical Damage Support"
   },
    409: {
+    "id": 409,
     "category": [
       "SupportGem"
     ],
@@ -3365,6 +3728,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Rage Support"
   },
    410: {
+    "id": 410,
     "category": [
       "SupportGem"
     ],
@@ -3373,6 +3737,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Sacred Wisps Support"
   },
    411: {
+    "id": 411,
     "category": [
       "SupportGem"
     ],
@@ -3381,6 +3746,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Shockwave Support"
   },
    412: {
+    "id": 412,
     "category": [
       "SupportGem"
     ],
@@ -3389,6 +3755,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Volatility Support"
   },
    413: {
+    "id": 413,
     "category": [
       "SupportGem"
     ],
@@ -3397,6 +3764,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Arrogance Support"
   },
    414: {
+    "id": 414,
     "category": [
       "SupportGem"
     ],
@@ -3405,6 +3773,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bloodthirst Support"
   },
    415: {
+    "id": 415,
     "category": [
       "SupportGem"
     ],
@@ -3413,6 +3782,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Burning Damage Support"
   },
    416: {
+    "id": 416,
     "category": [
       "SupportGem"
     ],
@@ -3421,6 +3791,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Controlled Blaze Support"
   },
    417: {
+    "id": 417,
     "category": [
       "SupportGem"
     ],
@@ -3429,6 +3800,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Corrupting Cry Support"
   },
    418: {
+    "id": 418,
     "category": [
       "SupportGem"
     ],
@@ -3437,6 +3809,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Divine Blessing Support"
   },
    419: {
+    "id": 419,
     "category": [
       "SupportGem"
     ],
@@ -3445,6 +3818,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Fire Penetration Support"
   },
    420: {
+    "id": 420,
     "category": [
       "SupportGem"
     ],
@@ -3453,6 +3827,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Fortify Support"
   },
    421: {
+    "id": 421,
     "category": [
       "SupportGem"
     ],
@@ -3461,6 +3836,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Generosity Support"
   },
    422: {
+    "id": 422,
     "category": [
       "SupportGem"
     ],
@@ -3469,6 +3845,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Guardian's Blessing Support"
   },
    423: {
+    "id": 423,
     "category": [
       "SupportGem"
     ],
@@ -3477,6 +3854,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Increased Duration Support"
   },
    424: {
+    "id": 424,
     "category": [
       "SupportGem"
     ],
@@ -3485,6 +3863,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Inspiration Support"
   },
    425: {
+    "id": 425,
     "category": [
       "SupportGem"
     ],
@@ -3493,6 +3872,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Less Duration Support"
   },
    426: {
+    "id": 426,
     "category": [
       "SupportGem"
     ],
@@ -3501,6 +3881,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Life Leech Support"
   },
    427: {
+    "id": 427,
     "category": [
       "SupportGem"
     ],
@@ -3509,6 +3890,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Pulverise Support"
   },
    428: {
+    "id": 428,
     "category": [
       "SupportGem"
     ],
@@ -3517,6 +3899,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Urgent Orders Support"
   },
    429: {
+    "id": 429,
     "category": [
       "SupportGem"
     ],
@@ -3525,6 +3908,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Behead Support"
   },
    430: {
+    "id": 430,
     "category": [
       "SupportGem"
     ],
@@ -3533,6 +3917,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Brutality Support"
   },
    431: {
+    "id": 431,
     "category": [
       "SupportGem"
     ],
@@ -3541,6 +3926,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cast on Melee Kill Support"
   },
    432: {
+    "id": 432,
     "category": [
       "SupportGem"
     ],
@@ -3549,6 +3935,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cast when Damage Taken Support"
   },
    433: {
+    "id": 433,
     "category": [
       "SupportGem"
     ],
@@ -3557,6 +3944,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Eternal Blessing Support"
   },
    434: {
+    "id": 434,
     "category": [
       "SupportGem"
     ],
@@ -3565,6 +3953,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Fist of War Support"
   },
    435: {
+    "id": 435,
     "category": [
       "SupportGem"
     ],
@@ -3573,6 +3962,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Multiple Totems Support"
   },
    436: {
+    "id": 436,
     "category": [
       "SupportGem"
     ],
@@ -3581,6 +3971,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Multistrike Support"
   },
    437: {
+    "id": 437,
     "category": [
       "SupportGem"
     ],
@@ -3589,6 +3980,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Trauma Support"
   },
    438: {
+    "id": 438,
     "category": [
       "SupportGem"
     ],
@@ -3605,6 +3997,7 @@ item_table: Dict[int, ItemDict] = {
 #    "name": "Enhance Support"
 #  },
    440: {
+    "id": 440,
     "category": [
       "SupportGem"
     ],
@@ -3613,6 +4006,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Momentum Support"
   },
    441: {
+    "id": 441,
     "category": [
       "SupportGem"
     ],
@@ -3621,6 +4015,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Mirage Archer Support"
   },
    442: {
+    "id": 442,
     "category": [
       "SupportGem"
     ],
@@ -3629,6 +4024,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Pierce Support"
   },
    443: {
+    "id": 443,
     "category": [
       "SupportGem"
     ],
@@ -3637,6 +4033,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Swift Assembly Support"
   },
    444: {
+    "id": 444,
     "category": [
       "SupportGem"
     ],
@@ -3645,6 +4042,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Volley Support"
   },
    445: {
+    "id": 445,
     "category": [
       "SupportGem"
     ],
@@ -3653,6 +4051,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Added Cold Damage Support"
   },
    446: {
+    "id": 446,
     "category": [
       "SupportGem"
     ],
@@ -3661,6 +4060,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Additional Accuracy Support"
   },
    447: {
+    "id": 447,
     "category": [
       "SupportGem"
     ],
@@ -3669,6 +4069,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Arrow Nova Support"
   },
    448: {
+    "id": 448,
     "category": [
       "SupportGem"
     ],
@@ -3677,6 +4078,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blind Support"
   },
    449: {
+    "id": 449,
     "category": [
       "SupportGem"
     ],
@@ -3685,6 +4087,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Chance to Flee Support"
   },
    450: {
+    "id": 450,
     "category": [
       "SupportGem"
     ],
@@ -3693,6 +4096,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Faster Attacks Support"
   },
    451: {
+    "id": 451,
     "category": [
       "SupportGem"
     ],
@@ -3701,6 +4105,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lesser Multiple Projectiles Support"
   },
    452: {
+    "id": 452,
     "category": [
       "SupportGem"
     ],
@@ -3709,6 +4114,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Locus Mine Support"
   },
    453: {
+    "id": 453,
     "category": [
       "SupportGem"
     ],
@@ -3717,6 +4123,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Manaforged Arrows Support"
   },
    454: {
+    "id": 454,
     "category": [
       "SupportGem"
     ],
@@ -3725,6 +4132,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Multiple Traps Support"
   },
    455: {
+    "id": 455,
     "category": [
       "SupportGem"
     ],
@@ -3733,6 +4141,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Trap Support"
   },
    456: {
+    "id": 456,
     "category": [
       "SupportGem"
     ],
@@ -3741,6 +4150,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Void Manipulation Support"
   },
    457: {
+    "id": 457,
     "category": [
       "SupportGem"
     ],
@@ -3749,6 +4159,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Block Chance Reduction Support"
   },
    458: {
+    "id": 458,
     "category": [
       "SupportGem"
     ],
@@ -3757,6 +4168,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Close Combat Support"
   },
    459: {
+    "id": 459,
     "category": [
       "SupportGem"
     ],
@@ -3765,6 +4177,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Culling Strike Support"
   },
    460: {
+    "id": 460,
     "category": [
       "SupportGem"
     ],
@@ -3773,6 +4186,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Deadly Ailments Support"
   },
    461: {
+    "id": 461,
     "category": [
       "SupportGem"
     ],
@@ -3781,6 +4195,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Nightblade Support"
   },
    462: {
+    "id": 462,
     "category": [
       "SupportGem"
     ],
@@ -3789,6 +4204,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Point Blank Support"
   },
    463: {
+    "id": 463,
     "category": [
       "SupportGem"
     ],
@@ -3797,6 +4213,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Sadism Support"
   },
    464: {
+    "id": 464,
     "category": [
       "SupportGem"
     ],
@@ -3805,6 +4222,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Trap and Mine Damage Support"
   },
    465: {
+    "id": 465,
     "category": [
       "SupportGem"
     ],
@@ -3813,6 +4231,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vicious Projectiles Support"
   },
    466: {
+    "id": 466,
     "category": [
       "SupportGem"
     ],
@@ -3821,6 +4240,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Advanced Traps Support"
   },
    467: {
+    "id": 467,
     "category": [
       "SupportGem"
     ],
@@ -3829,6 +4249,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Charged Traps Support"
   },
    468: {
+    "id": 468,
     "category": [
       "SupportGem"
     ],
@@ -3837,6 +4258,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cold Penetration Support"
   },
    469: {
+    "id": 469,
     "category": [
       "SupportGem"
     ],
@@ -3845,6 +4267,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Critical Strike Affliction Support"
   },
    470: {
+    "id": 470,
     "category": [
       "SupportGem"
     ],
@@ -3853,6 +4276,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Faster Projectiles Support"
   },
    471: {
+    "id": 471,
     "category": [
       "SupportGem"
     ],
@@ -3861,6 +4285,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Focused Ballista Support"
   },
    472: {
+    "id": 472,
     "category": [
       "SupportGem"
     ],
@@ -3869,6 +4294,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Fork Support"
   },
    473: {
+    "id": 473,
     "category": [
       "SupportGem"
     ],
@@ -3877,6 +4303,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Hypothermia Support"
   },
    474: {
+    "id": 474,
     "category": [
       "SupportGem"
     ],
@@ -3885,6 +4312,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ice Bite Support"
   },
    475: {
+    "id": 475,
     "category": [
       "SupportGem"
     ],
@@ -3893,6 +4321,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Impale Support"
   },
    476: {
+    "id": 476,
     "category": [
       "SupportGem"
     ],
@@ -3901,6 +4330,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Mana Leech Support"
   },
    477: {
+    "id": 477,
     "category": [
       "SupportGem"
     ],
@@ -3909,6 +4339,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Second Wind Support"
   },
    478: {
+    "id": 478,
     "category": [
       "SupportGem"
     ],
@@ -3917,6 +4348,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Slower Projectiles Support"
   },
    479: {
+    "id": 479,
     "category": [
       "SupportGem"
     ],
@@ -3925,6 +4357,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Swift Affliction Support"
   },
    480: {
+    "id": 480,
     "category": [
       "SupportGem"
     ],
@@ -3933,6 +4366,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Barrage Support"
   },
    481: {
+    "id": 481,
     "category": [
       "SupportGem"
     ],
@@ -3941,6 +4375,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cast On Critical Strike Support"
   },
    482: {
+    "id": 482,
     "category": [
       "SupportGem"
     ],
@@ -3949,6 +4384,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cast on Death Support"
   },
    483: {
+    "id": 483,
     "category": [
       "SupportGem"
     ],
@@ -3957,6 +4393,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Chain Support"
   },
    484: {
+    "id": 484,
     "category": [
       "SupportGem"
     ],
@@ -3965,6 +4402,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cluster Traps Support"
   },
    485: {
+    "id": 485,
     "category": [
       "SupportGem"
     ],
@@ -3973,6 +4411,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Greater Multiple Projectiles Support"
   },
    486: {
+    "id": 486,
     "category": [
       "SupportGem"
     ],
@@ -3981,6 +4420,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Greater Volley Support"
   },
    487: {
+    "id": 487,
     "category": [
       "SupportGem"
     ],
@@ -3989,6 +4429,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Mark On Hit Support"
   },
    488: {
+    "id": 488,
     "category": [
       "SupportGem"
     ],
@@ -3997,6 +4438,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Returning Projectiles Support"
   },
    489: {
+    "id": 489,
     "category": [
       "SupportGem"
     ],
@@ -4005,6 +4447,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Vile Toxins Support"
   },
    490: {
+    "id": 490,
     "category": [
       "SupportGem"
     ],
@@ -4013,6 +4456,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Withering Touch Support"
   },
    491: {
+    "id": 491,
     "category": [
       "SupportGem"
     ],
@@ -4021,6 +4465,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Added Chaos Damage Support"
   },
    492: {
+    "id": 492,
     "category": [
       "SupportGem"
     ],
@@ -4029,6 +4474,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Added Lightning Damage Support"
   },
    493: {
+    "id": 493,
     "category": [
       "SupportGem"
     ],
@@ -4037,6 +4483,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Arcane Surge Support"
   },
    494: {
+    "id": 494,
     "category": [
       "SupportGem"
     ],
@@ -4045,6 +4492,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Archmage Support"
   },
    495: {
+    "id": 495,
     "category": [
       "SupportGem"
     ],
@@ -4053,6 +4501,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blasphemy Support"
   },
    496: {
+    "id": 496,
     "category": [
       "SupportGem"
     ],
@@ -4061,6 +4510,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Blastchain Mine Support"
   },
    497: {
+    "id": 497,
     "category": [
       "SupportGem"
     ],
@@ -4069,6 +4519,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Bonechill Support"
   },
    498: {
+    "id": 498,
     "category": [
       "SupportGem"
     ],
@@ -4077,6 +4528,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cast when Stunned Support"
   },
    499: {
+    "id": 499,
     "category": [
       "SupportGem"
     ],
@@ -4085,6 +4537,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cast while Channelling Support"
   },
    500: {
+    "id": 500,
     "category": [
       "SupportGem"
     ],
@@ -4093,6 +4546,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Charged Mines Support"
   },
    501: {
+    "id": 501,
     "category": [
       "SupportGem"
     ],
@@ -4101,6 +4555,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Combustion Support"
   },
    502: {
+    "id": 502,
     "category": [
       "SupportGem"
     ],
@@ -4109,6 +4564,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Concentrated Effect Support"
   },
    503: {
+    "id": 503,
     "category": [
       "SupportGem"
     ],
@@ -4117,6 +4573,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Controlled Destruction Support"
   },
    504: {
+    "id": 504,
     "category": [
       "SupportGem"
     ],
@@ -4125,6 +4582,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Cursed Ground Support"
   },
    505: {
+    "id": 505,
     "category": [
       "SupportGem"
     ],
@@ -4133,6 +4591,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Decay Support"
   },
    506: {
+    "id": 506,
     "category": [
       "SupportGem"
     ],
@@ -4141,6 +4600,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Devour Support"
   },
    507: {
+    "id": 507,
     "category": [
       "SupportGem"
     ],
@@ -4149,6 +4609,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Efficacy Support"
   },
    508: {
+    "id": 508,
     "category": [
       "SupportGem"
     ],
@@ -4157,6 +4618,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Elemental Army Support"
   },
    509: {
+    "id": 509,
     "category": [
       "SupportGem"
     ],
@@ -4165,6 +4627,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Elemental Focus Support"
   },
    510: {
+    "id": 510,
     "category": [
       "SupportGem"
     ],
@@ -4173,6 +4636,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Elemental Penetration Support"
   },
    511: {
+    "id": 511,
     "category": [
       "SupportGem"
     ],
@@ -4181,6 +4645,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Elemental Proliferation Support"
   },
    512: {
+    "id": 512,
     "category": [
       "SupportGem"
     ],
@@ -4197,6 +4662,7 @@ item_table: Dict[int, ItemDict] = {
 #    "name": "Enlighten Support"
 #  },
    514: {
+    "id": 514,
     "category": [
       "SupportGem"
     ],
@@ -4205,6 +4671,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Faster Casting Support"
   },
    515: {
+    "id": 515,
     "category": [
       "SupportGem"
     ],
@@ -4213,6 +4680,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Feeding Frenzy Support"
   },
    516: {
+    "id": 516,
     "category": [
       "SupportGem"
     ],
@@ -4221,6 +4689,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Fresh Meat Support"
   },
    517: {
+    "id": 517,
     "category": [
       "SupportGem"
     ],
@@ -4229,6 +4698,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Frigid Bond Support"
   },
    518: {
+    "id": 518,
     "category": [
       "SupportGem"
     ],
@@ -4237,6 +4707,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Hex Bloom Support"
   },
    519: {
+    "id": 519,
     "category": [
       "SupportGem"
     ],
@@ -4245,6 +4716,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Hextouch Support"
   },
    520: {
+    "id": 520,
     "category": [
       "SupportGem"
     ],
@@ -4253,6 +4725,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "High-Impact Mine Support"
   },
    521: {
+    "id": 521,
     "category": [
       "SupportGem"
     ],
@@ -4261,6 +4734,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Ignite Proliferation Support"
   },
    522: {
+    "id": 522,
     "category": [
       "SupportGem"
     ],
@@ -4269,6 +4743,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Immolate Support"
   },
    523: {
+    "id": 523,
     "category": [
       "SupportGem"
     ],
@@ -4277,6 +4752,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Impending Doom Support"
   },
    524: {
+    "id": 524,
     "category": [
       "SupportGem"
     ],
@@ -4285,6 +4761,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Increased Area of Effect Support"
   },
    525: {
+    "id": 525,
     "category": [
       "SupportGem"
     ],
@@ -4293,6 +4770,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Increased Critical Damage Support"
   },
    526: {
+    "id": 526,
     "category": [
       "SupportGem"
     ],
@@ -4301,6 +4779,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Increased Critical Strikes Support"
   },
    527: {
+    "id": 527,
     "category": [
       "SupportGem"
     ],
@@ -4309,6 +4788,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Infernal Legion Support"
   },
    528: {
+    "id": 528,
     "category": [
       "SupportGem"
     ],
@@ -4317,6 +4797,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Infused Channelling Support"
   },
    529: {
+    "id": 529,
     "category": [
       "SupportGem"
     ],
@@ -4325,6 +4806,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Innervate Support"
   },
    530: {
+    "id": 530,
     "category": [
       "SupportGem"
     ],
@@ -4333,6 +4815,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Intensify Support"
   },
    531: {
+    "id": 531,
     "category": [
       "SupportGem"
     ],
@@ -4341,6 +4824,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Item Rarity Support"
   },
    532: {
+    "id": 532,
     "category": [
       "SupportGem"
     ],
@@ -4349,6 +4833,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Lightning Penetration Support"
   },
    533: {
+    "id": 533,
     "category": [
       "SupportGem"
     ],
@@ -4357,6 +4842,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Meat Shield Support"
   },
    534: {
+    "id": 534,
     "category": [
       "SupportGem"
     ],
@@ -4365,6 +4851,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Minefield Support"
   },
    535: {
+    "id": 535,
     "category": [
       "SupportGem"
     ],
@@ -4373,6 +4860,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Minion Damage Support"
   },
    536: {
+    "id": 536,
     "category": [
       "SupportGem"
     ],
@@ -4381,6 +4869,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Minion Life Support"
   },
    537: {
+    "id": 537,
     "category": [
       "SupportGem"
     ],
@@ -4389,6 +4878,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Minion Speed Support"
   },
    538: {
+    "id": 538,
     "category": [
       "SupportGem"
     ],
@@ -4397,6 +4887,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Overcharge Support"
   },
    539: {
+    "id": 539,
     "category": [
       "SupportGem"
     ],
@@ -4405,6 +4896,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Physical to Lightning Support"
   },
    540: {
+    "id": 540,
     "category": [
       "SupportGem"
     ],
@@ -4413,6 +4905,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Pinpoint Support"
   },
    541: {
+    "id": 541,
     "category": [
       "SupportGem"
     ],
@@ -4421,6 +4914,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Power Charge On Critical Support"
   },
    542: {
+    "id": 542,
     "category": [
       "SupportGem"
     ],
@@ -4429,6 +4923,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Predator Support"
   },
    543: {
+    "id": 543,
     "category": [
       "SupportGem"
     ],
@@ -4437,6 +4932,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Prismatic Burst Support"
   },
    544: {
+    "id": 544,
     "category": [
       "SupportGem"
     ],
@@ -4445,6 +4941,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Sacrifice Support"
   },
    545: {
+    "id": 545,
     "category": [
       "SupportGem"
     ],
@@ -4453,6 +4950,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spell Cascade Support"
   },
    546: {
+    "id": 546,
     "category": [
       "SupportGem"
     ],
@@ -4461,6 +4959,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spell Echo Support"
   },
    547: {
+    "id": 547,
     "category": [
       "SupportGem"
     ],
@@ -4469,6 +4968,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Spellblade Support"
   },
    548: {
+    "id": 548,
     "category": [
       "SupportGem"
     ],
@@ -4477,6 +4977,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Summon Phantasm Support"
   },
    549: {
+    "id": 549,
     "category": [
       "SupportGem"
     ],
@@ -4485,6 +4986,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Swiftbrand Support"
   },
    550: {
+    "id": 550,
     "category": [
       "SupportGem"
     ],
@@ -4493,6 +4995,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Trinity Support"
   },
    551: {
+    "id": 551,
     "category": [
       "SupportGem"
     ],
@@ -4501,6 +5004,7 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unbound Ailments Support"
   },
    552: {
+    "id": 552,
     "category": [
       "SupportGem"
     ],
@@ -4509,3 +5013,54 @@ item_table: Dict[int, ItemDict] = {
     "name": "Unleash Support"
   }
 }
+
+
+
+
+def get_flask_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+    """
+    Returns a set of all flask items available in the Path of Exile world.
+    """
+    return {item for item in table.values() if "Flask" in item["category"]}
+
+def get_character_class_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+    """
+    Returns a set of all character class items available in the Path of Exile world.
+    """
+    return {item for item in table.values() if "Character Class" in item["category"]}
+
+def get_ascendancy_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+    """
+    Returns a set of all ascendancy items available in the Path of Exile world.
+    """
+    return {item for item in table.values() if "Ascendancy" in item["category"]}
+
+def get_ascendancy_class_items(class_name: str, table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+    """
+    Returns a set of all ascendancy items available for a specific class in the Path of Exile world.
+    """
+    return {item for item in table.values() if "Ascendancy" in item["category"] and class_name in item["category"]}
+
+def get_main_skill_gem_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+    """
+    Returns a set of all main skill gem items available in the Path of Exile world.
+    """
+    return {item for item in table.values() if "MainSkillGem" in item["category"]}
+
+def get_main_skill_gem_items_under_level(level: int, table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+    """
+    Returns a set of all Main skill gem items available under a specific level in the Path of Exile world.
+    """
+    return {item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is None or item["reqLevel"] < level)}
+
+def get_gear_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+    """
+    Returns a set of all gear items available in the Path of Exile world.
+    """
+    return {item for item in table.values() if "Gear" in item["category"]}
+
+def get_max_links_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+    """
+    Returns a set of all max links items available in the Path of Exile world.
+    """
+    return {item for item in table.values() if "max links" in item["category"]}

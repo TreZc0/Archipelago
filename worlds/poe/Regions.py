@@ -14,12 +14,12 @@ acts = [
     {"act": 8, "maxMonsterLevel": 60},
     {"act": 9, "maxMonsterLevel": 64},
     {"act": 10, "maxMonsterLevel": 67},
-    {"act": "maps", "maxMonsterLevel": 86}
+    {"act": 11, "maxMonsterLevel": 86}
 ]
 
-def create_regions(world: PathOfExileWorld, multiworld: MultiWorld, player: int, name: str, locations=base_item_types, act_regions=acts) -> list[Region]:
+def create_and_populate_regions(world: PathOfExileWorld, multiworld: MultiWorld, player: int, name: str, locations=base_item_types, act_regions=acts) -> list[Region]:
     last_area_level = 0
-    menu = Region("menu", player, MultiWorld)
+    menu = Region("Menu", player, MultiWorld)
     multiworld.regions.append(menu)
     regions = []
     last_region = menu
