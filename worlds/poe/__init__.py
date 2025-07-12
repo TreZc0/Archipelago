@@ -52,9 +52,17 @@ class PathOfExileWorld(World):
     options_dataclass = PathOfExileOptions
     origin_region_name = "Menu"
 
+    items_to_place = {}
+    locations_to_place = {}
+    
     #generate the location and item tables from Locations.py and Items.py
     location_name_to_id = { loc.name: loc.id for loc in Locations.base_item_types }
     item_name_to_id = { item.name: item.id for item in Items.item_table }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.items_to_place = Items.item_table.copy()
+        self.locations_to_place = Locations.base_item_types.copy()
 
     def remove_and_create_item_by_dict(self, item: Items.ItemDict) -> Item:
         item_id = self.item_name_to_id[item.name]
@@ -67,8 +75,7 @@ class PathOfExileWorld(World):
         item_to_place = self.items_to_place.pop(item_id)  # Remove from items to place
         item_obj = Item(item_to_place.name, item_id, self.player, classification=ItemClassification.progression)
         return item_obj
-    items_to_place = Items.item_table.copy()
-    locations_to_place = Locations.base_item_types.copy()
+    
     def generate_early(self):
 
         
@@ -193,6 +200,6 @@ class PathOfExileWorld(World):
                             show_entrance_names=True,
                             regions_to_highlight=self.multiworld.get_all_state(self.player).reachable_regions[
                                 self.player])
-            
-            
-    
+
+
+
