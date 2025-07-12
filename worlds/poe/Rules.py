@@ -1,10 +1,7 @@
 
 from worlds.poe.Options import PathOfExileOptions
 from .Locations import PathOfExileLocation, base_item_types
-from .Regions import acts
-import Items
-
-from worlds.AutoWorld import World, MultiWorld
+from . import Items
 from BaseClasses import CollectionState, Region
 
 def can_reach(act: int, opt: PathOfExileOptions , state: CollectionState) -> bool:

@@ -9,9 +9,9 @@ import yaml
 import logging
 
 from .Options import PathOfExileOptions
-import Items
-import Locations
-import Regions
+from . import Items
+from . import Locations
+from . import Regions as poeRegions
 
 
 # ----- Configure the POE client ----- #
@@ -169,8 +169,7 @@ class PathOfExileWorld(World):
         # and only use the first `items_to_place_length` items of the Locations.base_item_types
         locations_to_place = Locations.base_item_types[:items_to_place_length]
 
-        Regions.create_and_populate_regions(self, self.multiworld, self.player, locations_to_place, Regions.acts)
-
+        poeRegions.create_and_populate_regions(self, self.multiworld, self.player, locations_to_place, poeRegions.acts)
 
         
     def fill_slot_data(self):

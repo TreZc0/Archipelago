@@ -1,5 +1,4 @@
-from BaseClasses import Region, region, MultiWorld
-from worlds.poe import PathOfExileWorld
+from BaseClasses import Region, MultiWorld
 from .Locations import PathOfExileLocation, base_item_types
 from .Rules import can_reach
 
@@ -17,7 +16,7 @@ acts = [
     {"act": 11, "maxMonsterLevel": 86}
 ]
 
-def create_and_populate_regions(world: PathOfExileWorld, multiworld: MultiWorld, player: int, name: str, locations=base_item_types, act_regions=acts) -> list[Region]:
+def create_and_populate_regions(world, multiworld: MultiWorld, player: int, name: str, locations=base_item_types, act_regions=acts) -> list[Region]:
     last_area_level = 0
     menu = Region("Menu", player, MultiWorld)
     multiworld.regions.append(menu)

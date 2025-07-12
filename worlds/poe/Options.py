@@ -106,7 +106,6 @@ class StartingCharacter(Choice):
     The starting character for the world. This will determine the class and ascendancy available.
      """
     display_name = "Starting Character"
-    option_random      = 0
     option_marauder    = 1
     option_ranger      = 2
     option_witch       = 3
