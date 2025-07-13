@@ -194,11 +194,11 @@ class PathOfExileWorld(World):
         This method initializes the items based on the items defined in Items.py.
         """
         options: PathOfExileOptions = self.options
-        # create the items from the items_to_place dict
-        for item in self.items_to_place.values():
+        # iterate over a copy to avoid RuntimeError
+        for item in list(self.items_to_place.values()):
             list_of_items = self.remove_and_create_item_by_dict(item)
             for item in list_of_items:
-                self.multiworld.create_item(item, self.player)
+                self.multiworld.itempool.append(item)
 
 
     def fill_slot_data(self):

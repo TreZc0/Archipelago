@@ -20,6 +20,15 @@ class PathOfExileItem(Item):
     itemInfo: ItemDict
     category = list[str]()
     
+    def create_item(self, item: str):
+        # this is called when AP wants to create an item by name (for plando, start inventory, item links) or when you call it from your own code
+        
+        # get the item from the item table, by name
+        id = self.item_name_to_id.get(item)
+        item = ItemTable.item_table.get(id)
+        classification = item.get("classification", None) # default to progression, but none for developing
+        return PathOfExileItem(item, classification, self.item_name_to_id[item], self.player)
+
 
 
 #def get_items():
