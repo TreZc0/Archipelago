@@ -4,6 +4,8 @@ from . import Items
 from BaseClasses import CollectionState, Region
 
 def can_reach(act: int, world , state: CollectionState) -> bool:
+    
+    return True
     opt : PathOfExileOptions = world.options
 
     reachable = True

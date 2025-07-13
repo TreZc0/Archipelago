@@ -54,7 +54,7 @@ class PathOfExileWorld(World):
 
     items_to_place = {}
     locations_to_place = {}
-    
+    total_items_count = 0
     #generate the location and item tables from Locations.py and Items.py
     # location_name_to_id = { loc.name: loc.id for loc in Locations.base_item_types }
     location_name_to_id = { loc["baseItem"]: id for id, loc in Locations.base_item_types.items() }
@@ -161,7 +161,6 @@ class PathOfExileWorld(World):
                 temp_items_to_place[item["id"]] = item
 
         # remove all the other ascendancy items
-
         for item in Items.get_ascendancy_items(table=self.items_to_place):
             item_id = self.item_name_to_id[item["name"]]
             self.items_to_place.pop(item_id, None)
@@ -178,10 +177,10 @@ class PathOfExileWorld(World):
                 item_id = self.item_name_to_id[item["name"]]
                 self.items_to_place.pop(item_id, None)
 
-        # get the length of items_to_place
-        items_to_place_length = len(self.items_to_place)
-        # and only use the first `items_to_place_length` items of the Locations.base_item_types
-        locations_to_place = list(Locations.base_item_types.values())[:items_to_place_length]
+        self.total_items_count = sum(item.get("count", 1) for item in self.items_to_place.values())
+        
+        # and only use the first `total_items_count` items of the Locations.base_item_types, we should have enough locations to place all items
+        locations_to_place = list(Locations.base_item_types.values())[:self.total_items_count]
         poeRegions.create_and_populate_regions(world = self,
                                                multiworld=self.multiworld,
                                                player= self.player,
@@ -194,16 +193,19 @@ class PathOfExileWorld(World):
         This method initializes the items based on the items defined in Items.py.
         """
         options: PathOfExileOptions = self.options
-        # iterate over a copy to avoid RuntimeError
+        # iterate over a copy to be safe while modifying the dictionary
         for item in list(self.items_to_place.values()):
             list_of_items = self.remove_and_create_item_by_dict(item)
             for item in list_of_items:
                 self.multiworld.itempool.append(item)
+        
+        if self._debug:
+            logger.info(f"[DEBUG]: Created {len(self.items_to_place)} - {self.total_items_count} items for player {self.player} in Path of Exile world. --")
+
 
 
     def fill_slot_data(self):
         options: PathOfExileOptions = self.options
-        # make a table of item id to location name
         client_options = {
             "gucciHobo" : options.gucci_hobo_mode.value,
             "ttsSpeed" : options.tts_speed.value,

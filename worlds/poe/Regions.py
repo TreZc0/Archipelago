@@ -27,7 +27,6 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
         region_name = f"Act {act['act']}"
         
         region = Region(region_name, player, multiworld)
-        # get me the itteratior 
         for i, loc in enumerate(locations):
             if loc != "used" and loc["dropLevel"] <= act["maxMonsterLevel"]:
                 location_name = f"{loc['baseItem']} - Act {act['act']}"
@@ -38,6 +37,7 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
         entrance_logic = lambda state: can_reach(act["act"], world, state)
         last_region.connect(region, rule=entrance_logic)
         region.connect(last_region, rule=entrance_logic)
+        multiworld.regions.append(region)
         last_region = region
 
         
