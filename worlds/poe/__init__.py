@@ -209,11 +209,10 @@ class PathOfExileWorld(World):
         client_options = {
             "gucciHobo" : options.gucci_hobo_mode.value,
             "ttsSpeed" : options.tts_speed.value,
-            "ttsVolume" : options.tts_volume.value,
-
+            "ttsEnabled": options.enable_tts.value,
         }
         return {
-            client_options: client_options,
+            "client_options": client_options,
         }
         
         
