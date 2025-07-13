@@ -245,16 +245,6 @@ base_item_types: Dict[int, LocationDict] = {
     "dropLevel": 4,
     "act": 1
   },
-  45:{
-    "baseItem": "Stone Axe",
-    "dropLevel": 4,
-    "act": 1
-  },
-  46:{
-    "baseItem": "Stone Axe",
-    "dropLevel": 4,
-    "act": 1
-  },
   47:{
     "baseItem": "Chain Boots",
     "dropLevel": 5,
@@ -866,16 +856,6 @@ base_item_types: Dict[int, LocationDict] = {
     "act": 2
   },
   169:{
-    "baseItem": "Two-Stone Ring",
-    "dropLevel": 20,
-    "act": 2
-  },
-  170:{
-    "baseItem": "Two-Stone Ring",
-    "dropLevel": 20,
-    "act": 2
-  },
-  171:{
     "baseItem": "Two-Stone Ring",
     "dropLevel": 20,
     "act": 2

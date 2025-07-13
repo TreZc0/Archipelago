@@ -56,8 +56,9 @@ class PathOfExileWorld(World):
     locations_to_place = {}
     
     #generate the location and item tables from Locations.py and Items.py
-    location_name_to_id = { loc.name: loc.id for loc in Locations.base_item_types }
-    item_name_to_id = { item.name: item.id for item in Items.item_table }
+    # location_name_to_id = { loc.name: loc.id for loc in Locations.base_item_types }
+    location_name_to_id = { loc["baseItem"]: id for id, loc in Locations.base_item_types.items() }
+    item_name_to_id = { item["name"]: item["id"] for item in Items.item_table.values() }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -65,30 +66,30 @@ class PathOfExileWorld(World):
         self.locations_to_place = Locations.base_item_types.copy()
 
     def remove_and_create_item_by_dict(self, item: Items.ItemDict) -> Item:
-        item_id = self.item_name_to_id[item.name]
+        item_id = self.item_name_to_id[item["name"]]
         item_to_place = self.items_to_place.pop(item_id)  # Remove from items to place
-        item_obj = Item(item_to_place.name, item_id, self.player, classification=ItemClassification.progression)
+        item_obj = Item(item_to_place["name"], ItemClassification.progression, item_id, self.player,)
         return item_obj
 
     def remove_and_create_item_by_name(self, item_name: str) -> Item:
         item_id = self.item_name_to_id[item_name]
         item_to_place = self.items_to_place.pop(item_id)  # Remove from items to place
-        item_obj = Item(item_to_place.name, item_id, self.player, classification=ItemClassification.progression)
+        item_obj = Item(item_to_place["name"], ItemClassification.progression, item_id, self.player)
         return item_obj
     
     def generate_early(self):
 
         
         options: PathOfExileOptions = self.options
-        if options.starting_character.value == options.starting_character.option_random:
-            options.starting_character.value = self.random.choice(
-                [options.starting_character.option_marauder,
-                 options.starting_character.option_ranger,
-                 options.starting_character.option_witch,
-                 options.starting_character.option_duelist,
-                 options.starting_character.option_templar,
-                 options.starting_character.option_shadow,
-                 options.starting_character.option_scion])
+        # if options.starting_character.value == options.starting_character.option_random:
+        #     options.starting_character.value = self.random.choice(
+        #         [options.starting_character.option_marauder,
+        #          options.starting_character.option_ranger,
+        #          options.starting_character.option_witch,
+        #          options.starting_character.option_duelist,
+        #          options.starting_character.option_templar,
+        #          options.starting_character.option_shadow,
+        #          options.starting_character.option_scion])
         
         if options.gear_unlocks.value == False:
             gear_upgrades = Items.get_gear_items(table=self.items_to_place)
@@ -105,7 +106,7 @@ class PathOfExileWorld(World):
         if options.support_gem_slot_upgrades.value == False:
             support_gem_slots = Items.get_max_links_items(table=self.items_to_place)
             for item in support_gem_slots:
-                item_obj = self.remove_and_create_item_by_dict(item)
+                item_obj = self.remove_and_create_item_by_dict(item)        
                 self.multiworld.push_precollected(item_obj)
                 
                 
@@ -151,12 +152,12 @@ class PathOfExileWorld(World):
         for item in range(0, options.ascendancies_available_per_class.value):
             for char_class in ["Marauder", "Ranger", "Witch", "Duelist", "Templar", "Shadow", "Scion"]:
                 item: Items.ItemDict = self.random.choice(Items.get_ascendancy_class_items(char_class + " Class", table=self.items_to_place))
-                temp_items_to_place[item.id] = item
+                temp_items_to_place[item["id"]] = item
 
         # remove all the other ascendancy items
 
         for item in Items.get_ascendancy_items(table=self.items_to_place):
-            item_id = self.item_name_to_id[item.name]
+            item_id = self.item_name_to_id[item["name"]]
             self.items_to_place.pop(item_id, None)
             
         # add the temp items to place back to the items to place
@@ -165,18 +166,22 @@ class PathOfExileWorld(World):
 
         if options.allow_unlock_of_other_characters.value == False : 
             for item in Items.get_character_class_items(table=self.items_to_place):
-                for ascendancy in Items.get_ascendancy_class_items(item.name + " Class", table=self.items_to_place):
-                    item_id = self.item_name_to_id[ascendancy.name]
+                for ascendancy in Items.get_ascendancy_class_items(item["name"] + " Class", table=self.items_to_place):
+                    item_id = self.item_name_to_id[ascendancy["name"]]
                     self.items_to_place.pop(item_id, None)
-                item_id = self.item_name_to_id[item.name]
+                item_id = self.item_name_to_id[item["name"]]
                 self.items_to_place.pop(item_id, None)
 
         # get the length of items_to_place
         items_to_place_length = len(self.items_to_place)
         # and only use the first `items_to_place_length` items of the Locations.base_item_types
-        locations_to_place = Locations.base_item_types[:items_to_place_length]
-
-        poeRegions.create_and_populate_regions(self, self.multiworld, self.player, locations_to_place, poeRegions.acts)
+        locations_to_place = list(Locations.base_item_types.values())[:items_to_place_length]
+        poeRegions.create_and_populate_regions(world = self,
+                                               multiworld=self.multiworld,
+                                               player= self.player,
+                                               locations=locations_to_place,
+                                               act_regions=poeRegions.acts)
+        #poeRegions.create_and_populate_regions(self, self.multiworld, self.player, locations_to_place, poeRegions.acts)
 
         
     def fill_slot_data(self):

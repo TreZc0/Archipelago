@@ -1,5 +1,5 @@
 from BaseClasses import Item, ItemClassification
-from typing import TypedDict, Dict, Set 
+from typing import TypedDict, Dict, Set
 
 class ItemDict(TypedDict, total=False): 
     classification: ItemClassification 
@@ -15,6 +15,7 @@ class PathOfExileItem(Item):
     This class can be extended to include specific item properties and methods.
     """
     game = "Path of Exile"
+    itemInfo: ItemDict
     category = list[str]()
 
 
@@ -5017,50 +5018,50 @@ item_table: Dict[int, ItemDict] = {
 
 
 
-def get_flask_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+def get_flask_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
     Returns a set of all flask items available in the Path of Exile world.
     """
-    return {item for item in table.values() if "Flask" in item["category"]}
+    return [item for item in table.values() if "Flask" in item["category"]]
 
-def get_character_class_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+def get_character_class_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
     Returns a set of all character class items available in the Path of Exile world.
     """
-    return {item for item in table.values() if "Character Class" in item["category"]}
+    return [item for item in table.values() if "Character Class" in item["category"]] 
 
-def get_ascendancy_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+def get_ascendancy_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
     Returns a set of all ascendancy items available in the Path of Exile world.
     """
-    return {item for item in table.values() if "Ascendancy" in item["category"]}
+    return [item for item in table.values() if "Ascendancy" in item["category"]]
 
-def get_ascendancy_class_items(class_name: str, table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+def get_ascendancy_class_items(class_name: str, table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
     Returns a set of all ascendancy items available for a specific class in the Path of Exile world.
     """
-    return {item for item in table.values() if "Ascendancy" in item["category"] and class_name in item["category"]}
+    return [item for item in table.values() if "Ascendancy" in item["category"] and class_name in item["category"]]
 
-def get_main_skill_gem_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+def get_main_skill_gem_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
     Returns a set of all main skill gem items available in the Path of Exile world.
     """
-    return {item for item in table.values() if "MainSkillGem" in item["category"]}
+    return [item for item in table.values() if "MainSkillGem" in item["category"]]
 
-def get_main_skill_gem_items_under_level(level: int, table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+def get_main_skill_gem_items_under_level(level: int, table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
-    Returns a set of all Main skill gem items available under a specific level in the Path of Exile world.
+    Returns a list of all Main skill gem items available under a specific level in the Path of Exile world.
     """
-    return {item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is None or item["reqLevel"] < level)}
+    return [item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is None or item["reqLevel"] < level)]
 
-def get_gear_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+def get_gear_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:    
     """
-    Returns a set of all gear items available in the Path of Exile world.
+    Returns a list of all gear items available in the Path of Exile world.
     """
-    return {item for item in table.values() if "Gear" in item["category"]}
+    return [item for item in table.values() if "Gear" in item["category"]]
 
-def get_max_links_items(table: Dict[int, ItemDict] = item_table) -> Set[ItemDict]:
+def get_max_links_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
-    Returns a set of all max links items available in the Path of Exile world.
+    Returns a list of all max links items available in the Path of Exile world.
     """
-    return {item for item in table.values() if "max links" in item["category"]}
+    return [item for item in table.values() if "max links" in item["category"]]

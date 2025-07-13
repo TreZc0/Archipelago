@@ -104,7 +104,7 @@ class AllowUnlockOfOtherCharacters(Toggle):
 class StartingCharacter(Choice):
     """
     The starting character for the world. This will determine the class and ascendancy available.
-     """
+    """
     display_name = "Starting Character"
     option_marauder    = 1
     option_ranger      = 2
@@ -113,16 +113,16 @@ class StartingCharacter(Choice):
     option_templar     = 5
     option_shadow      = 6
     option_scion       = 7
-    default = 0
+    default = "random"
 
 class EnableTTS(Choice):
     """
     Settings for the Text-to-Speech (TTS) feature.
     """
     display_name = "Text-to-Speech"
-    Disabled     = 0
-    Enabled_Saying_AP_Item = 1
-    Enabled_Saying_Base_Item = 2
+    option_no_tts     = 0
+    option_enabled_AP_Item = 1
+    option_enabled_Base_Item = 2
     default = 1
 
 class TTSSpeed(Range):

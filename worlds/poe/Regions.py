@@ -1,5 +1,6 @@
+from typing import Dict
 from BaseClasses import Region, MultiWorld
-from .Locations import PathOfExileLocation, base_item_types
+from .Locations import LocationDict, PathOfExileLocation, base_item_types
 from .Rules import can_reach
 
 acts = [
@@ -16,9 +17,9 @@ acts = [
     {"act": 11, "maxMonsterLevel": 86}
 ]
 
-def create_and_populate_regions(world, multiworld: MultiWorld, player: int, name: str, locations=base_item_types, act_regions=acts) -> list[Region]:
-    last_area_level = 0
-    menu = Region("Menu", player, MultiWorld)
+def create_and_populate_regions(world, multiworld: MultiWorld, player: int, locations: list[LocationDict] = base_item_types, act_regions=acts) -> list[Region]:
+    locations: list[LocationDict] = locations.copy()
+    menu = Region("Menu", player, multiworld)
     multiworld.regions.append(menu)
     regions = []
     last_region = menu
@@ -26,13 +27,14 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, name
         region_name = f"Act {act['act']}"
         
         region = Region(region_name, player, multiworld)
-
-        locations_for_regions = [loc for loc in locations if loc["dropLevel"] > last_area_level and loc["dropLevel"] <= act["maxMonsterLevel"]]
-        for location in locations_for_regions:
-            location_name = f"{location["baseItem"]} - {act['act']}"
-            locationObj = PathOfExileLocation(player, location_name, parent=region)
-            region.locations.append(locationObj)
-        last_area_level = act["maxMonsterLevel"]
+        # get me the itteratior 
+        for i, loc in enumerate(locations):
+            if loc != "used" and loc["dropLevel"] <= act["maxMonsterLevel"]:
+                location_name = f"{loc['baseItem']} - Act {act['act']}"
+                locationObj = PathOfExileLocation(player, location_name, parent=region)
+                region.locations.append(locationObj)
+                locations[i] = "used"   # Mark the location as used to avoid duplicates
+                
         entrance_logic = lambda state: can_reach(act["act"], world.options, state)
         last_region.connect(region, rule=entrance_logic)
         region.connect(last_region, rule=entrance_logic)
@@ -44,4 +46,3 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, name
 class PathOfExileRegion(Region):
     def can_reach(self, state):
         return super().can_reach(state) and can_reach(self.act, self, state)
-    
