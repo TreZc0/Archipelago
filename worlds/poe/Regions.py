@@ -35,7 +35,7 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
                 region.locations.append(locationObj)
                 locations[i] = "used"   # Mark the location as used to avoid duplicates
                 
-        entrance_logic = lambda state: can_reach(act["act"], world.options, state)
+        entrance_logic = lambda state: can_reach(act["act"], world, state)
         last_region.connect(region, rule=entrance_logic)
         region.connect(last_region, rule=entrance_logic)
         last_region = region

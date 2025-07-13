@@ -65,16 +65,20 @@ class PathOfExileWorld(World):
         self.items_to_place = Items.item_table.copy()
         self.locations_to_place = Locations.base_item_types.copy()
 
-    def remove_and_create_item_by_dict(self, item: Items.ItemDict) -> Item:
+    def remove_and_create_item_by_dict(self, item: Items.ItemDict) -> list[Items.PathOfExileItem]:
         item_id = self.item_name_to_id[item["name"]]
         item_to_place = self.items_to_place.pop(item_id)  # Remove from items to place
-        item_obj = Item(item_to_place["name"], ItemClassification.progression, item_id, self.player,)
-        return item_obj
+        item_objs = []
+        count = item.get("count", 1)
+        for i in range(count):
+            item_obj = Items.PathOfExileItem(item_to_place["name"], ItemClassification.progression, item_id, self.player)
+            item_objs.append(item_obj)
+        return item_objs
 
     def remove_and_create_item_by_name(self, item_name: str) -> Item:
         item_id = self.item_name_to_id[item_name]
         item_to_place = self.items_to_place.pop(item_id)  # Remove from items to place
-        item_obj = Item(item_to_place["name"], ItemClassification.progression, item_id, self.player)
+        item_obj = Items.PathOfExileItem(item_to_place["name"], ItemClassification.progression, item_id, self.player)
         return item_obj
     
     def generate_early(self):
@@ -94,15 +98,17 @@ class PathOfExileWorld(World):
         if options.gear_unlocks.value == False:
             gear_upgrades = Items.get_gear_items(table=self.items_to_place)
             for item in gear_upgrades:
-                item_obj = self.remove_and_create_item_by_dict(item)
-                self.multiworld.push_precollected(item_obj)
+                item_objs = self.remove_and_create_item_by_dict(item)
+                for item_obj in item_objs:
+                    self.multiworld.push_precollected(item_obj)
 
         if options.flask_slot_upgrades.value == False:
             flask_slots = Items.get_flask_items(table=self.items_to_place)
             for item in flask_slots:
-                item_obj = self.remove_and_create_item_by_dict(item)
-                self.multiworld.push_precollected(item_obj)
-                    
+                item_objs = self.remove_and_create_item_by_dict(item)
+                for item_obj in item_objs:
+                    self.multiworld.push_precollected(item_obj)
+
         if options.support_gem_slot_upgrades.value == False:
             support_gem_slots = Items.get_max_links_items(table=self.items_to_place)
             for item in support_gem_slots:
@@ -183,7 +189,18 @@ class PathOfExileWorld(World):
                                                act_regions=poeRegions.acts)
         #poeRegions.create_and_populate_regions(self, self.multiworld, self.player, locations_to_place, poeRegions.acts)
 
-        
+    def create_items(self):
+        """Create the items for the Path of Exile world.
+        This method initializes the items based on the items defined in Items.py.
+        """
+        options: PathOfExileOptions = self.options
+        # create the items from the items_to_place dict
+        for item in self.items_to_place.values():
+            list_of_items = self.remove_and_create_item_by_dict(item)
+            for item in list_of_items:
+                self.multiworld.create_item(item, self.player)
+
+
     def fill_slot_data(self):
         options: PathOfExileOptions = self.options
         # make a table of item id to location name
@@ -208,3 +225,5 @@ class PathOfExileWorld(World):
 
 
 
+# TODO handle multiple locations with the same name -- two stone rings and stone axe (IIRC)
+# TODO handle multiple items with the same name -- for flasks and such
