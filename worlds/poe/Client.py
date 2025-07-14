@@ -57,22 +57,30 @@ class PathOfExileContext(CommonContext):
     command_processor = PathOfExileCommandProcessor
     items_handling = 0b111
     _debug = True  # Enable debug mode for poe client
+    location_to_item_name: dict[int, str]
 
-    item_name_to_unlocker_location = {} # remove this I think?
-    required_for_finish_player_location_table = {}
-    item_id_to_location_name = {}
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Dictionary mapping location id to item name (string)
+        self.location_to_item_name: dict[int, str] = {}
 
     async def server_auth(self, password_requested: bool = False):
         if password_requested and not self.password:
-            await super(TextContext, self).server_auth(password_requested)
+            await super(self).server_auth(password_requested)
         await self.get_username()
         await self.send_connect(game="Path of Exile")
 
     def on_package(self, cmd: str, args: dict):
         if cmd == 'Connected':
-            pass
-        if cmd == "ReceivedItems":
-            pass
+            # Request info for all locations after connecting
+            location_ids = list(self.location_names[self.game].keys())
+            self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}])
+        if cmd == "LocationInfo":   
+            a = 1 + 1
+            for loc_id, item_id in args.get("locations", []):
+                item_name = self.item_names.lookup_in_game(item_id)
+                items_player = self.items_player.get_item(item_id)
+                self.location_to_item_name[loc_id] = f"{item_name} for {items_player}"
         super().on_package(cmd, args)
 
 

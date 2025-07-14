@@ -6,8 +6,8 @@ import threading
 _debug = True
 _engine = pyttsx3.init()
 _engine_lock = threading.Lock()
-
-async def text_to_speech(text, filename: str, tts_rate_wpm=250, volume=1, voice_id=None):
+WPM = 250  # Default words per minute for TTS
+async def text_to_speech(text, filename: str, tts_rate_wpm=WPM, volume=1, voice_id=None):
     loop = asyncio.get_event_loop()
     def run_tts():
         with _engine_lock:
@@ -22,3 +22,7 @@ async def text_to_speech(text, filename: str, tts_rate_wpm=250, volume=1, voice_
             if _debug:
                 print(f"[DEBUG] Finished TTS: text='{text}' file saved to '{filename}'")
     await loop.run_in_executor(None, run_tts)
+
+async def text_to_speech_if_doesnt_exist(text, filename: str, tts_rate_wpm=WPM, volume=1, voice_id=None):
+    if not Path(filename).exists():
+        await text_to_speech(text, filename, tts_rate_wpm, volume, voice_id)

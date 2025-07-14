@@ -6,6 +6,10 @@ from . import baseItemTypes
 from . import gggAPI
 from . import fileHelper
 from . import inputHelper
+from . import tts
+
+import worlds.poe.Items as Items
+import worlds.poe.Locations as Locations
 
 character_name = "DefaultCharacter"
 found_items_dict = {}
@@ -31,50 +35,79 @@ async def when_enter_new_zone(line: str):
     await asyncio.sleep(0.5)  # Allow some time for the filter to update
     await inputHelper.send_poe_text("/itemfilter __ap")
 
-async def validate_and_update(character_name: str = character_name, ctx: PathOfExileContext = None) -> bool:
-    """
-    Validates the character and updates the item filter if the character is valid.
-    This function checks if the character exists and then updates the item filter with the found items.
-
-    Args:
-        character_name (str): The name of the character to validate.
-
-    Returns:
-        bool: True if the character is valid and the filter was updated, False otherwise.
-    """
-    
+async def validate_and_update(character_name: str = character_name, ctx: PathOfExileContext = None) -> bool:   
     if ctx is None:
         # something is wrong, are we not connected?
         print("Context is None, cannot validate character.")
         return False
     
-    ctx.checked_locations 
-    
+    char = {}
+    try: 
+        char = await gggAPI.get_character(character_name)
+    except Exception as e:
+        print(f"Error fetching character {character_name}: {e}")
+        return False
     
     global is_char_in_logic
     try:
-        is_char_in_logic = await validate_char(character_name)
+        is_char_in_logic = await validate_char(char)
     except Exception as e:
         print(f"Error validating character: {e}")
         return False
-    found_items_set.update(await get_found_items(character_name))
+    found_items_set = await get_found_items(char)
+    # for each item in found_items_set: send locations via ctx
+    if is_char_in_logic:
+        for item in found_items_set:
+            if _debug:
+                print(f"[DEBUG] Found item: {item}")
+            location_id = Locations.get_location_id_from_item_name(item)
+            await ctx.check_locations(location_id)
+        await update_filter(ctx)
+    
     await fileHelper.write_set_to_file(found_items_set, save_path)
-    await update_filter()
+    await update_filter(ctx.missing_locations)
 
 
 
-async def validate_char(character_name: str = character_name) -> bool:
+async def validate_char(character: gggAPI.Character, ctx: PathOfExileContext) -> bool:
+    # Perform validation logic here
+
+    if character is None:
+        print("Character is None, cannot validate.")
+        return False
+
+    total_recieved = ctx.items_received
+
+
+
+    # Check if the character is valid
+    for equipped_item in character.equipment:
+        if equipped_item.baseType not in total_items:
+            print(f"Invalid item found: {equipped_item.baseType}")
+            await update_filter_to_invalid_char_filter()
+            return False
+
     return True
 
-async def update_filter(full_items: set = total_items, found_items: set = found_items_set,) -> bool:
-    missing_items = full_items - found_items
+async def update_filter(ctx: PathOfExileContext) -> bool:
     item_filter_string = ""
-    for item in missing_items:
-        item_filter_string += itemFilter.generate_item_filter_block(item, f"{itemFilter.filter_sounds_dir_name}/{item.lower()}.wav") + "\n\n"
+    missing_location_ids = ctx.missing_locations
+    for base_item_location_id in missing_location_ids:
+        item_text = ctx.location_to_item_name.get(base_item_location_id, "Unknown Item")
+        filename =  f"{item_text.lower()}_{tts.WPM}.wav"
+        base_item_location_name = ctx.location_names.lookup_in_game(base_item_location_id)
+        await tts.text_to_speech_if_doesnt_exist(
+            text=f"{item_text}",
+            filename=itemFilter.filter_sounds_path / filename,
+            tts_rate_wpm=tts.WPM
+        )
+        item_filter_string += itemFilter.generate_item_filter_block(base_item_location_name, f"{itemFilter.filter_sounds_dir_name}/{filename}.wav") + "\n\n"
 
     if item_filter_string:
         itemFilter.write_item_filter(item_filter_string)
-        print(f"Item filter updated with {len(missing_items)} items.")
+        print(f"Item filter updated with {len(missing_location_ids)} items.")
+    return True
+
 
 async def update_filter_to_invalid_char_filter():
     invalid_alert_sound = "apsound/invalid.wav"
@@ -84,7 +117,7 @@ async def update_filter_to_invalid_char_filter():
     itemFilter.write_item_filter(invalid_item_filter_string, item_filter_import=None)
 
 
-async def get_found_items(character_name: str = character_name) -> set:
+async def get_found_items(char: gggAPI.Character) -> set:
     """
     Fetches the found items for a given character from the GGG API.
 
@@ -95,8 +128,7 @@ async def get_found_items(character_name: str = character_name) -> set:
         dict: A dictionary containing the found items.
     """
     try:
-        char = await gggAPI.get_character(character_name)
-        for item in char.character.inventory:
+        for item in char.inventory:
             found_items_set.add(item.baseType)
             if _debug:
                 print(f"[DEBUG] Item in inventory: {item.baseType}")

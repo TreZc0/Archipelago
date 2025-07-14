@@ -69,6 +69,7 @@ def on_press(key):
 
 last_ran_validate_char = 0
 def validate_char(ctx: PathOfExileContext = context):
+    
     # add a debounce timer to the validate_char function. I want this function to run at most every 5 seconds
     global last_ran_validate_char
     current_time = time.time()
@@ -84,7 +85,8 @@ def validate_char(ctx: PathOfExileContext = context):
 
 async def load_async():
     validationLogic.character_name = character_name
-    await validationLogic.load_found_items_from_file()
+    #TODO GET THIS FROM AP
+    #await validationLogic.load_found_items_from_file()
 
     await gggAPI.async_get_access_token()
     base_items = baseItemTypes.get_base_item_types()

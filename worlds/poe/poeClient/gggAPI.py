@@ -115,18 +115,29 @@ async def _rate_limited_access_request(method, url, **kwargs):
 # --- Dataclasses for API response ---
 
 @dataclass
+class ItemProperty:
+    name: str
+    values: List[List[Any]]
+    displayMode: int
+    type: int
+    progress: Optional[int] = None
+    suffix: Optional[str] = None
+    augmented: Optional[bool] = None
+    hashes: Optional[List[int]] = None
+
+@dataclass
 class Item:
     id: str
     name: str
     typeLine: str
     baseType: str
-    rarity: str
+    rarity: str # 'e.g., "Normal", "Magic", "Rare", "Unique"'
     ilvl: int
     identified: bool
     inventoryId: str
-    # ...add more fields as needed...
-    # Use Optional for fields that may not be present
-    # For brevity, not all fields are included here
+    properties: List[ItemProperty] = field(default_factory=list)
+    socketedItems: List["Item"] = field(default_factory=list)
+    # ...other fields as needed...
 
 @dataclass
 class Passives:
