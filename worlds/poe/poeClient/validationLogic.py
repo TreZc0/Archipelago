@@ -1,5 +1,6 @@
 import asyncio
-
+from worlds.poe.Client import PathOfExileContext
+from worlds.poe import PathOfExileWorld
 from . import itemFilter
 from . import baseItemTypes
 from . import gggAPI
@@ -30,7 +31,7 @@ async def when_enter_new_zone(line: str):
     await asyncio.sleep(0.5)  # Allow some time for the filter to update
     await inputHelper.send_poe_text("/itemfilter __ap")
 
-async def validate_and_update(character_name: str = character_name) -> bool:
+async def validate_and_update(character_name: str = character_name, ctx: PathOfExileContext = None) -> bool:
     """
     Validates the character and updates the item filter if the character is valid.
     This function checks if the character exists and then updates the item filter with the found items.
@@ -41,6 +42,15 @@ async def validate_and_update(character_name: str = character_name) -> bool:
     Returns:
         bool: True if the character is valid and the filter was updated, False otherwise.
     """
+    
+    if ctx is None:
+        # something is wrong, are we not connected?
+        print("Context is None, cannot validate character.")
+        return False
+    
+    ctx.checked_locations 
+    
+    
     global is_char_in_logic
     try:
         is_char_in_logic = await validate_char(character_name)

@@ -6,7 +6,7 @@ from BaseClasses import CollectionState, Region
 
 MAX_GEAR_UPGRADES   = 50
 MAX_FLASK_SLOTS     = 10
-MAX_GEM_SLOTS       = 19
+MAX_GEM_SLOTS       = 21
 MAX_SKILL_GEMS      = 20 # you will get more, but this is the max required for "logic"
 _debug = True
 def can_reach(act: int, world , state: CollectionState) -> bool:

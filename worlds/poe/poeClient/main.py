@@ -1,6 +1,8 @@
 # Do the vendor imports
 import os
 import sys
+
+from worlds.poe.Client import PathOfExileContext
 vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
 if vendor_dir not in sys.path:
     sys.path.insert(0, vendor_dir)
@@ -26,7 +28,7 @@ _generate_wav = False  # Set to True if you want to generate the wav files
 validate_char_debounce_time = 5  # seconds
 loop_timer = 60  # Time in seconds to wait before reloading the item filter
 _debug = True  # Set to True for debug output, False for production
-
+context = {}
 possible_paths_to_client_txt = [
     Path("C:/Program Files (x86)/Grinding Gear Games/Path of Exile/logs/client.txt"),
     Path("C:/Program Files (x86)/Steam/steamapps/common/Path of Exile/logs/client.txt"),
@@ -39,7 +41,7 @@ path_to_client_txt = Path("D:/games/poe/logs/Client.txt")
 key_functions = {
     #keyboard.KeyCode: lambda: validate_char(),
     # numpad 1
-    keyboard.Key.f12: lambda : validate_char(),
+    keyboard.Key.f12: lambda : validate_char(context),
     #keyboard.Key.f11: lambda : ,
 }
 
@@ -66,7 +68,7 @@ def on_press(key):
             print(f"Error executing function for key {key}: {e}")
 
 last_ran_validate_char = 0
-def validate_char():
+def validate_char(ctx: PathOfExileContext = context):
     # add a debounce timer to the validate_char function. I want this function to run at most every 5 seconds
     global last_ran_validate_char
     current_time = time.time()
@@ -77,7 +79,7 @@ def validate_char():
 
     if _debug:
         print(f"[DEBUG] Validating character: {character_name} at {current_time}")
-    sync_run_async(validationLogic.validate_and_update(character_name))
+    sync_run_async(validationLogic.validate_and_update(character_name, ctx))
     last_ran_validate_char = time.time()
 
 async def load_async():
@@ -129,6 +131,11 @@ def run():
     except KeyboardInterrupt:
         print("Main Loop stopped by user.")
 
+def client_start(ctx: PathOfExileContext):
+    global context
+    context = ctx
+    run()
+    
 async def main_async():
     import time
 
