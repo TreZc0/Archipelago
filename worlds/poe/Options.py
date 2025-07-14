@@ -67,22 +67,21 @@ class SupportGemSlotUpgrades(Toggle):
 
 class SupportGemSlotsPerAct(Range):
     """
-    Specifies a minimum number of available support gem slots per act. (there are 19 total)
+    Specifies a minimum number of available support gem slots (maximum usable links in items) per act. (there are 21 total)
     This will be ignored if the "Support Gem Slot Upgrades" option is turned off.
     """
     display_name = "Support Gem Slots Per Act"
     range_start = 0
-    range_end = 19
+    range_end = 21
     default = 2
 
 class SkillGemsPerAct(Range):
     """
     Specifies a minimum number of available, usable skill gem slots per act.
-    This will be ignored if the "Skill Gem Slot Upgrades" option is turned off.
     """
     display_name = "Skill Gem Slots Per Act"
     range_start = 0
-    range_end = 19
+    range_end = 20
     default = 2
 
 class AscendanciesAvailablePerClass(Range):

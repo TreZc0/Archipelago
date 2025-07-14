@@ -1,4 +1,10 @@
+1 // 1; """
+/*"""
+#*/ ItemClassification = {'progression': 'progression', 'useful': 'useful', 'filler': 'filler'} /*
 from BaseClasses import ItemClassification
+# This is so that we can also use this file in js. Hyper ugly.
+#*/
+
 
 
 item_table = {
@@ -2241,7 +2247,7 @@ item_table = {
       "MainSkillGem"
     ],
     "reqLevel": 4,
-    "classification": ItemClassification.progression,
+    "classification": ItemClassification.useful,
     "name": "Ancestral Protector"
   },
    248: {
@@ -2250,7 +2256,7 @@ item_table = {
       "MainSkillGem"
     ],
     "reqLevel": 28,
-    "classification": ItemClassification.progression,
+    "classification": ItemClassification.useful,
     "name": "Ancestral Warchief"
   },
    249: {
@@ -2286,7 +2292,7 @@ item_table = {
       "MainSkillGem"
     ],
     "reqLevel": 12,
-    "classification": ItemClassification.progression,
+    "classification": ItemClassification.useful,
     "name": "Chain Hook"
   },
    253: {
@@ -2304,7 +2310,7 @@ item_table = {
       "MainSkillGem"
     ],
     "reqLevel": 28,
-    "classification": ItemClassification.progression,
+    "classification": ItemClassification.useful,
     "name": "Consecrated Path"
   },
    255: {
@@ -3144,15 +3150,6 @@ item_table = {
     "classification": ItemClassification.useful,
     "name": "Detonate Mines"
   },
-   348: {
-    "id": 348,
-    "category": [
-      "UtilSkillGem"
-    ],
-    "reqLevel": 10,
-    "classification": ItemClassification.useful,
-    "name": "Portal"
-  },
    349: {
     "id": 349,
     "category": [
@@ -3486,14 +3483,6 @@ item_table = {
     "classification": ItemClassification.useful,
     "name": "Chance to Bleed Support"
   },
-#   386: {
-#    "category": [
-#      "SupportGem"
-#    ],
-#    "reqLevel": 1,
-#    "classification": ItemClassification.useful,
-#    "name": "Empower Support"
-#  },
    387: {
     "id": 387,
     "category": [
@@ -3608,7 +3597,7 @@ item_table = {
       "SupportGem"
     ],
     "reqLevel": 8,
-    "classification": ItemClassification.useful,
+    "classification": ItemClassification.filler,
     "name": "Stun Support"
   },
    400: {
@@ -3962,14 +3951,6 @@ item_table = {
     "classification": ItemClassification.useful,
     "name": "Chance to Poison Support"
   },
-#   439: {
-#    "category": [
-#      "SupportGem"
-#    ],
-#    "reqLevel": 1,
-#    "classification": ItemClassification.useful,
-#    "name": "Enhance Support"
-#  },
    440: {
     "id": 440,
     "category": [
@@ -4129,7 +4110,7 @@ item_table = {
       "SupportGem"
     ],
     "reqLevel": 18,
-    "classification": ItemClassification.useful,
+    "classification": ItemClassification.filler,
     "name": "Block Chance Reduction Support"
   },
    458: {
@@ -4354,7 +4335,7 @@ item_table = {
       "SupportGem"
     ],
     "reqLevel": 38,
-    "classification": ItemClassification.useful,
+    "classification": ItemClassification.filler,
     "name": "Cast on Death Support"
   },
    483: {
@@ -4399,7 +4380,7 @@ item_table = {
       "SupportGem"
     ],
     "reqLevel": 38,
-    "classification": ItemClassification.useful,
+    "classification": ItemClassification.progression,
     "name": "Mark On Hit Support"
   },
    488: {
@@ -4498,7 +4479,7 @@ item_table = {
       "SupportGem"
     ],
     "reqLevel": 38,
-    "classification": ItemClassification.useful,
+    "classification": ItemClassification.filler,
     "name": "Cast when Stunned Support"
   },
    499: {
@@ -4627,14 +4608,6 @@ item_table = {
     "classification": ItemClassification.useful,
     "name": "Energy Leech Support"
   },
-#   513: {
-#    "category": [
-#      "SupportGem"
-#    ],
-#    "reqLevel": 1,
-#    "classification": ItemClassification.useful,
-#    "name": "Enlighten Support"
-#  },
    514: {
     "id": 514,
     "category": [

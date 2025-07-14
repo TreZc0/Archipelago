@@ -181,6 +181,8 @@ class PathOfExileWorld(World):
         
         # and only use the first `total_items_count` items of the Locations.base_item_types, we should have enough locations to place all items
         locations_to_place = list(Locations.base_item_types.values())[:self.total_items_count]
+        if self._debug:
+            logger.info(f"[DEBUG]: total locations to add: {len(locations_to_place)} / {len(Locations.base_item_types)} possible")
         poeRegions.create_and_populate_regions(world = self,
                                                multiworld=self.multiworld,
                                                player= self.player,
@@ -200,7 +202,7 @@ class PathOfExileWorld(World):
                 self.multiworld.itempool.append(item)
         
         if self._debug:
-            logger.info(f"[DEBUG]: Created {len(self.items_to_place)} - {self.total_items_count} items for player {self.player} in Path of Exile world. --")
+            logger.info(f"[DEBUG]: items left to place:{len(self.items_to_place)} /{self.total_items_count}.\n Created {len(self.locations_to_place)} locations.")
 
 
 
