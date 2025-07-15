@@ -66,7 +66,7 @@ class PathOfExileWorld(World):
         self.locations_to_place = Locations.base_item_types.copy()
 
     def remove_and_create_item_by_dict(self, item: Items.ItemDict) -> list[Items.PathOfExileItem]:
-        item_id = self.item_name_to_id[item["name"]]
+        item_id = item["id"]
         item_to_place = self.items_to_place.pop(item_id)  # Remove from items to place
         item_objs = []
         count = item.get("count", 1)

@@ -85,14 +85,30 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     for item in ctx.items_received:
         total_recieved_items.append(Items.item_table.get(item))
 
+
+    possible_equipment_slots = ["Offhand",
+                  "Ring",
+                  "BodyArmour",
+                  "Amulet",
+                  "Belt",
+                  "Boots",
+                  "Gloves"]
+                 # Ring,
+                 # Ring2,
+                 # Flask,
+                 # Weapon
+    
     # Check if the character is valid
     for equipped_item in character.equipment:
         # switch but in python
         rarity = equipped_item.get("rarity")
-        if equipped_item.inventoryId == "Boots":
-            valid = rarity_check(total_recieved_items, rarity, "Boots")
-        elif equipped_item.inventoryId == "Gloves":
-            valid = rarity_check(total_recieved_items, rarity, "Gloves")
+        for slot in possible_equipment_slots:
+            if equipped_item.inventoryId == slot:
+                valid = rarity_check(total_recieved_items, rarity, slot)
+        if equipped_item.inventoryId == "Ring":
+            valid = rarity_check(total_recieved_items, rarity, "Ring (left)")
+        if equipped_item.inventoryId == "Ring2":
+            valid = rarity_check(total_recieved_items, rarity, "Ring (right)")
         elif equipped_item.inventoryId == "Helmet":
             valid = rarity_check(total_recieved_items, rarity, "Helmet")
         elif equipped_item.inventoryId == "Chest":

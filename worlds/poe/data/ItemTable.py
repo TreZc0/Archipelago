@@ -8,17 +8,11 @@ from BaseClasses import ItemClassification
 
 
 item_array = [ 
- {"category": ["Flask","Normal"],"classification": ItemClassification.progression,"name": "Normal Flask in Slot 1"}, 
- {"category": ["Flask","Normal"],"classification": ItemClassification.progression,"name": "Normal Flask in Slot 2"}, 
- {"category": ["Flask","Normal"],"classification": ItemClassification.progression,"name": "Normal Flask in Slot 3"}, 
- {"category": ["Flask","Normal"],"classification": ItemClassification.progression,"name": "Normal Flask in Slot 4"}, 
- {"category": ["Flask","Normal"],"classification": ItemClassification.progression,"name": "Normal Flask in Slot 5"}, 
+ {"category": ["Flask","Normal"],"classification": ItemClassification.progression,"name": "Progressive Flask Unlock Slot", "count": 5}, 
  
- {"category": ["Flask","Magic"],"classification": ItemClassification.progression,"name": "Magic Flask in Slot 1"}, 
- {"category": ["Flask","Magic"],"classification": ItemClassification.progression,"name": "Magic Flask in Slot 2"}, 
- {"category": ["Flask","Magic"],"classification": ItemClassification.progression,"name": "Magic Flask in Slot 3"}, 
- {"category": ["Flask","Magic"],"classification": ItemClassification.progression,"name": "Magic Flask in Slot 4"}, 
- {"category": ["Flask","Magic"],"classification": ItemClassification.progression,"name": "Magic Flask in Slot 5"}, 
+ {"category": ["Flask","Magic"],"classification": ItemClassification.progression,"name": "Progressive Magic Flask Unlock", "count": 5}, 
+ {"category": ["Flask","Unique"],"classification": ItemClassification.filler,"name": "Progressive Unique Flask Unlock", "count": 5}, 
+ 
  
  {"category": ["Character Class","Base Class"],"classification": ItemClassification.progression,"name": "Scion"}, 
  {"category": ["Character Class","Base Class"],"classification": ItemClassification.progression,"name": "Marauder"}, 
