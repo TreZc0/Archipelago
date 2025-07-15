@@ -79,16 +79,21 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
         print("Character is None, cannot validate.")
         return False
 
-    total_recieved = ctx.items_received
-
-
+    total_recieved_items = list()
+    for item in ctx.items_received:
+        total_recieved_items.append(Items.item_table.get(item))
 
     # Check if the character is valid
     for equipped_item in character.equipment:
-        if equipped_item.baseType not in total_items:
-            print(f"Invalid item found: {equipped_item.baseType}")
-            await update_filter_to_invalid_char_filter()
-            return False
+        # switch but in python
+        rarity = equipped_item.get("rarity")
+        if equipped_item.inventoryId == "Boots":
+            if rarity == "Unique":
+                
+            
+            
+        
+        
 
     return True
 
