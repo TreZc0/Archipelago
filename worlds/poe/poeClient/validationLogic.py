@@ -57,16 +57,31 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
 
     is_char_in_logic = True if len(validate_errors) == 0 else False
 
+
     if is_char_in_logic:
+        loctions_to_check = set()
+        found_items_set = get_found_items(char)
         for item in found_items_set:
             if _debug:
                 print(f"[DEBUG] Found item: {item}")
             location_id = Locations.get_location_id_from_item_name(item)
-            await ctx.check_locations(location_id)
+            if location_id is not None:
+                loctions_to_check.add(location_id)
+
+#        await asyncio.gather(ctx.check_locations(loctions_to_check),update_filter(ctx))
+        if len(loctions_to_check) > 0:
+            if _debug:
+                print(f"[DEBUG] Locations to check: {loctions_to_check}")
+            await ctx.check_locations(loctions_to_check)
+        else:
+            if _debug:
+                print("[DEBUG] No locations to check, skipping check_locations.")
         await update_filter(ctx)
-    
-    elif not is_char_in_logic: 
+        return True
+
+    else:
         await update_filter_to_invalid_char_filter(validate_errors)
+        return False
 
 
 
@@ -80,11 +95,15 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     errors = []
     
     total_recieved_items = list()
-    for item in ctx.items_received:
-        total_recieved_items.append(Items.item_table.get(item))
+    for network_item in ctx.items_received:
+        total_recieved_items.append(Items.item_table.get(network_item.item))
 
     simple_equipment_slots = ["BodyArmour","Amulet","Belt","Boots","Gloves","Helmet"]
-    
+
+    normal_flask_count = 0
+    magic_flask_count = 0
+    unique_flask_count = 0
+
     for equipped_item in character.equipment:
         rarity = equipped_item.get("rarity")
         
@@ -109,9 +128,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
                     if prop_name.lower().endswith(weapon_base_type.lower()):
                         errors.append(rarity_check(total_recieved_items, rarity, weapon_base_type))
 
-        normal_flask_count = 0
-        magic_flask_count = 0
-        unique_flask_count = 0
+
         if equipped_item.inventoryId == "Flask":
             flask_rarity = equipped_item.get("rarity")
             if flask_rarity == "Normal":
@@ -183,7 +200,7 @@ async def update_filter_to_invalid_char_filter(errors: list[str]):
     itemFilter.write_item_filter(invalid_item_filter_string, item_filter_import=None)
 
 
-async def get_found_items(char: gggAPI.Character) -> set:
+def get_found_items(char: gggAPI.Character) -> set:
     """
     Fetches the found items for a given character from the GGG API.
 

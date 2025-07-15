@@ -51,6 +51,12 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         poe_main.client_start(self.ctx)
         return True
 
+    def _cmd_start_test(self):
+        self._cmd_poe_char_name("_ap_test_one")
+        self._cmd_connect("Player1:@localhost:38281")
+        self._cmd_received()
+        self._cmd_start_poe()
+
 
 class PathOfExileContext(CommonContext):
     game = "Path of Exile"
