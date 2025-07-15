@@ -1,6 +1,8 @@
 import asyncio
-from worlds.poe.Client import PathOfExileContext
-from worlds.poe import PathOfExileWorld
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from worlds.poe.Client import PathOfExileContext
+    from worlds.poe import PathOfExileWorld
 from . import itemFilter
 from . import baseItemTypes
 from . import gggAPI
