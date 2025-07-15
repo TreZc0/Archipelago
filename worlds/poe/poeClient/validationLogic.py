@@ -52,13 +52,10 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
         return False
     
     global is_char_in_logic
-    try:
-        is_char_in_logic = await validate_char(char)
-    except Exception as e:
-        print(f"Error validating character: {e}")
-        return False
-    found_items_set = await get_found_items(char)
-    # for each item in found_items_set: send locations via ctx
+    validate_errors = validate_char(char)
+
+    is_char_in_logic = True if len(validate_errors) == 0 else False
+
     if is_char_in_logic:
         for item in found_items_set:
             if _debug:
@@ -67,19 +64,19 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
             await ctx.check_locations(location_id)
         await update_filter(ctx)
     
-    await fileHelper.write_set_to_file(found_items_set, save_path)
-    await update_filter(ctx.missing_locations)
+    elif not is_char_in_logic: 
+        await update_filter_to_invalid_char_filter(validate_errors)
 
 
 
-async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") -> bool:
+async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") -> str:
     # Perform validation logic here
 
     if character is None:
         print("Character is None, cannot validate.")
         return False
 
-    valid = True
+    errors = []
     
     total_recieved_items = list()
     for item in ctx.items_received:
@@ -93,25 +90,25 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
         # simple checks.
         for slot in simple_equipment_slots:
             if equipped_item.inventoryId == slot:
-                valid = rarity_check(total_recieved_items, rarity, slot)
+                errors = rarity_check(total_recieved_items, rarity, slot)
                 
         if equipped_item.inventoryId == "Ring":
-            valid = rarity_check(total_recieved_items, rarity, "Ring (left)")
+            errors.append(rarity_check(total_recieved_items, rarity, "Ring (left)"))
         if equipped_item.inventoryId == "Ring2":
-            valid = rarity_check(total_recieved_items, rarity, "Ring (right)")
+            errors.append(rarity_check(total_recieved_items, rarity, "Ring (right)"))
         if equipped_item.inventoryId == "Offhand":
             if equipped_item.baseType in Items.quiver_base_types:
-                valid = rarity_check(total_recieved_items, rarity, "Quiver")
+                errors.append(rarity_check(total_recieved_items, rarity, "Quiver"))
             else:
-                valid = rarity_check(total_recieved_items, rarity, "Shield")
+                errors.append(rarity_check(total_recieved_items, rarity, "Shield"))
         if equipped_item.inventoryId == "Weapon":
             for prop in equipped_item.properties:
                 prop_name = prop.get("name") 
                 for weapon_base_type in Items.weapon_base_types:
                     if prop_name.lower().endswith(weapon_base_type.lower()):
-                        valid = rarity_check(total_recieved_items, rarity, weapon_base_type)
-                        
-        normal_flask_count = 0            
+                        errors.append(rarity_check(total_recieved_items, rarity, weapon_base_type))
+
+        normal_flask_count = 0
         magic_flask_count = 0
         unique_flask_count = 0
         if equipped_item.inventoryId == "Flask":
@@ -124,15 +121,17 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
                 unique_flask_count += 1
                 
     if normal_flask_count > total_recieved_items.count("Normal Flask"):
-        valid = False
+        errors.append("Normal Flasks")
     if magic_flask_count > total_recieved_items.count("Magic Flask"):
-        valid = False
+        errors.append("Magic Flasks")
     if unique_flask_count > total_recieved_items.count("Unique Flask"):
-        valid = False
+        errors.append("Unique Flasks")
 
-    return valid
+    return errors
+    
 
-def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> bool:
+def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> str:
+    valid = True
     if rarity == "Unique":
         valid = True if f"Unique {equipmentId}" in total_recieved_items else False
     elif rarity == "Rare":
@@ -141,7 +140,12 @@ def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> bool:
         valid = True if f"Magic {equipmentId}" in total_recieved_items else False
     else:
         valid = True if f"Normal {equipmentId}" in total_recieved_items else False
-    return valid
+    
+    if not valid:
+        return equipmentId
+    else: 
+        return ""
+
 
 async def update_filter(ctx: "PathOfExileContext") -> bool:
     item_filter_string = ""
@@ -163,7 +167,14 @@ async def update_filter(ctx: "PathOfExileContext") -> bool:
     return True
 
 
-async def update_filter_to_invalid_char_filter():
+async def update_filter_to_invalid_char_filter(errors: list[str]):
+    error_text = " and ".join(errors)
+    filename = fileHelper.short_hash(error_text) # this could be a long text lol
+    await tts.text_to_speech_if_doesnt_exist(
+        text=f"YOU ARE OUT OF LOGIC: {error_text}",
+        filename=itemFilter.filter_sounds_path / f"{filename}_{tts.WPM}.wav",
+        tts_rate_wpm=tts.WPM
+    )
     invalid_alert_sound = "apsound/invalid.wav"
     invalid_item_filter_string = f""""Show
 {itemFilter.invalid_style_string}

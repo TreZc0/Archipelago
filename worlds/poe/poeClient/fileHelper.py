@@ -1,6 +1,6 @@
 import asyncio
+import hashlib
 from collections import deque
-
 from pathlib import Path
 
 _debug = True
@@ -48,6 +48,9 @@ def get_last_n_lines_of_file(filepath, n=1):
     with open(filepath, 'r') as f:
         return list(deque(f, n))
 
+
+def short_hash(s: str) -> str:
+    return hashlib.sha256(s.encode()).hexdigest()[:8]
 
 async def write_set_to_file(data: set, file_path: str):
     """
