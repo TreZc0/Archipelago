@@ -48,7 +48,7 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
             self.output("ERROR: Please set your character name first using 'poe_char_name <name>'.")
             return False
         self.output(f"Starting Path of Exile client for character: {poe_main.character_name}")
-        poe_main.run(self.ctx)
+        poe_main.client_start(self.ctx)
         return True
 
 

@@ -23,7 +23,7 @@ is_char_in_logic = True
 _debug = True
 total_items.update(baseItemTypes.get_base_item_types())
 
-
+hacky_2am_ctx = None
 
 async def when_enter_new_zone(line: str):
     """
@@ -33,8 +33,9 @@ async def when_enter_new_zone(line: str):
     Args:
         line (str): The line from the log file indicating the new zone entry.
     """
+    global hacky_2am_ctx
     global is_char_in_logic
-    await validate_and_update(character_name)
+    await validate_and_update(character_name, ctx=hacky_2am_ctx)
     await asyncio.sleep(0.5)  # Allow some time for the filter to update
     await inputHelper.send_poe_text("/itemfilter __ap")
 
@@ -46,13 +47,13 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
     
     char = {}
     try: 
-        char = await gggAPI.get_character(character_name)
+        char = (await gggAPI.get_character(character_name)).character
     except Exception as e:
         print(f"Error fetching character {character_name}: {e}")
         return False
     
     global is_char_in_logic
-    validate_errors = validate_char(char)
+    validate_errors = await validate_char(char, ctx)
 
     is_char_in_logic = True if len(validate_errors) == 0 else False
 

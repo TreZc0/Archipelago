@@ -141,6 +141,7 @@ def run():
 def client_start(ctx: "PathOfExileContext"):
     global context
     context = ctx
+    validationLogic.hacky_2am_ctx = ctx
     run()
     
 async def main_async():
