@@ -85,33 +85,51 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     for item in ctx.items_received:
         total_recieved_items.append(Items.item_table.get(item))
 
-
-    possible_equipment_slots = ["Offhand",
-                  "Ring",
-                  "BodyArmour",
-                  "Amulet",
-                  "Belt",
-                  "Boots",
-                  "Gloves"]
-                 # Ring,
-                 # Ring2,
-                 # Flask,
-                 # Weapon
+    simple_equipment_slots = ["BodyArmour","Amulet","Belt","Boots","Gloves","Helmet"]
     
-    # Check if the character is valid
     for equipped_item in character.equipment:
-        # switch but in python
         rarity = equipped_item.get("rarity")
-        for slot in possible_equipment_slots:
+        
+        # simple checks.
+        for slot in simple_equipment_slots:
             if equipped_item.inventoryId == slot:
                 valid = rarity_check(total_recieved_items, rarity, slot)
+                
         if equipped_item.inventoryId == "Ring":
             valid = rarity_check(total_recieved_items, rarity, "Ring (left)")
         if equipped_item.inventoryId == "Ring2":
             valid = rarity_check(total_recieved_items, rarity, "Ring (right)")
-        elif equipped_item.inventoryId == "Helmet":
-            valid = rarity_check(total_recieved_items, rarity, "Helmet")
-        elif equipped_item.inventoryId == "Chest":
+        if equipped_item.inventoryId == "Offhand":
+            if equipped_item.baseType in Items.quiver_base_types:
+                valid = rarity_check(total_recieved_items, rarity, "Quiver")
+            else:
+                valid = rarity_check(total_recieved_items, rarity, "Shield")
+        if equipped_item.inventoryId == "Weapon":
+            for prop in equipped_item.properties:
+                prop_name = prop.get("name") 
+                for weapon_base_type in Items.weapon_base_types:
+                    if prop_name.lower().endswith(weapon_base_type.lower()):
+                        valid = rarity_check(total_recieved_items, rarity, weapon_base_type)
+                        
+        normal_flask_count = 0            
+        magic_flask_count = 0
+        unique_flask_count = 0
+        if equipped_item.inventoryId == "Flask":
+            flask_rarity = equipped_item.get("rarity")
+            if flask_rarity == "Normal":
+                normal_flask_count += 1
+            elif flask_rarity == "Magic":
+                magic_flask_count += 1
+            elif flask_rarity == "Unique":
+                unique_flask_count += 1
+                
+    if normal_flask_count > total_recieved_items.count("Normal Flask"):
+        valid = False
+    if magic_flask_count > total_recieved_items.count("Magic Flask"):
+        valid = False
+    if unique_flask_count > total_recieved_items.count("Unique Flask"):
+        valid = False
+
     return valid
 
 def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> bool:

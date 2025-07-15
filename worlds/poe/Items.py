@@ -64,7 +64,7 @@ def get_ascendancy_class_items(class_name: str, table: Dict[int, ItemDict] = ite
     """
     Returns a set of all ascendancy items available for a specific class in the Path of Exile world.
     """
-    return [item for item in table.values() if "Ascendancy" in item["category"] and class_name in item["category"]]
+    return [item for item in table.values() if "Ascendancy" in item["category"] and f"{class_name} Class" in item["category"]]
 
 def get_main_skill_gem_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
@@ -89,3 +89,22 @@ def get_max_links_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDic
     Returns a list of all max links items available in the Path of Exile world.
     """
     return [item for item in table.values() if "max links" in item["category"]]
+
+# used to check offhands
+
+quiver_base_types = ItemTable.quiver_base_type_array.copy()  # Copy the list to avoid modifying the original data
+shield_base_types = ItemTable.shield_base_type_array.copy() 
+
+# used to check weapon base types
+weapon_base_types = [
+"Axe",
+"Bow",
+"Claw",
+"Dagger",
+"Mace",
+"Sceptre",
+"Staff",
+"Sword",
+"Wand",
+"Fishing Rod",
+]
