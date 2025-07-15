@@ -79,6 +79,8 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
         print("Character is None, cannot validate.")
         return False
 
+    valid = True
+    
     total_recieved_items = list()
     for item in ctx.items_received:
         total_recieved_items.append(Items.item_table.get(item))
@@ -88,14 +90,24 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
         # switch but in python
         rarity = equipped_item.get("rarity")
         if equipped_item.inventoryId == "Boots":
-            if rarity == "Unique":
-                
-            
-            
-        
-        
+            valid = rarity_check(total_recieved_items, rarity, "Boots")
+        elif equipped_item.inventoryId == "Gloves":
+            valid = rarity_check(total_recieved_items, rarity, "Gloves")
+        elif equipped_item.inventoryId == "Helmet":
+            valid = rarity_check(total_recieved_items, rarity, "Helmet")
+        elif equipped_item.inventoryId == "Chest":
+    return valid
 
-    return True
+def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> bool:
+    if rarity == "Unique":
+        valid = True if f"Unique {equipmentId}" in total_recieved_items else False
+    elif rarity == "Rare":
+        valid = True if f"Rare {equipmentId}" in total_recieved_items else False
+    elif rarity == "Magic":
+        valid = True if f"Magic {equipmentId}" in total_recieved_items else False
+    else:
+        valid = True if f"Normal {equipmentId}" in total_recieved_items else False
+    return valid
 
 async def update_filter(ctx: "PathOfExileContext") -> bool:
     item_filter_string = ""
