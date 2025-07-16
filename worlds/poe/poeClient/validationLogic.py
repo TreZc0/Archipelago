@@ -66,8 +66,6 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
             location_id = Locations.get_location_id_from_item_name(item)
             if location_id is not None:
                 locations_to_check.add(location_id)
-
-        await ctx.check_locations(locations_to_check)
         await update_filter(ctx)
         if len(locations_to_check) > 0:
             if _debug:
@@ -170,7 +168,9 @@ async def update_filter(ctx: "PathOfExileContext") -> bool:
     item_filter_string = ""
     missing_location_ids = ctx.missing_locations
     for base_item_location_id in missing_location_ids:
-        item_text = ctx.location_to_item_name.get(base_item_location_id, "Unknown Item")
+
+#        item_text = Items.get(base_item_location_id, "Unknown Item") # this needs to be the scouted item name, unless the options specify otherwise
+
         filename =  f"{item_text.lower()}_{tts.WPM}.wav"
         base_item_location_name = ctx.location_names.lookup_in_game(base_item_location_id)
         await tts.text_to_speech_if_doesnt_exist(

@@ -69,12 +69,10 @@ class PathOfExileContext(CommonContext):
     command_processor = PathOfExileCommandProcessor
     items_handling = 0b111
     _debug = True  # Enable debug mode for poe client
-    location_to_item_name: dict[int, str]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Dictionary mapping location id to item name (string)
-        self.location_to_item_name: dict[int, str] = {}
+
 
     async def server_auth(self, password_requested: bool = False):
         if password_requested and not self.password:
@@ -116,7 +114,8 @@ async def main():
     ctx = PathOfExileContext(None, None)
 
 
-    if gui_enabled:
+    #if gui_enabled:
+    if False: # disable GUI for now
         ctx.run_gui()
     ctx.run_cli()
 

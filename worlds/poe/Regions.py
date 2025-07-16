@@ -36,7 +36,7 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
         for i, loc in enumerate(locations):
             if loc != "used" and loc["dropLevel"] <= act["maxMonsterLevel"]:
                 location_name = f"{loc['baseItem']} - Act {act['act']}"
-                locationObj = PathOfExileLocation(player, location_name, parent=region)
+                locationObj = PathOfExileLocation(player, location_name, parent=region, address=loc["id"])
                 region.locations.append(locationObj)
                 locations[i] = "used"  # Mark the location as used to avoid duplicates
             # act=act["act"] -- this is used to pass the act number to the can_reach function, otherwise it would be the last act number.
