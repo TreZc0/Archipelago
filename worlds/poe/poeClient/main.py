@@ -141,7 +141,7 @@ def run():
 def client_start(ctx: "PathOfExileContext"):
     global context
     context = ctx
-    validationLogic.hacky_2am_ctx = ctx
+    validationLogic.defaultContext = ctx
     run()
     
 async def main_async():
@@ -154,7 +154,11 @@ async def main_async():
         elapsed_time = time.time() - start_time
         print(f"Generated item filter and TTS files in {elapsed_time:.2f} seconds.")
         print(f"Starting polling, watching for changes at {path_to_client_txt}...")
-        await fileHelper.callback_on_zone_change(path_to_client_txt, validationLogic.when_enter_new_zone)
+
+        async def enter_new_zone_callback(line: str):
+            await validationLogic.when_enter_new_zone(line, context) # add the context to the callback
+        await fileHelper.callback_on_zone_change(path_to_client_txt, enter_new_zone_callback)
+
         print(f"Starting Main Loop...")
         await timer_loop()
     except KeyboardInterrupt:

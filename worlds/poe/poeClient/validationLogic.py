@@ -23,9 +23,7 @@ is_char_in_logic = True
 _debug = True
 total_items.update(baseItemTypes.get_base_item_types())
 
-hacky_2am_ctx = None
-
-async def when_enter_new_zone(line: str):
+async def when_enter_new_zone(line: str, context: "PathOfExileContext" = None):
     """
     Callback function that is called when a new zone is entered.
     It validates the character and updates the item filter accordingly.
@@ -33,9 +31,8 @@ async def when_enter_new_zone(line: str):
     Args:
         line (str): The line from the log file indicating the new zone entry.
     """
-    global hacky_2am_ctx
     global is_char_in_logic
-    await validate_and_update(character_name, ctx=hacky_2am_ctx)
+    await validate_and_update(character_name, ctx=context)
     await asyncio.sleep(0.5)  # Allow some time for the filter to update
     await inputHelper.send_poe_text("/itemfilter __ap")
 
@@ -70,7 +67,7 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
         if len(locations_to_check) > 0:
             if _debug:
                 print(f"[DEBUG] Locations to check: {locations_to_check}")
-            await ctx.check_locations(locations_to_check) # missing missing items?
+            await ctx.check_locations(locations_to_check)
 #           await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": tuple(locations_to_check)}])
         else:
             if _debug:
@@ -170,7 +167,8 @@ async def update_filter(ctx: "PathOfExileContext") -> bool:
     for base_item_location_id in missing_location_ids:
 
 #        item_text = Items.get(base_item_location_id, "Unknown Item") # this needs to be the scouted item name, unless the options specify otherwise
-
+        network_item = ctx.locations_info[base_item_location_id]
+        item_text = ctx.player_names[network_item.player] + " world's " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
         filename =  f"{item_text.lower()}_{tts.WPM}.wav"
         base_item_location_name = ctx.location_names.lookup_in_game(base_item_location_id)
         await tts.text_to_speech_if_doesnt_exist(

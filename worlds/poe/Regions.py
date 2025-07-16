@@ -36,6 +36,7 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
         for i, loc in enumerate(locations):
             if loc != "used" and loc["dropLevel"] <= act["maxMonsterLevel"]:
                 location_name = f"{loc['baseItem']} - Act {act['act']}"
+                #location_name = loc["baseItem"]
                 locationObj = PathOfExileLocation(player, location_name, parent=region, address=loc["id"])
                 region.locations.append(locationObj)
                 locations[i] = "used"  # Mark the location as used to avoid duplicates

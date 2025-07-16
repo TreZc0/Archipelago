@@ -4,32 +4,42 @@ vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
 if vendor_dir not in sys.path:
     sys.path.insert(0, vendor_dir)
 
-
-# Now safe to import
 import asyncio
 import pygetwindow as gw
-import tkinter as tk
 import time
 from pynput.keyboard import Controller, Key
 
-
-tkRoot = tk.Tk()
-tkRoot.withdraw()
-
-
 keyboard_controller = Controller()
-
 _debug = True
 _last_called = None
 _debounce_time = 5  # seconds
 
+def get_clipboard():
+    import tkinter as tk
+    root = tk.Tk()
+    root.withdraw()
+    try:
+        value = root.clipboard_get()
+    except tk.TclError:
+        value = ""
+    root.destroy()
+    return value
+
+def set_clipboard(value):
+    import tkinter as tk
+    root = tk.Tk()
+    root.withdraw()
+    root.clipboard_clear()
+    root.clipboard_append(value)
+    root.update()  # Ensure clipboard is set before destroying
+    root.destroy()
 
 async def important_send_poe_text(command: str, retry_times: int = 9001, retry_delay: float = 0.5):
     return await send_poe_text(command, retry_times, retry_delay)
 
 async def send_poe_text(command:str, retry_times:int = 0, retry_delay:float = 0):
     window = gw.getActiveWindow()
-
+    global _last_called
     # if windows is active
     if window.title == "Path of Exile":
         if _debug:
@@ -40,16 +50,10 @@ async def send_poe_text(command:str, retry_times:int = 0, retry_delay:float = 0)
             if _debug:
                 print("[DEBUG] Debounced: send_poe_text called too soon.")
             return
-        send_poe_text._last_called = now
-        clipboard_value = ""
-        try:
-            clipboard_value = tkRoot.clipboard_get()
-        except tk.TclError:
-            print("Clipboard is empty, will not restore clipboard value after sending command")
+        _last_called = now
 
-        tkRoot.clipboard_clear()
-        tkRoot.clipboard_append(command)
-
+        clipboard_value = get_clipboard()
+        set_clipboard(command)
 
         # Press Enter
         keyboard_controller.press(Key.enter)
@@ -67,8 +71,7 @@ async def send_poe_text(command:str, retry_times:int = 0, retry_delay:float = 0)
         keyboard_controller.press(Key.enter)
         keyboard_controller.release(Key.enter)
 
-        tkRoot.clipboard_clear()
-        tkRoot.clipboard_append(clipboard_value)
+        set_clipboard(clipboard_value)
         if _debug:
             print("[DEBUG] Sent command to Path of Exile:", command)
     else:

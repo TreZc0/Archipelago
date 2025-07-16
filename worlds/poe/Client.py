@@ -83,14 +83,8 @@ class PathOfExileContext(CommonContext):
     def on_package(self, cmd: str, args: dict):
         if cmd == 'Connected':
             # Request info for all locations after connecting
-            location_ids = list(self.location_names[self.game].keys())
-            #self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}])
-        if cmd == "LocationInfo":   
-            a = 1 + 1
-            for loc_id, item_id in args.get("locations", []):
-                item_name = self.item_names.lookup_in_game(item_id)
-                items_player = self.items_player.get_item(item_id)
-                self.location_to_item_name[loc_id] = f"{item_name} for {items_player}"
+            location_ids = list(self.missing_locations)
+            sync_run_async(self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}]))
 
         super().on_package(cmd, args)
 

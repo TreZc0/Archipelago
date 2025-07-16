@@ -33,6 +33,7 @@ class LocationDict(TypedDict, total=False):
     baseItem: str
     dropLevel: int
     act: int
+    id: int
 
 # based off of baseItemTypes.json
 base_item_types: Dict[int, LocationDict] = LocationTable.location_table
