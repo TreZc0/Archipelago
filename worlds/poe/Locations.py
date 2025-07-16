@@ -37,3 +37,4 @@ class LocationDict(TypedDict, total=False):
 
 # based off of baseItemTypes.json
 base_item_types: Dict[int, LocationDict] = LocationTable.location_table
+base_item_types_by_name: Dict[str, LocationDict] = {loc['baseItem']: loc for loc in base_item_types.values()}

@@ -6,6 +6,7 @@
 # purp = 201 148 194 255
 #orange = 216 160 125 255
 from pathlib import Path
+from worlds.poe.Locations import base_item_types_by_name
 filter_file_dir = Path.home() / "Documents" / "My Games" / "Path of Exile"
 filter_file_path = Path.home() / "Documents" / "My Games" / "Path of Exile" / "__ap.filter"
 filter_sounds_dir_name = "apsound"
@@ -29,6 +30,12 @@ SetBackgroundColor 255 0 0 0
 _debug = True
 base_item_to_relative_wav_path = {}
 def generate_item_filter_block(base_type_name, alert_sound, style_string=default_style_string):
+    if base_type_name not in base_item_types_by_name:
+        print(f"[ERROR] Base type '{base_type_name}' not found in item table.")
+        return ""
+    if not Path.exists(filter_file_dir / alert_sound):
+        print(f"[ERROR] Alert sound '{alert_sound}' does not exist in {filter_sounds_path}.")
+        return ""
     return f"""
 {start_item_filter_block}
 Show 

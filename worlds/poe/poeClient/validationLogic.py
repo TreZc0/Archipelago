@@ -171,7 +171,7 @@ async def update_filter(ctx: "PathOfExileContext") -> bool:
         item_text = ctx.player_names[network_item.player] + " world's " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
         filename =  f"{item_text.lower()}_{tts.WPM}.wav"
         base_item_location_name = ctx.location_names.lookup_in_game(base_item_location_id)
-        item_filter_string += itemFilter.generate_item_filter_block(base_item_location_name, f"{itemFilter.filter_sounds_dir_name}/{filename}.wav") + "\n\n"
+        item_filter_string += itemFilter.generate_item_filter_block(base_item_location_name, f"{itemFilter.filter_sounds_dir_name}/{fileHelper.safe_filename(filename)}")+ "\n\n"
 
     if item_filter_string:
         itemFilter.write_item_filter(item_filter_string)

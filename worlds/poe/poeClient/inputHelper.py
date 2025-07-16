@@ -34,7 +34,7 @@ def set_clipboard(value):
     root.update()  # Ensure clipboard is set before destroying
     root.destroy()
     
-def get_then_set_clipboard(value: str) -> str:
+def get_then_set_clipboard(new_value: str) -> str:
     import tkinter as tk
     root = tk.Tk()
     root.withdraw()
@@ -44,7 +44,7 @@ def get_then_set_clipboard(value: str) -> str:
         value = ""
     root.clipboard_clear()
     root.update()
-    root.clipboard_append(value)
+    root.clipboard_append(new_value)
     root.update()  # Ensure clipboard is set before destroying
     root.destroy()
     return value
