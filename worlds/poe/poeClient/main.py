@@ -95,9 +95,8 @@ async def load_async(ctx: "PathOfExileContext" = None):
     #await validationLogic.load_found_items_from_file()
 
     await gggAPI.async_get_access_token()
-    base_items = baseItemTypes.get_base_item_types()
     item_filter_str = ""
-    tts_tasks = []
+    #tts_tasks = []
     global context
     ctx = ctx if ctx is not None else context
 
@@ -110,19 +109,20 @@ async def load_async(ctx: "PathOfExileContext" = None):
         relativePath = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
         fullPath = itemFilter.filter_sounds_path / f"{filename}"
         if _generate_wav:
+            if _debug:
+                print(f"[DEBUG] Generating TTS for item: {item_text} at {fullPath}")
             if not os.path.exists(fullPath):
-                tts_tasks.append(
-                    tts.safe_tts(
-                        text=item_text,
-                        filename=fullPath
-                    )
+                tts.safe_tts(
+                    text=item_text,
+                    filename=fullPath
                 )
+                
         itemFilter.base_item_to_relative_wav_path[base_item_location_id] = relativePath
         item_filter_str += itemFilter.generate_item_filter_block(
             ctx.location_names.lookup_in_game(base_item_location_id),
             relativePath
         ) + "\n\n"
-    await asyncio.gather(*tts_tasks)
+    #await asyncio.gather(*tts_tasks)
     itemFilter.write_item_filter(item_filter_str)
 
     listener = keyboard.Listener(on_press=on_press)
