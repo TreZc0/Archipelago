@@ -10,6 +10,8 @@ WPM = 250  # Default words per minute for TTS
 async def text_to_speech(text, filename: str, tts_rate_wpm=WPM, volume=1, voice_id=None):
     loop = asyncio.get_event_loop()
     def run_tts():
+        if not Path(filename).parent.exists():
+            Path(filename).parent.mkdir(parents=True, exist_ok=True)
         with _engine_lock:
             if _debug:
                 print(f"[DEBUG] Starting TTS: text='{text}', filename='{filename}', rate={tts_rate_wpm}, volume={volume}, voice_id={voice_id}")
@@ -18,7 +20,9 @@ async def text_to_speech(text, filename: str, tts_rate_wpm=WPM, volume=1, voice_
             if voice_id is not None:
                 _engine.setProperty('voice', voice_id)
             _engine.save_to_file(text, filename)
-            _engine.runAndWait()
+            _engine.runAndWait()   
+            if not Path(filename).exists():
+                print(f"[ERROR] TTS did not create file: {filename}")
             if _debug:
                 print(f"[DEBUG] Finished TTS: text='{text}' file saved to '{filename}'")
     await loop.run_in_executor(None, run_tts)

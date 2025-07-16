@@ -27,6 +27,7 @@ SetBorderColor 255 0 0 0
 SetBackgroundColor 255 0 0 0
 """
 _debug = True
+base_item_to_relative_wav_path = {}
 def generate_item_filter_block(base_type_name, alert_sound, style_string=default_style_string):
     return f"""
 {start_item_filter_block}

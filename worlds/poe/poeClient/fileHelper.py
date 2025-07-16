@@ -1,10 +1,17 @@
 import asyncio
 import hashlib
+import re
 from collections import deque
 from pathlib import Path
 
 _debug = True
 client_txt_last_modified_time = None
+
+
+def safe_filename(filename: str) -> str:
+    # Replace problematic characters with underscores
+    return re.sub(r"[^\w\-_\. ]", "_", filename)
+
 def get_last_zone_log(filepath: Path, maxlines: int = 100 ) -> str:
     # read the last `maxlines` lines from the file, and returns the most recent line that contains "Entered" or "Left"
     global client_txt_last_modified_time

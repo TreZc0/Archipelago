@@ -30,10 +30,11 @@ from pathlib import Path
 
 character_name = "merc_MY_FIREEE"
 _generate_wav = True  # Set to True if you want to generate the wav files
+_debug = True  # Set to True for debug output, False for production
 validate_char_debounce_time = 5  # seconds
 loop_timer = 60  # Time in seconds to wait before reloading the item filter
-_debug = True  # Set to True for debug output, False for production
 context = {}
+
 possible_paths_to_client_txt = [
     Path("C:/Program Files (x86)/Grinding Gear Games/Path of Exile/logs/client.txt"),
     Path("C:/Program Files (x86)/Steam/steamapps/common/Path of Exile/logs/client.txt"),
@@ -104,7 +105,7 @@ async def load_async(ctx: "PathOfExileContext" = None):
     for base_item_location_id in missing_location_ids:
         network_item = ctx.locations_info[base_item_location_id]
         item_text = ctx.player_names[network_item.player] + " world's " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
-        filename =  f"{item_text.lower()}_{tts.WPM}.wav"
+        filename =  fileHelper.safe_filename(f"{item_text.lower()}_{tts.WPM}.wav")
 
         relativePath = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
         fullPath = itemFilter.filter_sounds_path / f"{filename}"
@@ -116,6 +117,7 @@ async def load_async(ctx: "PathOfExileContext" = None):
                         filename=fullPath
                     )
                 )
+        itemFilter.base_item_to_relative_wav_path[base_item_location_id] = relativePath
         item_filter_str += itemFilter.generate_item_filter_block(
             ctx.location_names.lookup_in_game(base_item_location_id),
             relativePath
