@@ -171,11 +171,6 @@ async def update_filter(ctx: "PathOfExileContext") -> bool:
         item_text = ctx.player_names[network_item.player] + " world's " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
         filename =  f"{item_text.lower()}_{tts.WPM}.wav"
         base_item_location_name = ctx.location_names.lookup_in_game(base_item_location_id)
-        await tts.text_to_speech_if_doesnt_exist(
-            text=f"{item_text}",
-            filename=itemFilter.filter_sounds_path / filename,
-            tts_rate_wpm=tts.WPM
-        )
         item_filter_string += itemFilter.generate_item_filter_block(base_item_location_name, f"{itemFilter.filter_sounds_dir_name}/{filename}.wav") + "\n\n"
 
     if item_filter_string:

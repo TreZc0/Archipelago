@@ -33,6 +33,20 @@ def set_clipboard(value):
     root.clipboard_append(value)
     root.update()  # Ensure clipboard is set before destroying
     root.destroy()
+    
+def get_then_set_clipboard(value: str) -> str:
+    import tkinter as tk
+    root = tk.Tk()
+    root.withdraw()
+    try:
+        value = root.clipboard_get()
+    except tk.TclError:
+        value = ""
+    root.clipboard_clear()
+    root.clipboard_append(value)
+    root.update()  # Ensure clipboard is set before destroying
+    root.destroy()
+    return value
 
 async def important_send_poe_text(command: str, retry_times: int = 9001, retry_delay: float = 0.5):
     return await send_poe_text(command, retry_times, retry_delay)
@@ -52,8 +66,7 @@ async def send_poe_text(command:str, retry_times:int = 0, retry_delay:float = 0)
             return
         _last_called = now
 
-        clipboard_value = get_clipboard()
-        set_clipboard(command)
+        clipboard_value = get_then_set_clipboard(command)
 
         # Press Enter
         keyboard_controller.press(Key.enter)

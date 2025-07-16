@@ -29,7 +29,7 @@ from pathlib import Path
 
 
 character_name = "merc_MY_FIREEE"
-_generate_wav = False  # Set to True if you want to generate the wav files
+_generate_wav = True  # Set to True if you want to generate the wav files
 validate_char_debounce_time = 5  # seconds
 loop_timer = 60  # Time in seconds to wait before reloading the item filter
 _debug = True  # Set to True for debug output, False for production
@@ -88,7 +88,7 @@ def validate_char(ctx: "PathOfExileContext" = context):
     sync_run_async(validationLogic.validate_and_update(character_name, ctx))
     last_ran_validate_char = time.time()
 
-async def load_async():
+async def load_async(ctx: "PathOfExileContext" = None):
     validationLogic.character_name = character_name
     #TODO GET THIS FROM AP
     #await validationLogic.load_found_items_from_file()
@@ -97,20 +97,27 @@ async def load_async():
     base_items = baseItemTypes.get_base_item_types()
     item_filter_str = ""
     tts_tasks = []
-    for item in base_items:
-        ttsString = "archipelago " + item.lower()
-        relativePath = f"{itemFilter.filter_sounds_dir_name}/{item.lower()}.wav"
-        fullPath = itemFilter.filter_sounds_path / f"{ttsString}.wav"
+    global context
+    ctx = ctx if ctx is not None else context
+
+    missing_location_ids = ctx.missing_locations
+    for base_item_location_id in missing_location_ids:
+        network_item = ctx.locations_info[base_item_location_id]
+        item_text = ctx.player_names[network_item.player] + " world's " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
+        filename =  f"{item_text.lower()}_{tts.WPM}.wav"
+
+        relativePath = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
+        fullPath = itemFilter.filter_sounds_path / f"{filename}"
         if _generate_wav:
             if not os.path.exists(fullPath):
                 tts_tasks.append(
                     tts.text_to_speech(
-                        text=ttsString,
+                        text=item_text,
                         filename=fullPath
                     )
                 )
         item_filter_str += itemFilter.generate_item_filter_block(
-            item,
+            ctx.location_names.lookup_in_game(base_item_location_id),
             relativePath
         ) + "\n\n"
     await asyncio.gather(*tts_tasks)

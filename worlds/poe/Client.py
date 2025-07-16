@@ -51,12 +51,9 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         poe_main.client_start(self.ctx)
         return True
 
-    def _cmd_start_test(self):
-        self._cmd_connect("Player1:@localhost:38281")
+    def _cmd_t(self):
+        # self._cmd_connect("Player1:@localhost:38281")
         # wait 4 seconds to allow the character name to be set
-        asyncio.create_task(
-            asyncio.sleep(4)  # type: ignore
-        )
         self._cmd_poe_char_name("_ap_test_one")
 
         self._cmd_received()
