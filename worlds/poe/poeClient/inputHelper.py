@@ -43,6 +43,7 @@ def get_then_set_clipboard(value: str) -> str:
     except tk.TclError:
         value = ""
     root.clipboard_clear()
+    root.update()
     root.clipboard_append(value)
     root.update()  # Ensure clipboard is set before destroying
     root.destroy()
@@ -55,7 +56,7 @@ async def send_poe_text(command:str, retry_times:int = 0, retry_delay:float = 0)
     window = gw.getActiveWindow()
     global _last_called
     # if windows is active
-    if window.title == "Path of Exile":
+    if window is not None and window.title == "Path of Exile":
         if _debug:
             print("[DEBUG] Found active Path of Exile window")
 

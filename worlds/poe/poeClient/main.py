@@ -96,14 +96,14 @@ async def load_async(ctx: "PathOfExileContext" = None):
 
     await gggAPI.async_get_access_token()
     item_filter_str = ""
-    #tts_tasks = []
+    tts_tasks = []
     global context
     ctx = ctx if ctx is not None else context
 
     missing_location_ids = ctx.missing_locations
     for base_item_location_id in missing_location_ids:
         network_item = ctx.locations_info[base_item_location_id]
-        item_text = ctx.player_names[network_item.player] + " world's " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
+        item_text = ctx.player_names[network_item.player] + " ... " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
         filename =  fileHelper.safe_filename(f"{item_text.lower()}_{tts.WPM}.wav")
 
         relativePath = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
@@ -112,9 +112,11 @@ async def load_async(ctx: "PathOfExileContext" = None):
             if _debug:
                 print(f"[DEBUG] Generating TTS for item: {item_text} at {fullPath}")
             if not os.path.exists(fullPath):
-                tts.safe_tts(
-                    text=item_text,
-                    filename=fullPath
+                tts_tasks.append(
+                    tts.safe_tts_async(
+                        text=item_text,
+                        filename=fullPath
+                    )
                 )
                 
         itemFilter.base_item_to_relative_wav_path[base_item_location_id] = relativePath
@@ -122,7 +124,11 @@ async def load_async(ctx: "PathOfExileContext" = None):
             ctx.location_names.lookup_in_game(base_item_location_id),
             relativePath
         ) + "\n\n"
-    #await asyncio.gather(*tts_tasks)
+        
+    batch_size = 10
+    for i in range(0, len(tts_tasks), batch_size):
+        batch = tts_tasks[i:i+batch_size]
+        await asyncio.gather(*batch)
     itemFilter.write_item_filter(item_filter_str)
 
     listener = keyboard.Listener(on_press=on_press)
