@@ -44,7 +44,6 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
         # something is wrong, are we not connected?
         print("Context is None, cannot validate character.")
         return False
-    
     char = {}
     try: 
         char = (await gggAPI.get_character(character_name)).character
@@ -59,20 +58,22 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
 
 
     if is_char_in_logic:
-        loctions_to_check = set()
+        locations_to_check = set()
         found_items_set = get_found_items(char)
         for item in found_items_set:
             if _debug:
                 print(f"[DEBUG] Found item: {item}")
             location_id = Locations.get_location_id_from_item_name(item)
             if location_id is not None:
-                loctions_to_check.add(location_id)
+                locations_to_check.add(location_id)
 
-#        await asyncio.gather(ctx.check_locations(loctions_to_check),update_filter(ctx))
-        if len(loctions_to_check) > 0:
+        await ctx.check_locations(locations_to_check)
+        await update_filter(ctx)
+        if len(locations_to_check) > 0:
             if _debug:
-                print(f"[DEBUG] Locations to check: {loctions_to_check}")
-            await ctx.check_locations(loctions_to_check)
+                print(f"[DEBUG] Locations to check: {locations_to_check}")
+            await ctx.check_locations(locations_to_check) # missing missing items?
+#           await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": tuple(locations_to_check)}])
         else:
             if _debug:
                 print("[DEBUG] No locations to check, skipping check_locations.")

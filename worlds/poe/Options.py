@@ -16,7 +16,8 @@ class GearUnlocks(Toggle):
 class GucciHoboMode(Toggle):
     """
     Specifies if the world should be in Gucci Hobo Mode, this restricts use of any non-unique equipment to only 1 slot.
-    (this will probobly be very difficult to play with)
+    This is an extremely difficult challenge intended for experienced players, and will greatly increase the length of your run.
+    Expect a very slow start, involving farming early act 1 zones.
     """
     display_name = "Gucci Hobo Mode"
     default = False
@@ -102,7 +103,7 @@ class AllowUnlockOfOtherCharacters(Toggle):
 
 class StartingCharacter(Choice):
     """
-    The starting character for the world. This will determine the class and ascendancy available.
+    The starting character for the world. This will determine the class available at the start.
     """
     display_name = "Starting Character"
     option_marauder    = 1

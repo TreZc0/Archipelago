@@ -52,9 +52,15 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         return True
 
     def _cmd_start_test(self):
-        self._cmd_poe_char_name("_ap_test_one")
         self._cmd_connect("Player1:@localhost:38281")
+        # wait 4 seconds to allow the character name to be set
+        asyncio.create_task(
+            asyncio.sleep(4)  # type: ignore
+        )
+        self._cmd_poe_char_name("_ap_test_one")
+
         self._cmd_received()
+
         self._cmd_start_poe()
 
 
@@ -80,13 +86,14 @@ class PathOfExileContext(CommonContext):
         if cmd == 'Connected':
             # Request info for all locations after connecting
             location_ids = list(self.location_names[self.game].keys())
-            self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}])
+            #self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}])
         if cmd == "LocationInfo":   
             a = 1 + 1
             for loc_id, item_id in args.get("locations", []):
                 item_name = self.item_names.lookup_in_game(item_id)
                 items_player = self.items_player.get_item(item_id)
                 self.location_to_item_name[loc_id] = f"{item_name} for {items_player}"
+
         super().on_package(cmd, args)
 
 
