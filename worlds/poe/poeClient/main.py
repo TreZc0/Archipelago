@@ -112,7 +112,7 @@ async def load_async(ctx: "PathOfExileContext" = None):
         if _generate_wav:
             if not os.path.exists(fullPath):
                 tts_tasks.append(
-                    tts.text_to_speech(
+                    tts.safe_tts(
                         text=item_text,
                         filename=fullPath
                     )
