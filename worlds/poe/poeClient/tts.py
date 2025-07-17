@@ -15,6 +15,9 @@ from pathlib import Path
 _debug = True
 WPM = 250  # Default words per minute for TTS
 
+def get_item_name_tts_text(ctx, network_item):
+    return ctx.player_names[network_item.player] + " ... " + ctx.item_names.lookup_in_slot(network_item.item,
+                                                                                               network_item.player)
 
 def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False):
     if not overwrite and Path(filename).exists():

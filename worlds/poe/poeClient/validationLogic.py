@@ -101,7 +101,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     unique_flask_count = 0
 
     for equipped_item in character.equipment:
-        rarity = equipped_item.get("rarity")
+        rarity = equipped_item.rarity
         
         # simple checks.
         for slot in simple_equipment_slots:
@@ -119,14 +119,14 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
                 errors.append(rarity_check(total_recieved_items, rarity, "Shield"))
         if equipped_item.inventoryId == "Weapon":
             for prop in equipped_item.properties:
-                prop_name = prop.get("name") 
+                prop_name = prop.name
                 for weapon_base_type in Items.weapon_base_types:
                     if prop_name.lower().endswith(weapon_base_type.lower()):
                         errors.append(rarity_check(total_recieved_items, rarity, weapon_base_type))
 
 
         if equipped_item.inventoryId == "Flask":
-            flask_rarity = equipped_item.get("rarity")
+            flask_rarity = equipped_item.rarity
             if flask_rarity == "Normal":
                 normal_flask_count += 1
             elif flask_rarity == "Magic":
@@ -168,7 +168,7 @@ async def update_filter(ctx: "PathOfExileContext") -> bool:
 
 #        item_text = Items.get(base_item_location_id, "Unknown Item") # this needs to be the scouted item name, unless the options specify otherwise
         network_item = ctx.locations_info[base_item_location_id]
-        item_text = ctx.player_names[network_item.player] + " world's " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
+        item_text = tts.get_item_name_tts_text(ctx, network_item)
         filename =  f"{item_text.lower()}_{tts.WPM}.wav"
         base_item_location_name = ctx.location_names.lookup_in_game(base_item_location_id)
         item_filter_string += itemFilter.generate_item_filter_block(base_item_location_name, f"{itemFilter.filter_sounds_dir_name}/{fileHelper.safe_filename(filename)}")+ "\n\n"
@@ -177,7 +177,6 @@ async def update_filter(ctx: "PathOfExileContext") -> bool:
         itemFilter.write_item_filter(item_filter_string)
         print(f"Item filter updated with {len(missing_location_ids)} items.")
     return True
-
 
 async def update_filter_to_invalid_char_filter(errors: list[str]):
     error_text = " and ".join(errors)

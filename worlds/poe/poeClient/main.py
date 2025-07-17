@@ -103,7 +103,7 @@ async def load_async(ctx: "PathOfExileContext" = None):
     missing_location_ids = ctx.missing_locations
     for base_item_location_id in missing_location_ids:
         network_item = ctx.locations_info[base_item_location_id]
-        item_text = ctx.player_names[network_item.player] + " ... " + ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
+        item_text = tts.get_item_name_tts_text(ctx, network_item)
         filename =  fileHelper.safe_filename(f"{item_text.lower()}_{tts.WPM}.wav")
 
         relativePath = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
