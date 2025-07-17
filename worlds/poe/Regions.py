@@ -1,21 +1,9 @@
 from typing import Dict
 from BaseClasses import Region, MultiWorld
-from .Locations import LocationDict, PathOfExileLocation, base_item_types
+from .Locations import LocationDict, PathOfExileLocation, base_item_types, acts
 from .Rules import can_reach
 
-acts = [
-    {"act": 1, "maxMonsterLevel": 13},
-    {"act": 2, "maxMonsterLevel": 23},
-    {"act": 3, "maxMonsterLevel": 33},
-    {"act": 4, "maxMonsterLevel": 40},
-    {"act": 5, "maxMonsterLevel": 45},
-    {"act": 6, "maxMonsterLevel": 50},
-    {"act": 7, "maxMonsterLevel": 54},
-    {"act": 8, "maxMonsterLevel": 60},
-    {"act": 9, "maxMonsterLevel": 64},
-    {"act": 10, "maxMonsterLevel": 67},
-#    {"act": 11, "maxMonsterLevel": 86}
-]
+
 
 def create_and_populate_regions(world, multiworld: MultiWorld, player: int, locations: list[LocationDict] = base_item_types, act_regions=acts) -> list[Region]:
     locations: list[LocationDict] = locations.copy()

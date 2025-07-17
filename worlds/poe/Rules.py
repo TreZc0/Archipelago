@@ -1,8 +1,7 @@
 from worlds.poe.Options import PathOfExileOptions
-from .Locations import PathOfExileLocation, base_item_types
+from .Locations import PathOfExileLocation, base_item_types, acts
 from . import Items
 from BaseClasses import CollectionState, Region
-
 
 MAX_GEAR_UPGRADES   = 50
 MAX_FLASK_SLOTS     = 10
@@ -14,11 +13,8 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
     opt : PathOfExileOptions = world.options
 
     reachable = True
-    if act == 1:
+    if act < 1:
         return True
-
-#    if act != 10:
-#        print("_______________________________________ YOU ARE IN ACT " + str(act) + " _______________________________________")
 
 
     ascedancy_amount = opt.ascendancies_available_per_class.value if act == 3 else 0
@@ -27,13 +23,19 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
     gem_slot_amount = 0 if not opt.support_gem_slot_upgrades else min(opt.support_gem_slots_per_act.value * (act - 1), MAX_GEM_SLOTS)
     skill_gem_amount = min(opt.skill_gems_per_act.value * (act - 1), MAX_SKILL_GEMS)
 
+
     ascedancy_count = state.count_from_list([item['name'] for item in Items.get_ascendancy_class_items(opt.starting_character.current_option_name)], world.player)
     gear_count = state.count_from_list([item['name'] for item in Items.get_gear_items()], world.player)
     flask_count = state.count_from_list([item['name'] for item in Items.get_flask_items()], world.player)
     gem_slot_count = state.count_from_list([item['name'] for item in Items.get_max_links_items()], world.player)
-    skill_gem_count = state.count_from_list([item['name'] for item in Items.get_main_skill_gem_items()], world.player)
+    skill_gem_count = state.count_from_list([item['name'] for item in Items.get_main_skill_gems_by_required_level(
+        level_maximum=acts[act].get("maxMonsterLevel", 0))], world.player)
+    if act == 1:
+        starting_gems = skill_gem_count = state.count_from_list([item['name'] for item in Items.get_main_skill_gems_by_required_level(level_maximum=1)], world.player)
+        weapons = state.count_from_list([item['name'] for item in Items.get_weapon_items()], world.player)
+        reachable &= starting_gems >= 2 and weapons >= 2
 
-    reachable = ascedancy_count >= ascedancy_amount and \
+    reachable &= ascedancy_count >= ascedancy_amount and \
            gear_count >= gear_amount and \
            flask_count >= flask_amount and \
            gem_slot_count >= gem_slot_amount and \

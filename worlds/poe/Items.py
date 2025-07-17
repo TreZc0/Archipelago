@@ -72,11 +72,16 @@ def get_main_skill_gem_items(table: Dict[int, ItemDict] = item_table) -> list[It
     """
     return [item for item in table.values() if "MainSkillGem" in item["category"]]
 
-def get_main_skill_gem_items_under_level(level: int, table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
+def get_main_skill_gems_by_required_level(level_minimum:int=0, level_maximum:int=100, table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
-    Returns a list of all Main skill gem items available under a specific level in the Path of Exile world.
+    Returns a list of all Main skill gem items available within a specific level range in the Path of Exile world.
+
+    Args:
+        level_minimum (int): The minimum required level for the skill gems.
+        level_maximum (int): The maximum required level for the skill gems.
     """
-    return [item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is None or item["reqLevel"] < level)]
+
+    return [item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is not None and (level_minimum <= item["reqLevel"] <= level_maximum))]
 
 def get_gear_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:    
     """
@@ -90,6 +95,11 @@ def get_max_links_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDic
     """
     return [item for item in table.values() if "max links" in item["category"]]
 
+def get_weapon_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
+    """
+    Returns a list of all weapon items available in the Path of Exile world.
+    """
+    return [item for item in table.values() if "Weapon" in item["category"]]
 # used to check offhands
 
 quiver_base_types = ItemTable.quiver_base_type_array.copy()  # Copy the list to avoid modifying the original data

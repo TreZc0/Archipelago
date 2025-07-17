@@ -35,6 +35,20 @@ class LocationDict(TypedDict, total=False):
     act: int
     id: int
 
+acts = [
+    {"act": 0.5, "maxMonsterLevel": 4},
+    {"act": 1, "maxMonsterLevel": 13},
+    {"act": 2, "maxMonsterLevel": 23},
+    {"act": 3, "maxMonsterLevel": 33},
+    {"act": 4, "maxMonsterLevel": 40},
+    {"act": 5, "maxMonsterLevel": 45},
+    {"act": 6, "maxMonsterLevel": 50},
+    {"act": 7, "maxMonsterLevel": 54},
+    {"act": 8, "maxMonsterLevel": 60},
+    {"act": 9, "maxMonsterLevel": 64},
+    {"act": 10, "maxMonsterLevel": 67},
+#    {"act": 11, "maxMonsterLevel": 86}
+]
 # based off of baseItemTypes.json
 base_item_types: Dict[int, LocationDict] = LocationTable.location_table
 base_item_types_by_name: Dict[str, LocationDict] = {loc['baseItem']: loc for loc in base_item_types.values()}
