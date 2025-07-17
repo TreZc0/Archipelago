@@ -14,13 +14,14 @@ from . import tts
 import worlds.poe.Items as Items
 import worlds.poe.Locations as Locations
 
-character_name = "DefaultCharacter"
 found_items_dict = {}
 found_items_set = set()
 save_path = "found_items.txt"
 total_items = set()
 is_char_in_logic = True
+
 _debug = True
+_verbose_debug = False
 total_items.update(baseItemTypes.get_base_item_types())
 
 async def when_enter_new_zone(line: str, context: "PathOfExileContext" = None):
@@ -32,18 +33,20 @@ async def when_enter_new_zone(line: str, context: "PathOfExileContext" = None):
         line (str): The line from the log file indicating the new zone entry.
     """
     global is_char_in_logic
-    await validate_and_update(character_name, ctx=context)
+    await validate_and_update(ctx=context)
     await asyncio.sleep(0.5)  # Allow some time for the filter to update
     await inputHelper.send_poe_text("/itemfilter __ap")
 
-async def validate_and_update(character_name: str = character_name, ctx: "PathOfExileContext" = None) -> bool:
+async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
     if ctx is None:
         # something is wrong, are we not connected?
         print("Context is None, cannot validate character.")
         return False
+    character_name = ctx.character_name
     char = {}
     try: 
         char = (await gggAPI.get_character(character_name)).character
+        ctx.last_response_from_api.setdefault("character",{})[ctx.character_name] = char
     except Exception as e:
         print(f"Error fetching character {character_name}: {e}")
         return False
@@ -58,7 +61,7 @@ async def validate_and_update(character_name: str = character_name, ctx: "PathOf
         locations_to_check = set()
         found_items_set = get_found_items(char)
         for item in found_items_set:
-            if _debug:
+            if _debug and _verbose_debug:
                 print(f"[DEBUG] Found item: {item}")
             location_id = Locations.get_location_id_from_item_name(item)
             if location_id is not None:
@@ -198,7 +201,7 @@ def get_found_items(char: gggAPI.Character) -> set:
     Fetches the found items for a given character from the GGG API.
 
     Args:
-        character_name (str): The name of the character to fetch items for.
+        char (gggAPI.Character): The character to fetch items for.
 
     Returns:
         dict: A dictionary containing the found items.
@@ -206,7 +209,7 @@ def get_found_items(char: gggAPI.Character) -> set:
     try:
         for item in char.inventory:
             found_items_set.add(item.baseType)
-            if _debug:
+            if _debug and _verbose_debug:
                 print(f"[DEBUG] Item in inventory: {item.baseType}")
     except Exception as e:
         print(f"Error fetching found items: {e}")

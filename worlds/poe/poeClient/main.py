@@ -27,8 +27,6 @@ import asyncio
 from pynput import keyboard
 from pathlib import Path
 
-
-character_name = "merc_MY_FIREEE"
 _generate_wav = True  # Set to True if you want to generate the wav files
 _debug = True  # Set to True for debug output, False for production
 validate_char_debounce_time = 5  # seconds
@@ -85,12 +83,11 @@ def validate_char(ctx: "PathOfExileContext" = context):
         return
 
     if _debug:
-        print(f"[DEBUG] Validating character: {character_name} at {current_time}")
-    sync_run_async(validationLogic.validate_and_update(character_name, ctx))
+        print(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
+    sync_run_async(validationLogic.validate_and_update(ctx.character_name, ctx))
     last_ran_validate_char = time.time()
 
 async def load_async(ctx: "PathOfExileContext" = None):
-    validationLogic.character_name = character_name
     #TODO GET THIS FROM AP
     #await validationLogic.load_found_items_from_file()
 
@@ -109,9 +106,9 @@ async def load_async(ctx: "PathOfExileContext" = None):
         relativePath = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
         fullPath = itemFilter.filter_sounds_path / f"{filename}"
         if _generate_wav:
-            if _debug:
-                print(f"[DEBUG] Generating TTS for item: {item_text} at {fullPath}")
             if not os.path.exists(fullPath):
+                if _debug:
+                    print(f"[DEBUG] Generating TTS for item: {item_text} at {fullPath}")
                 tts_tasks.append(
                     tts.safe_tts_async(
                         text=item_text,
@@ -174,6 +171,11 @@ async def main_async():
             await validationLogic.when_enter_new_zone(line, context) # add the context to the callback
         await fileHelper.callback_on_zone_change(path_to_client_txt, enter_new_zone_callback)
 
+        async def whisper_callback(line: str):
+            from worlds.poe.poeClient.textUpdate import self_whisper_callback
+            await self_whisper_callback(line, context)
+        await fileHelper.callback_on_whisper_from_char(path_to_client_txt, context.character_name, whisper_callback)
+
         print(f"Starting Main Loop...")
         await timer_loop()
     except KeyboardInterrupt:
@@ -181,7 +183,7 @@ async def main_async():
 
 if __name__ == '__main__':
     # Set the character name here or pass it as an argument
-    character_name = "merc_MY_FIREEE"  # Replace with your character name
+    context.character_name = "merc_MY_FIREEE"  # Replace with your character name
 
     run()
 

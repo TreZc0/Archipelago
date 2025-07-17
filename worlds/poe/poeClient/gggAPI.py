@@ -206,7 +206,7 @@ def debug_request(headers, url):
     print(f"[DEBUG] GET {url}")
     print(f"[DEBUG] Headers: {headers}")
 
-async def get_character(character_name: str, token: str = access_token, retry_count: int = 0, max_retry_count: int = 3) -> Optional[CharacterResponse]:
+async def get_character(character_name: str, token: str = access_token,  retry_count: int = 0, max_retry_count: int = 3) -> Optional[CharacterResponse]:
     """
     Fetch character data from the Path of Exile API.
     :param character_name: The name of the character.

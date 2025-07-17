@@ -35,7 +35,8 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
 
     def _cmd_poe_char_name(self, character_name: str = "") -> bool:
         """Set the character name for the Path of Exile client."""
-        poe_main.character_name = character_name
+        poe_main.character_name = character_name # lets move away from this.
+        self.ctx.character_name = character_name
         if not character_name:
             self.output("ERROR: Please provide a character name.")
             return False
@@ -44,10 +45,10 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
 
     def _cmd_start_poe(self) -> bool:
         """Start the Path of Exile client."""
-        if not poe_main.character_name:
+        if not self.ctx.character_name:
             self.output("ERROR: Please set your character name first using 'poe_char_name <name>'.")
             return False
-        self.output(f"Starting Path of Exile client for character: {poe_main.character_name}")
+        self.output(f"Starting Path of Exile client for character: {self.ctx.character_name}")
         poe_main.client_start(self.ctx)
         return True
 
@@ -65,6 +66,8 @@ class PathOfExileContext(CommonContext):
     game = "Path of Exile"
     command_processor = PathOfExileCommandProcessor
     items_handling = 0b111
+    character_name = ""
+    last_response_from_api = {}
     _debug = True  # Enable debug mode for poe client
 
     def __init__(self, *args, **kwargs):
