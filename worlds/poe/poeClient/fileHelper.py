@@ -40,23 +40,34 @@ async def callback_on_zone_change(filepath: Path, async_callback: callable):
     await callback_on_file_line_change(filepath, zone_change_callback)
 
 async def callback_on_whisper_from_char(filepath: Path, character_name: str, async_callback: callable):
-    async def zone_change_callback(line: str):
+    async def chat_callback(line: str):
         if f"] @From {character_name}: " in line:
             await async_callback(line)
-    await callback_on_file_line_change(filepath, zone_change_callback)
+    await callback_on_file_line_change(filepath, chat_callback)
 
-
+_looping = False
+callbacks: list[callable] = []
+poll_time = 0.3  # seconds
 async def callback_on_file_line_change(filepath: Path, async_callback: callable):
+    global _looping, callbacks
+    callbacks.append(async_callback)
+    if _looping:
+        print("[DEBUG] Already running a file line change callback loop.")
+        return
+    
     with open(filepath, 'r') as f:
         f.seek(0, 2)  # Move the cursor to the end of the file
+        _looping = True
         while True:
             line = f.readline()
             if not line:
-                await asyncio.sleep(0.3)
+                await asyncio.sleep(poll_time)
                 continue
 
             line = line.strip()
-            await async_callback(line)
+            for callback in callbacks:
+                if callable(callback):
+                    await callback(line)
 
 
 def get_last_n_lines_of_file(filepath, n=1):
