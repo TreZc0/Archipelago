@@ -100,10 +100,20 @@ def get_main_skill_gems_by_required_level(level_minimum:int=0, level_maximum:int
         level_minimum (int): The minimum required level for the skill gems.
         level_maximum (int): The maximum required level for the skill gems.
     """
-
     return [item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is not None and (level_minimum <= item["reqLevel"] <= level_maximum))]
 
-def get_gear_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:    
+def get_main_skill_gems_by_required_level_and_useable_weapon(available_weapons: set[str], level_minimum:int=0, level_maximum:int=100, table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
+    """
+    Returns a list of all Main skill gem items available within a specific level range and usable with the provided weapons in the Path of Exile world.
+
+    Args:
+        available_weapons (set[str]): A set of weapon items that can be used with the skill gems.
+        level_minimum (int): The minimum required level for the skill gems.
+        level_maximum (int): The maximum required level for the skill gems.
+    """
+    return [item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is not None and (level_minimum <= item["reqLevel"] <= level_maximum)) and any(weapon in available_weapons for weapon in item.get("reqToUse", []))]
+
+def get_gear_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
     Returns a list of all gear items available in the Path of Exile world.
     """

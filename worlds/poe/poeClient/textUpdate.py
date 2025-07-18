@@ -1,3 +1,4 @@
+from NetUtils import ClientStatus
 from worlds.poe import Items
 from worlds.poe.poeClient import inputHelper
 
@@ -7,6 +8,15 @@ if TYPE_CHECKING:
     from worlds.poe import PathOfExileWorld
 
 _debug = True
+
+async def self_goal_callback(line: str, ctx: "PathOfExileContext"):
+    # Implement the logic for handling self goals here
+    if not f"] : You have entered Karui Shores." in line:
+        return
+    if _debug:
+        print(f"[DEBUG] self_goal_callback: {line}")
+    await ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
+    ctx.finished_game = True
 
 async def self_whisper_callback(line: str, ctx: "PathOfExileContext"):
     # Implement the logic for handling self whispers here

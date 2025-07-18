@@ -174,8 +174,12 @@ async def main_async():
         async def whisper_callback(line: str):
             from worlds.poe.poeClient.textUpdate import self_whisper_callback
             await self_whisper_callback(line, context)
+            
+        async def goal_callback(line: str):
+            from worlds.poe.poeClient.textUpdate import self_goal_callback
+            await self_goal_callback(line, context)
 
-        await fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, whisper_callback])
+        await fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, whisper_callback, goal_callback])
 
         print(f"Starting Main Loop...")
         await timer_loop()
