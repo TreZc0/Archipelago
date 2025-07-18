@@ -33,16 +33,11 @@ def get_last_zone_log(filepath: Path, maxlines: int = 100 ) -> str:
     return ""
 
 
-async def callback_on_zone_change(filepath: Path, async_callback: callable):
+async def callback_on_file_change(filepath: Path, async_callbacks: list[callable]):
     async def zone_change_callback(line: str):
-        if "] : You have entered" in line:
-            await async_callback(line)
-    await callback_on_file_line_change(filepath, zone_change_callback)
-
-async def callback_on_whisper_from_char(filepath: Path, character_name: str, async_callback: callable):
-    async def zone_change_callback(line: str):
-        if f"] @From {character_name}: " in line:
-            await async_callback(line)
+        for callback in async_callbacks:
+            if callable(callback):
+                await callback(line)
     await callback_on_file_line_change(filepath, zone_change_callback)
 
 

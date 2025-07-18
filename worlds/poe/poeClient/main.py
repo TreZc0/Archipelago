@@ -169,12 +169,13 @@ async def main_async():
 
         async def enter_new_zone_callback(line: str):
             await validationLogic.when_enter_new_zone(line, context) # add the context to the callback
-        await fileHelper.callback_on_zone_change(path_to_client_txt, enter_new_zone_callback)
+
 
         async def whisper_callback(line: str):
             from worlds.poe.poeClient.textUpdate import self_whisper_callback
             await self_whisper_callback(line, context)
-        await fileHelper.callback_on_whisper_from_char(path_to_client_txt, context.character_name, whisper_callback)
+
+        await fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, whisper_callback])
 
         print(f"Starting Main Loop...")
         await timer_loop()
