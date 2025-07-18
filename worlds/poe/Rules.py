@@ -32,7 +32,11 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
 
     # make a list of valid weapon types, based on the state
 
-    valid_weapon_types = {item for item in req_to_use_weapon_types if state.has_from_list([Items.get_by_category(item)], world.player)}
+    valid_weapon_types = {
+        item for item in req_to_use_weapon_types
+        if state.has_from_list([i["name"] for i in Items.get_by_category(item)], world.player, 1)
+    }
+    valid_weapon_types.add("Unarmed")  # every character can use unarmed, so we always add it
     
     ascedancy_count = state.count_from_list([item['name'] for item in Items.get_ascendancy_class_items(opt.starting_character.current_option_name)], world.player)
     gear_count = state.count_from_list([item['name'] for item in Items.get_gear_items()], world.player)
@@ -42,10 +46,9 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
     usable_skill_gem_count = 0
 
 
-
-    usable_skill_gem_count = (
-        state.count_from_list([item['name'] for item in Items.get_main_skill_gems_by_required_level_and_useable_weapon(
-            available_weapons= valid_weapon_types, level_minimum=1, level_maximum=acts[act].get("maxMonsterLevel", 0) )], world.player))
+    gems_for_our_weapons = [item['name'] for item in Items.get_main_skill_gems_by_required_level_and_useable_weapon(
+            available_weapons= valid_weapon_types, level_minimum=1, level_maximum=acts[act].get("maxMonsterLevel", 0) )]
+    usable_skill_gem_count = (state.count_from_list(gems_for_our_weapons, world.player))
 
 
     

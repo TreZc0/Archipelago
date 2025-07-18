@@ -111,7 +111,8 @@ def get_main_skill_gems_by_required_level_and_useable_weapon(available_weapons: 
         level_minimum (int): The minimum required level for the skill gems.
         level_maximum (int): The maximum required level for the skill gems.
     """
-    return [item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is not None and (level_minimum <= item["reqLevel"] <= level_maximum)) and any(weapon in available_weapons for weapon in item.get("reqToUse", []))]
+    return [item for item in table.values() if "MainSkillGem" in item["category"] and (item["reqLevel"] is not None and (level_minimum <= item["reqLevel"] <= level_maximum))
+            and (any(weapon in available_weapons for weapon in item.get("reqToUse", [])) or not item.get("reqToUse", []))] # we have the weapon, or there are no reqToUse
 
 def get_gear_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     """
