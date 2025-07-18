@@ -53,17 +53,17 @@ BaseType == "{base_type_name}"
 {end_item_filter_block}"""
 
 
-def generate_invalid_item_filter_block( alert_sound):
+def generate_invalid_item_filter_block(alert_sound):
     if not Path.exists(filter_file_dir / alert_sound):
         print(f"[ERROR] Alert sound '{alert_sound}' does not exist in {filter_sounds_path}.")
-        return generate_item_filter_block_without_sound()
+        return generate_invalid_item_filter_block_without_sound()
     return f"""
 Show 
 {invalid_style_string}
 CustomAlertSound "{alert_sound}" 300
 """
 
-def generate_item_filter_block_without_sound():
+def generate_invalid_item_filter_block_without_sound():
     return f"""
     Show 
     {invalid_style_string}
