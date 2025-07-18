@@ -137,6 +137,7 @@ class Item:
     inventoryId: str
     properties: List[ItemProperty] = field(default_factory=list)
     socketedItems: List["Item"] = field(default_factory=list)
+    support: Optional[bool] = None
     # ...other fields as needed...
 
 @dataclass
@@ -259,6 +260,7 @@ def parse_character_response(data: dict) -> CharacterResponse:
             inventoryId=item.get("inventoryId", ""),
             properties=[parse_item_property(prop) for prop in item.get("properties", [])],
             socketedItems=[parse_item(si) for si in item.get("socketedItems", [])],
+            support=item.get("support", None)  # Optional field, can be None
             # Add other fields as needed, e.g.:
             # explicitMods=item.get("explicitMods", []),
             # implicitMods=item.get("implicitMods", []),

@@ -1,4 +1,6 @@
 import asyncio
+from random import Random
+
 import colorama
 import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui_enabled
@@ -35,13 +37,15 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
 
     def _cmd_poe_char_name(self, character_name: str = "") -> bool:
         """Set the character name for the Path of Exile client."""
-        poe_main.character_name = character_name # lets move away from this.
         self.ctx.character_name = character_name
         if not character_name:
             self.output("ERROR: Please provide a character name.")
             return False
         else:
             self.output(f"Character name set to: {character_name}")
+
+    def _cmd_set_current_character(self) -> bool:
+        ctx.player_verify_code = Random.randint()
 
     def _cmd_start_poe(self) -> bool:
         """Start the Path of Exile client."""

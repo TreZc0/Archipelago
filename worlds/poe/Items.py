@@ -10,6 +10,7 @@ class ItemDict(TypedDict, total=False):
     name: str 
     category: list[str]
     reqLevel: int | None
+    reqToUse: list[str] | None
 
 class PathOfExileItem(Item):
     """
@@ -125,6 +126,24 @@ def get_max_links_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDic
     Returns a list of all max links items available in the Path of Exile world.
     """
     return [item for item in table.values() if "max links" in item["category"]]
+
+def get_by_category(category: str, table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
+    """
+    Returns a list of all items in the Path of Exile world that belong to a specific category.
+
+    Args:
+        category (str): The category to filter items by.
+    """
+    return [item for item in table.values() if category in item["category"]]
+
+def get_by_has_every_category(categories: Set[str], table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
+    """
+    Returns a list of all items in the Path of Exile world that have every category in the provided set.
+
+    Args:
+        categories (Set[str]): A set of categories to filter items by.
+    """
+    return [item for item in table.values() if all(cat in item["category"] for cat in categories)]
 
 # used to check offhands
 

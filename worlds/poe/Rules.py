@@ -32,7 +32,7 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
         level_maximum=acts[act].get("maxMonsterLevel", 0))], world.player)
     if act == 1:
         starting_gems = skill_gem_count = state.count_from_list([item['name'] for item in Items.get_main_skill_gems_by_required_level(level_maximum=1)], world.player)
-        weapons = state.count_from_list([item['name'] for item in Items.get_weapon_items()], world.player)
+        weapons = state.count_from_list([item['name'] for item in Items.get_by_has_every_category(set("Weapon","Normal"))], world.player)
         reachable &= starting_gems >= 2 and weapons >= 2
 
     reachable &= ascedancy_count >= ascedancy_amount and \

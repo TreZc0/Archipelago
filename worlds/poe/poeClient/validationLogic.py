@@ -94,7 +94,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
         return False
 
     errors = list()
-    
+
     total_recieved_items = list()
     for network_item in ctx.items_received:
         total_recieved_items.append(Items.item_table.get(network_item.item))
@@ -105,9 +105,14 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     magic_flask_count = 0
     unique_flask_count = 0
 
+    if character.class_ not in [i["name"] for i in total_recieved_items]:
+        errors.append(f"Class {character.class_}")
+
+    gucci_rarity_check = {}
     for equipped_item in character.equipment:
         rarity = equipped_item.rarity
-        
+        gucci_rarity_check.setdefault(rarity, 0)
+        gucci_rarity_check[rarity] += 1
         # simple checks.
         for slot in simple_equipment_slots:
             if equipped_item.inventoryId == slot:
@@ -129,15 +134,17 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
                     if prop_name.lower().endswith(weapon_base_type.lower()):
                         errors.append(rarity_check(total_recieved_items, rarity, weapon_base_type))
 
-
-        #socketed items may not exist
+        equipped_sockets = 0
         if equipped_item.socketedItems is not None:
             for socketed_item in equipped_item.socketedItems:
+                if socketed_item.support:
+                    equipped_sockets += 1
                 if socketed_item.baseType not in [i["name"] for i in total_recieved_items]:
                     errors.append(f"Socketed {socketed_item.baseType} in {equipped_item.inventoryId}")
 
-
-
+        links = [i["name"] for i in total_recieved_items if i["name"] == f"Progressive max links - {equipped_item.baseType}"]
+        if len(links) > equipped_sockets - 1: # -1 for the skill gem
+            errors.append(f"Too many links for {equipped_item.baseType}")
 
         if equipped_item.inventoryId == "Flask":
             flask_rarity = equipped_item.rarity
@@ -155,7 +162,19 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     if unique_flask_count > total_recieved_items.count("Unique Flask"):
         errors.append("Unique Flasks")
 
-    return [x for x in errors if x]
+    gucci_hobo_mode = ctx.slot_info.get("gucci_hobo_mode", False)
+    if gucci_hobo_mode == 1 or gucci_hobo_mode == 2 or gucci_hobo_mode ==3:
+        normal_gear = gucci_rarity_check.setdefault("Normal", 0)
+        magic_gear = gucci_rarity_check.setdefault("Magic", 0)
+        rare_gear = gucci_rarity_check.setdefault("Rare", 0)
+        if gucci_hobo_mode == 1 and  normal_gear + magic_gear + rare_gear > 1: #options_allow_one_slot_of_any_rarity
+            errors.append("Gucci Hobo Mode - Only one item allowed of any rarity")
+        if gucci_hobo_mode == 2 and (normal_gear > 1 or magic_gear + rare_gear > 0):  # options_allow_one_slot_of_normal_rarity
+            errors.append("Gucci Hobo Mode - Only one normal item allowed")
+        if gucci_hobo_mode == 3 and (normal_gear + magic_gear + rare_gear > 0): # option_no_non_unique_items
+            errors.append("Gucci Hobo Mode - No non-unique items allowed")
+
+    return [x for x in errors if x] # filter out empty strings
     
 
 def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> str | None:

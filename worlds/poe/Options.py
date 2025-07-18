@@ -13,14 +13,18 @@ class GearUnlocks(Toggle):
     display_name = "Gear Unlocks"
     default = False
 
-class GucciHoboMode(Toggle):
+class GucciHoboMode(Choice):
     """
     Specifies if the world should be in Gucci Hobo Mode, this restricts use of any non-unique equipment to only 1 slot.
     This is an extremely difficult challenge intended for experienced players, and will greatly increase the length of your run.
     Expect a very slow start, involving farming early act 1 zones.
     """
     display_name = "Gucci Hobo Mode"
-    default = False
+    option_disabled = 0
+    options_allow_one_slot_of_any_rarity = 1
+    options_allow_one_slot_of_normal_rarity = 2
+    option_no_non_unique_items = 3
+    default = 0
 
 class GearUpgrades(Choice):
     """

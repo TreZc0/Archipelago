@@ -95,11 +95,18 @@ class PathOfExileWorld(World):
         #          options.starting_character.option_shadow,
         #          options.starting_character.option_scion])
         
-        if options.gucci_hobo_mode.value == True:
+        if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.options_allow_one_slot_of_normal_rarity
+                or options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
             gear_upgrades = Items.get_gear_items(table=self.items_to_place)
             for item in gear_upgrades:
                 if "Magic" in item["category"] or "Rare" in item["category"]:
-                    self.items_to_place.pop(item["id"]) 
+                    self.items_to_place.pop(item["id"])
+
+        if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
+            for item in gear_upgrades:
+                if "Normal" in item["category"]:
+                    self.items_to_place.pop(item["id"])
+
         
         if options.gear_unlocks.value == False:
             gear_upgrades = Items.get_gear_items(table=self.items_to_place)
