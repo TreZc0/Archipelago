@@ -143,7 +143,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
                     errors.append(f"Socketed {socketed_item.baseType} in {equipped_item.inventoryId}")
 
         links = [i["name"] for i in total_recieved_items if i["name"] == f"Progressive max links - {equipped_item.baseType}"]
-        if len(links) > equipped_sockets - 1: # -1 for the skill gem
+        if len(links) < equipped_sockets - 1: # -1 for the skill gem
             errors.append(f"Too many links for {equipped_item.baseType}")
 
         if equipped_item.inventoryId == "Flask":
@@ -174,7 +174,14 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
         if gucci_hobo_mode == 3 and (normal_gear + magic_gear + rare_gear > 0): # option_no_non_unique_items
             errors.append("Gucci Hobo Mode - No non-unique items allowed")
 
-    return [x for x in errors if x] # filter out empty strings
+    errors = [x for x in errors if x]  # filter out empty strings
+    if _debug and errors:
+        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+    return errors
     
 
 def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> str | None:
