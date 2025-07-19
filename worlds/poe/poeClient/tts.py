@@ -1,15 +1,8 @@
 import asyncio
 import os
 import sys
-
-vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
-if vendor_dir not in sys.path:
-    sys.path.insert(0, vendor_dir)
-for subdir in os.listdir(vendor_dir):
-    full_path = os.path.join(vendor_dir, subdir)
-    if full_path not in sys.path:
-        if os.path.isdir(full_path):
-            sys.path.insert(0, full_path)
+from . import fileHelper
+fileHelper.load_vendor_modules()
 
 from pathlib import Path
 _debug = True

@@ -1,22 +1,12 @@
 # Do the vendor imports
+from . import fileHelper
+fileHelper.load_vendor_modules()
+
 import os
-import sys
-
-    
-vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
-if vendor_dir not in sys.path:
-    sys.path.insert(0, vendor_dir)
-for subdir in os.listdir(vendor_dir):
-    full_path = os.path.join(vendor_dir, subdir)
-    if full_path not in sys.path:
-        if os.path.isdir(full_path):
-            sys.path.insert(0, full_path)
-
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
-    
-from . import fileHelper
+
 from . import itemFilter
 from . import baseItemTypes
 from . import inputHelper
@@ -151,9 +141,11 @@ def run():
         print("Main Loop stopped by user.")
 
 def client_start(ctx: "PathOfExileContext"):
-    global context
+    global context, path_to_client_txt
     context = ctx
     validationLogic.defaultContext = ctx
+    path_to_client_txt = ctx.client_text_path if ctx.client_text_path else path_to_client_txt
+    path_to_client_txt = Path(path_to_client_txt)
     run()
     
 async def main_async():

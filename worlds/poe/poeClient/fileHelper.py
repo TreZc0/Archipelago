@@ -10,6 +10,59 @@ client_txt_last_modified_time = None
 
 callbacks_on_file_change: list[callable] = []
 
+
+def load_vendor_modules():
+    import os
+    import sys
+    import importlib.util
+
+    base_vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
+
+    if not os.path.isdir(base_vendor_dir):
+        raise RuntimeError(f"Vendor directory not found: {base_vendor_dir}")
+
+    for entry in os.listdir(base_vendor_dir):
+        entry_path = os.path.join(base_vendor_dir, entry)
+
+        # Skip if already loaded
+        if entry in sys.modules:
+            continue
+
+        # Single-file module: vendor/foo.py
+        if os.path.isfile(entry_path) and entry_path.endswith(".py"):
+            modname = os.path.splitext(entry)[0]
+            if modname in sys.modules:
+                continue
+            spec = importlib.util.spec_from_file_location(modname, entry_path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            sys.modules[modname] = mod
+            print(f"[vendor] Loaded single-file module '{modname}' from {entry_path}")
+
+        # Single-layer or double-layer package
+        elif os.path.isdir(entry_path):
+            single_layer = os.path.join(entry_path, "__init__.py")
+            double_layer = os.path.join(entry_path, entry, "__init__.py")
+
+            if os.path.isfile(double_layer):
+                if entry_path not in sys.path:
+                    sys.path.insert(0, entry_path)
+                spec = importlib.util.spec_from_file_location(entry, double_layer)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                sys.modules[entry] = mod
+                print(f"[vendor] Loaded double-layer package '{entry}' from {double_layer}")
+
+            elif os.path.isfile(single_layer):
+                if base_vendor_dir not in sys.path:
+                    sys.path.insert(0, base_vendor_dir)
+                spec = importlib.util.spec_from_file_location(entry, single_layer)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                sys.modules[entry] = mod
+                print(f"[vendor] Loaded single-layer package '{entry}' from {single_layer}")
+
+
 def safe_filename(filename: str) -> str:
     # Replace problematic characters with underscores
     return re.sub(r"[^\w\-_\. ]", "_", filename)

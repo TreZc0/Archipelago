@@ -155,11 +155,12 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
             elif flask_rarity == "Unique":
                 unique_flask_count += 1
                 
-    if normal_flask_count > total_recieved_items.count("Normal Flask"):
+    # get count of items.name that match the progressive unlocks
+    if normal_flask_count > len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive Flask Unlock Slot']):
         errors.append("Normal Flasks")
-    if magic_flask_count > total_recieved_items.count("Magic Flask"):
+    if magic_flask_count > len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive Magic Flask Unlock']):
         errors.append("Magic Flasks")
-    if unique_flask_count > total_recieved_items.count("Unique Flask"):
+    if unique_flask_count > len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive Unique Flask Unlock']):
         errors.append("Unique Flasks")
 
     gucci_hobo_mode = ctx.slot_info.get("gucci_hobo_mode", False)
