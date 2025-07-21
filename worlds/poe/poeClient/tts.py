@@ -1,7 +1,7 @@
 import asyncio
 import os
 import sys
-from . import fileHelper
+from worlds.poe.poeClient import fileHelper
 fileHelper.load_vendor_modules()
 
 from pathlib import Path
