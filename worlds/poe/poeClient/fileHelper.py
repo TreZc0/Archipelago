@@ -10,40 +10,34 @@ client_txt_last_modified_time = None
 
 callbacks_on_file_change: list[callable] = []
 
-
 def load_vendor_modules():
     import os
     import sys
     import importlib.util
-    import tempfile
     import zipfile
-    import shutil
+    import tempfile
 
+    # Initial vendor directory location (source mode)
     base_dir = os.path.dirname(__file__)
     base_vendor_dir = os.path.join(base_dir, "vendor")
 
-    # Handle zip case by extracting vendor dir
+    # If vendor directory doesn't exist, maybe we're in a zip
     if not os.path.isdir(base_vendor_dir):
-        # Check if running from a zip
-        archive_path = base_dir
+        archive_path = os.path.abspath(__file__)
         while not os.path.isfile(archive_path) and archive_path != os.path.dirname(archive_path):
             archive_path = os.path.dirname(archive_path)
 
         if zipfile.is_zipfile(archive_path):
-            print(f"[vendor] Extracting vendor directory from zip: {archive_path}")
+            print(f"[vendor] Extracting vendor from zip: {archive_path}")
             temp_dir = tempfile.mkdtemp(prefix="vendor_extract_")
             with zipfile.ZipFile(archive_path, 'r') as z:
-                for file in z.namelist():
-                    if file.startswith("poe/poeClient/vendor/") and not file.endswith("/"):
-                        z.extract(file, temp_dir)
-
-            # Update base_vendor_dir to extracted version
+                for name in z.namelist():
+                    if name.startswith("poe/poeClient/vendor/") and not name.endswith("/"):
+                        z.extract(name, temp_dir)
             base_vendor_dir = os.path.join(temp_dir, "poe", "poeClient", "vendor")
 
-            if not os.path.isdir(base_vendor_dir):
-                raise RuntimeError(f"Failed to extract vendor from zip: {base_vendor_dir}")
-        else:
-            raise RuntimeError(f"Vendor directory not found: {base_vendor_dir}")
+        if not os.path.isdir(base_vendor_dir):
+            raise FileNotFoundError(f"Vendor directory could not be found or extracted: {base_vendor_dir}")
 
     for entry in os.listdir(base_vendor_dir):
         entry_path = os.path.join(base_vendor_dir, entry)
@@ -84,6 +78,7 @@ def load_vendor_modules():
                 spec.loader.exec_module(mod)
                 sys.modules[entry] = mod
                 print(f"[vendor] Loaded single-layer package '{entry}' from {single_layer}")
+
 
 
 
