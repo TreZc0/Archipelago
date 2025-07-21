@@ -15,16 +15,39 @@ def load_vendor_modules():
     import os
     import sys
     import importlib.util
+    import tempfile
+    import zipfile
+    import shutil
 
-    base_vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
+    base_dir = os.path.dirname(__file__)
+    base_vendor_dir = os.path.join(base_dir, "vendor")
 
+    # Handle zip case by extracting vendor dir
     if not os.path.isdir(base_vendor_dir):
-        raise RuntimeError(f"Vendor directory not found: {base_vendor_dir}")
+        # Check if running from a zip
+        archive_path = base_dir
+        while not os.path.isfile(archive_path) and archive_path != os.path.dirname(archive_path):
+            archive_path = os.path.dirname(archive_path)
+
+        if zipfile.is_zipfile(archive_path):
+            print(f"[vendor] Extracting vendor directory from zip: {archive_path}")
+            temp_dir = tempfile.mkdtemp(prefix="vendor_extract_")
+            with zipfile.ZipFile(archive_path, 'r') as z:
+                for file in z.namelist():
+                    if file.startswith("poe/poeClient/vendor/") and not file.endswith("/"):
+                        z.extract(file, temp_dir)
+
+            # Update base_vendor_dir to extracted version
+            base_vendor_dir = os.path.join(temp_dir, "poe", "poeClient", "vendor")
+
+            if not os.path.isdir(base_vendor_dir):
+                raise RuntimeError(f"Failed to extract vendor from zip: {base_vendor_dir}")
+        else:
+            raise RuntimeError(f"Vendor directory not found: {base_vendor_dir}")
 
     for entry in os.listdir(base_vendor_dir):
         entry_path = os.path.join(base_vendor_dir, entry)
 
-        # Skip if already loaded
         if entry in sys.modules:
             continue
 
@@ -61,6 +84,7 @@ def load_vendor_modules():
                 spec.loader.exec_module(mod)
                 sys.modules[entry] = mod
                 print(f"[vendor] Loaded single-layer package '{entry}' from {single_layer}")
+
 
 
 def safe_filename(filename: str) -> str:
