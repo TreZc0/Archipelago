@@ -9,20 +9,26 @@ client_txt_last_modified_time = None
 
 
 callbacks_on_file_change: list[callable] = []
-
 def load_vendor_modules():
     import os
     import sys
     import importlib.util
     import zipfile
     import tempfile
+    import atexit
+    import shutil
 
-    # Initial vendor directory location (source mode)
+    # Prevent running more than once
+    if getattr(sys, "_vendor_modules_loaded", False):
+        return
+    sys._vendor_modules_loaded = True
+
+    temp_dir = None
     base_dir = os.path.dirname(__file__)
     base_vendor_dir = os.path.join(base_dir, "vendor")
 
-    # If vendor directory doesn't exist, maybe we're in a zip
     if not os.path.isdir(base_vendor_dir):
+        # Try to find enclosing .zip file
         archive_path = os.path.abspath(__file__)
         while not os.path.isfile(archive_path) and archive_path != os.path.dirname(archive_path):
             archive_path = os.path.dirname(archive_path)
@@ -34,7 +40,11 @@ def load_vendor_modules():
                 for name in z.namelist():
                     if name.startswith("poe/poeClient/vendor/") and not name.endswith("/"):
                         z.extract(name, temp_dir)
+
             base_vendor_dir = os.path.join(temp_dir, "poe", "poeClient", "vendor")
+
+            # Clean up after exit
+            atexit.register(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
 
         if not os.path.isdir(base_vendor_dir):
             raise FileNotFoundError(f"Vendor directory could not be found or extracted: {base_vendor_dir}")
