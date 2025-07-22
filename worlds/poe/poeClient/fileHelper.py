@@ -102,7 +102,7 @@ def load_vendor_modules():
 
 def safe_filename(filename: str) -> str:
     # Replace problematic characters with underscores
-    return re.sub(r"[^\w\-_\. ]", "_", filename)
+    return re.sub(r"[^\w\-_\. ]", "", filename)
 
 def get_last_zone_log(filepath: Path, maxlines: int = 100 ) -> str:
     # read the last `maxlines` lines from the file, and returns the most recent line that contains "Entered" or "Left"
