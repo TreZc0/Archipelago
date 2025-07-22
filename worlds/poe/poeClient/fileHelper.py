@@ -6,9 +6,8 @@ from pathlib import Path
 
 _debug = True
 client_txt_last_modified_time = None
-
-
 callbacks_on_file_change: list[callable] = []
+
 
 def load_vendor_modules():
     import os
@@ -16,25 +15,44 @@ def load_vendor_modules():
     import importlib.util
     import zipfile
     import tempfile
+    import atexit
+    import shutil
 
-    # Initial vendor directory location (source mode)
+    # Prevent double-load
+    if getattr(sys, "_vendor_modules_loaded", False):
+        return
+    sys._vendor_modules_loaded = True
+
+    # Use consistent temp directory for vendor extraction
+    temp_dir = os.path.join(tempfile.gettempdir(), "archipelago_vendor")
+
+    # Default vendor path (source mode)
     base_dir = os.path.dirname(__file__)
     base_vendor_dir = os.path.join(base_dir, "vendor")
 
-    # If vendor directory doesn't exist, maybe we're in a zip
     if not os.path.isdir(base_vendor_dir):
+        # Try to detect if running from zip
         archive_path = os.path.abspath(__file__)
         while not os.path.isfile(archive_path) and archive_path != os.path.dirname(archive_path):
             archive_path = os.path.dirname(archive_path)
 
         if zipfile.is_zipfile(archive_path):
             print(f"[vendor] Extracting vendor from zip: {archive_path}")
-            temp_dir = tempfile.mkdtemp(prefix="vendor_extract_")
+
+            # Clean up the temp dir first
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir, ignore_errors=True)
+            os.makedirs(temp_dir, exist_ok=True)
+
             with zipfile.ZipFile(archive_path, 'r') as z:
                 for name in z.namelist():
                     if name.startswith("poe/poeClient/vendor/") and not name.endswith("/"):
                         z.extract(name, temp_dir)
+
             base_vendor_dir = os.path.join(temp_dir, "poe", "poeClient", "vendor")
+
+            # Clean up after exit
+            atexit.register(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
 
         if not os.path.isdir(base_vendor_dir):
             raise FileNotFoundError(f"Vendor directory could not be found or extracted: {base_vendor_dir}")
@@ -45,7 +63,7 @@ def load_vendor_modules():
         if entry in sys.modules:
             continue
 
-        # Single-file module: vendor/foo.py
+        # Single-file module
         if os.path.isfile(entry_path) and entry_path.endswith(".py"):
             modname = os.path.splitext(entry)[0]
             if modname in sys.modules:
@@ -84,7 +102,7 @@ def load_vendor_modules():
 
 def safe_filename(filename: str) -> str:
     # Replace problematic characters with underscores
-    return re.sub(r"[^\w\-_\. ]", "_", filename)
+    return re.sub(r"[^\w\-_\. ]", "", filename)
 
 def get_last_zone_log(filepath: Path, maxlines: int = 100 ) -> str:
     # read the last `maxlines` lines from the file, and returns the most recent line that contains "Entered" or "Left"

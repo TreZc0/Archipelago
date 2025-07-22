@@ -180,7 +180,7 @@ async def main_async():
 
 if __name__ == '__main__':
     # Set the character name here or pass it as an argument
-    context.character_name = "merc_MY_FIREEE"  # Replace with your character name
+#    context.character_name = "merc_MY_FIREEE"  # Replace with your character name
 
     run()
 
