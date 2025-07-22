@@ -6,9 +6,9 @@ from pathlib import Path
 
 _debug = True
 client_txt_last_modified_time = None
-
-
 callbacks_on_file_change: list[callable] = []
+
+
 def load_vendor_modules():
     import os
     import sys
@@ -18,24 +18,32 @@ def load_vendor_modules():
     import atexit
     import shutil
 
-    # Prevent running more than once
+    # Prevent double-load
     if getattr(sys, "_vendor_modules_loaded", False):
         return
     sys._vendor_modules_loaded = True
 
-    temp_dir = None
+    # Use consistent temp directory for vendor extraction
+    temp_dir = os.path.join(tempfile.gettempdir(), "archipelago_vendor")
+
+    # Default vendor path (source mode)
     base_dir = os.path.dirname(__file__)
     base_vendor_dir = os.path.join(base_dir, "vendor")
 
     if not os.path.isdir(base_vendor_dir):
-        # Try to find enclosing .zip file
+        # Try to detect if running from zip
         archive_path = os.path.abspath(__file__)
         while not os.path.isfile(archive_path) and archive_path != os.path.dirname(archive_path):
             archive_path = os.path.dirname(archive_path)
 
         if zipfile.is_zipfile(archive_path):
             print(f"[vendor] Extracting vendor from zip: {archive_path}")
-            temp_dir = tempfile.mkdtemp(prefix="vendor_extract_")
+
+            # Clean up the temp dir first
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir, ignore_errors=True)
+            os.makedirs(temp_dir, exist_ok=True)
+
             with zipfile.ZipFile(archive_path, 'r') as z:
                 for name in z.namelist():
                     if name.startswith("poe/poeClient/vendor/") and not name.endswith("/"):
@@ -55,7 +63,7 @@ def load_vendor_modules():
         if entry in sys.modules:
             continue
 
-        # Single-file module: vendor/foo.py
+        # Single-file module
         if os.path.isfile(entry_path) and entry_path.endswith(".py"):
             modname = os.path.splitext(entry)[0]
             if modname in sys.modules:
