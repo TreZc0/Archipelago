@@ -14,8 +14,10 @@ from . import validationLogic
 from . import gggAPI
 from . import tts
 import asyncio
+import threading
 from pynput import keyboard
 from pathlib import Path
+
 
 _generate_wav = True  # Set to True if you want to generate the wav files
 _debug = True  # Set to True for debug output, False for production
@@ -82,41 +84,14 @@ async def load_async(ctx: "PathOfExileContext" = None):
     #await validationLogic.load_found_items_from_file()
 
     await gggAPI.async_get_access_token()
-    item_filter_str = ""
-    tts_tasks = []
+    
     global context
     ctx = ctx if ctx is not None else context
 
-    missing_location_ids = ctx.missing_locations
-    for base_item_location_id in missing_location_ids:
-        network_item = ctx.locations_info[base_item_location_id]
-        item_text = tts.get_item_name_tts_text(ctx, network_item)
-        filename =  fileHelper.safe_filename(f"{item_text.lower()}_{tts.WPM}.wav")
+    thread = threading.Thread(target=tts.generate_tts_from_missing_locations, args=(ctx,)) # comma to make it a tuple
+    thread.start()
 
-        relativePath = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
-        fullPath = itemFilter.filter_sounds_path / f"{filename}"
-        if _generate_wav:
-            if not os.path.exists(fullPath):
-                if _debug:
-                    print(f"[DEBUG] Generating TTS for item: {item_text} at {fullPath}")
-                tts_tasks.append(
-                    tts.safe_tts_async(
-                        text=item_text,
-                        filename=fullPath
-                    )
-                )
-                
-        itemFilter.base_item_to_relative_wav_path[base_item_location_id] = relativePath
-        item_filter_str += itemFilter.generate_item_filter_block(
-            ctx.location_names.lookup_in_game(base_item_location_id),
-            relativePath
-        ) + "\n\n"
-        
-    batch_size = 10
-    for i in range(0, len(tts_tasks), batch_size):
-        batch = tts_tasks[i:i+batch_size]
-        await asyncio.gather(*batch)
-    itemFilter.write_item_filter(item_filter_str)
+    itemFilter.update_item_filter_from_context(ctx)
 
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
@@ -146,6 +121,17 @@ def client_start(ctx: "PathOfExileContext"):
     validationLogic.defaultContext = ctx
     path_to_client_txt = ctx.client_text_path if ctx.client_text_path else path_to_client_txt
     path_to_client_txt = Path(path_to_client_txt)
+
+    #start a thread to run generate_tts_from_missing_locations
+    if _generate_wav:
+        if not ctx.locations_info:
+            print("[DEBUG] No locations info available, skipping TTS generation.")
+        else:
+            print("[DEBUG] Generating TTS files for missing locations...")
+            tts.generate_tts_from_missing_locations(ctx)
+            
+    itemFilter.base_item_filter = ctx.base_item_filter if ctx.base_item_filter_import else itemFilter.base_item_filter
+
     run()
     
 async def main_async():

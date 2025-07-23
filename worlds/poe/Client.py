@@ -54,6 +54,16 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
     #def _cmd_set_current_character(self) -> bool:
     #    self.ctx.player_verify_code = Random.randint()
 
+    def _cmd_base_item_filter(self, filter_name: str) -> bool:
+        """Set the base item filter for Path of Exile."""
+        if not filter_name:
+            self.output("ERROR: Please provide a valid item filter name.")
+            return False
+        # Assuming we have a method to set the item filter in the context
+        self.ctx.base_item_filter = filter_name
+        self.output(f"Base item filter set to: {filter_name}")
+        return True
+
     def _cmd_start_poe(self) -> bool:
         """Start the Path of Exile client."""
         if not self.ctx.character_name:
@@ -65,7 +75,7 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
 
     def _cmd_t(self):
         """A test command to check if the command processor is working. -- This is a placeholder for testing purposes."""
-        # self._cmd_connect("Player1:@localhost:38281")
+        self._cmd_connect("Player1:@localhost:38281")
         # wait 4 seconds to allow the character name to be set
         self._cmd_poe_char_name("_ap_test_one")
 
@@ -80,9 +90,10 @@ class PathOfExileContext(CommonContext):
     game = "Path of Exile"
     command_processor = PathOfExileCommandProcessor
     items_handling = 0b111
-    character_name = ""
     last_response_from_api = {}
+    character_name = ""
     client_text_path = ""
+    base_item_filter = ""
     _debug = True  # Enable debug mode for poe client
 
     def __init__(self, *args, **kwargs):
