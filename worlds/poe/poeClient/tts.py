@@ -1,10 +1,10 @@
 import asyncio
-import os
-import sys
 from worlds.poe.poeClient import fileHelper
 fileHelper.load_vendor_modules()
 
+import pyttsx3
 from pathlib import Path
+
 _debug = True
 WPM = 250  # Default words per minute for TTS
 
@@ -19,14 +19,9 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
         return
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
     try:
-        import pyttsx3
-        engine = None
-        if sys.platform.startswith('win'):
-            import pythoncom
-            pythoncom.CoInitialize()
-            engine = pyttsx3.Engine('sapi5')
-        else:
-            engine = pyttsx3.init()
+        if _debug:
+            print(f"[DEBUG] Initializing TTS engine for text: {text}")
+        engine = pyttsx3.init()  # No driver specified
         if _debug:
             print(f"[DEBUG] TTS: text='{text}', filename='{filename}'")
         engine.setProperty('rate', rate)
@@ -38,9 +33,6 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
             print("[DEBUG] Voices available:", voices)
         engine.save_to_file(text, str(filename))
         engine.runAndWait()
-        engine.stop()
-        if sys.platform.startswith('win'):
-            pythoncom.CoUninitialize()
         if Path(filename).exists():
             print(f"[DEBUG] File created: {filename}")
         else:
@@ -48,31 +40,17 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
     except Exception as e:
         print(f"[ERROR] Exception during TTS: {e}")
 
-def tts_blocking(text, filename, rate=250, volume=1, voice_id=None):
-    import pythoncom
-    pythoncom.CoInitialize()
-    import pyttsx3
-    Path(filename).parent.mkdir(parents=True, exist_ok=True)
-    engine = pyttsx3.Engine('sapi5')
-    engine.setProperty('rate', rate)
-    engine.setProperty('volume', volume)
-    if voice_id is not None:
-        engine.setProperty('voice', voice_id)
-    engine.save_to_file(text, str(filename))
-    engine.runAndWait()
-    engine.stop()
-    pythoncom.CoUninitialize()
-
-
 async def safe_tts_async(text, filename, rate=250, volume=1, voice_id=None):
-    await asyncio.to_thread(tts_blocking, text, filename, rate, volume, voice_id)
+    # Run sequentially to avoid COM/threading issues
+    if _debug:
+        print(f"[DEBUG] Async TTS: text='{text}', filename='{filename}'")
+
+    safe_tts(text, filename, rate, volume, voice_id)
 
 async def async_test():
-    tasks = [
-        safe_tts_async("Hello 1", "test1.wav"),
-        safe_tts_async("Hello 2", "test2.wav"),
-        safe_tts_async("Hello 3", "test3.wav"),
-    ]
+    tasks = []
+    for i in range(100):
+        tasks.append(safe_tts_async(f"Hello {i}", f"test{i}.wav"))
     await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
