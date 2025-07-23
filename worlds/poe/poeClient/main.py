@@ -130,7 +130,7 @@ def client_start(ctx: "PathOfExileContext"):
             print("[DEBUG] Generating TTS files for missing locations...")
             tts.generate_tts_from_missing_locations(ctx)
             
-    itemFilter.base_item_filter = ctx.base_item_filter if ctx.base_item_filter_import else itemFilter.base_item_filter
+    itemFilter.base_item_filter = ctx.base_item_filter if ctx.base_item_filter else itemFilter.base_item
 
     run()
     

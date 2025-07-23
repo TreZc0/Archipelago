@@ -3,7 +3,7 @@ from worlds.poe.poeClient import fileHelper
 fileHelper.load_vendor_modules()
 
 
-from . import itemFilter
+from worlds.poe.poeClient import itemFilter
 import os
 import typing
 if typing.TYPE_CHECKING:
@@ -39,12 +39,10 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
         engine.setProperty('volume', volume)
         if voice_id is not None:
             engine.setProperty('voice', voice_id)
-        voices = engine.getProperty('voices')
-        if _debug:
-            print("[DEBUG] Voices available:", voices)
         engine.save_to_file(text, str(filename))
         engine.runAndWait()
         engine.stop()
+        del engine
         if Path(filename).exists():
             print(f"[DEBUG] File created: {filename}")
         else:
