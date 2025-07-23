@@ -68,7 +68,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
             location_id = Locations.get_location_id_from_item_name(item)
             if location_id is not None:
                 locations_to_check.add(location_id)
-        await update_filter(ctx)
+        itemFilter.update_item_filter_from_context(ctx)
         if len(locations_to_check) > 0:
             if _debug:
                 print(f"[DEBUG] Locations to check: {locations_to_check}")
@@ -77,7 +77,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         else:
             if _debug:
                 print("[DEBUG] No locations to check, skipping check_locations.")
-        await update_filter(ctx)
+        itemFilter.update_item_filter_from_context(ctx)
         return True
 
     else:
@@ -90,14 +90,16 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     # Perform validation logic here
 
     if character is None:
-        print("Character is None, cannot validate.")
-        return False
+        return ["Character name is not set, cannot validate."]
 
     errors = list()
 
     total_recieved_items = list()
     for network_item in ctx.items_received:
         total_recieved_items.append(Items.item_table.get(network_item.item))
+
+    if not total_recieved_items:
+        return ["No items received from the server... are you sure you are connected?"]
 
     simple_equipment_slots = ["BodyArmour","Amulet","Belt","Boots","Gloves","Helmet"]
 
@@ -202,26 +204,26 @@ def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> str | N
         return None
 
 
-async def update_filter(ctx: "PathOfExileContext") -> bool:
-    item_filter_string = ""
-    missing_location_ids = ctx.missing_locations
-    for base_item_location_id in missing_location_ids:
-
-#        item_text = Items.get(base_item_location_id, "Unknown Item") # this needs to be the scouted item name, unless the options specify otherwise
-        network_item = ctx.locations_info[base_item_location_id]
-        item_text = tts.get_item_name_tts_text(ctx, network_item)
-        filename =  f"{item_text.lower()}_{tts.WPM}.wav"
-        base_item_location_name = ctx.location_names.lookup_in_game(base_item_location_id)
-        item_filter_string += itemFilter.generate_item_filter_block(base_item_location_name, f"{itemFilter.filter_sounds_dir_name}/{fileHelper.safe_filename(filename)}")+ "\n\n"
-
-    if item_filter_string:
-        itemFilter.write_item_filter(item_filter_string)
-        print(f"Item filter updated with {len(missing_location_ids)} items.")
-    return True
+#async def update_filter(ctx: "PathOfExileContext") -> bool:
+#    item_filter_string = ""
+#    missing_location_ids = ctx.missing_locations
+#    for base_item_location_id in missing_location_ids:
+#
+##        item_text = Items.get(base_item_location_id, "Unknown Item") # this needs to be the scouted item name, unless the options specify otherwise
+#        network_item = ctx.locations_info[base_item_location_id]
+#        item_text = tts.get_item_name_tts_text(ctx, network_item)
+#        filename =  f"{item_text.lower()}_{tts.WPM}.wav"
+#        base_item_location_name = ctx.location_names.lookup_in_game(base_item_location_id)
+#        item_filter_string += itemFilter.generate_item_filter_block(base_item_location_name, f"{itemFilter.filter_sounds_dir_name}/{fileHelper.safe_filename(filename)}")+ "\n\n"
+#
+#    if item_filter_string:
+#        itemFilter.write_item_filter(item_filter_string)
+#        print(f"Item filter updated with {len(missing_location_ids)} items.")
+#    return True
 
 async def update_filter_to_invalid_char_filter(errors: list[str]):
     if len(errors) > 1:
-        error_text = " ... and ".join(errors)
+        error_text = " and ... ".join(errors)
     else:
         error_text = errors[0]
     filename = f"{fileHelper.short_hash(error_text)}_{tts.WPM}.wav" # this could be a long text, so we use a hash

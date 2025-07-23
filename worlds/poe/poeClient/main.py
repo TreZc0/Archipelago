@@ -22,7 +22,7 @@ from pathlib import Path
 _generate_wav = True  # Set to True if you want to generate the wav files
 _debug = True  # Set to True for debug output, False for production
 validate_char_debounce_time = 5  # seconds
-loop_timer = 60  # Time in seconds to wait before reloading the item filter
+loop_timer = 0.1  # Time in seconds to wait before reloading the item filter
 context = {}
 
 possible_paths_to_client_txt = [
@@ -32,7 +32,6 @@ possible_paths_to_client_txt = [
     Path.home() / "Documents" / "My Games" / "Path of Exile" / "Client.txt",
 ]
 path_to_client_txt = Path("D:/games/poe/logs/Client.txt")
-
 
 key_functions = {
     #keyboard.KeyCode: lambda: validate_char(),
@@ -79,32 +78,50 @@ def validate_char(ctx: "PathOfExileContext" = context):
     sync_run_async(validationLogic.validate_and_update(ctx.character_name, ctx))
     last_ran_validate_char = time.time()
 
-async def load_async(ctx: "PathOfExileContext" = None):
-    #TODO GET THIS FROM AP
-    #await validationLogic.load_found_items_from_file()
+async def async_load(ctx: "PathOfExileContext" = None):
+    # TODO: store / load character name, path to client.txt and base item filter from the context to a file
+
 
     await gggAPI.async_get_access_token()
     
     global context
     ctx = ctx if ctx is not None else context
 
-    thread = threading.Thread(target=tts.generate_tts_from_missing_locations, args=(ctx,)) # comma to make it a tuple
-    thread.start()
+
+    # Doesn't work rn  ¯\_(ツ)_/¯
+    #thread = threading.Thread(target=tts.generate_tts_from_missing_locations, args=(ctx,)) # comma to make it a tuple
+    #thread.start()
+    tts.generate_tts_tasks_from_missing_locations(ctx)
 
     itemFilter.update_item_filter_from_context(ctx)
 
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
 
-    await inputHelper.important_send_poe_text("/itemfilter __ap")
+#    await inputHelper.important_send_poe_text("/itemfilter __ap")
 
 
 # make a loop that runs every 5 seconds to loop the item filter command
 async def timer_loop():
+    ticks = 0.1
+    batch_size = 1  # Number of TTS tasks to run at a time
     while True:
-        validate_char()
-        await inputHelper.send_poe_text("/itemfilter __ap")
         await asyncio.sleep(loop_timer)  # Adjust the sleep time as needed
+        ticks += 0.1
+        if ticks % 3600 < 0.1: # every hour
+            validate_char()
+            await inputHelper.send_poe_text("/itemfilter __ap")
+
+
+        if ticks % 1 < 0.1:
+            if tts.tasks:
+                if _debug:
+                    print(f"[DEBUG] Running TTS tasks: {len(tts.tasks)} tasks pending.")
+                await asyncio.gather(*tts.tasks[:batch_size])
+                tts.tasks = tts.tasks[batch_size:]
+            
+            
+
 def run():
     try:
         if asyncio.get_event_loop().is_running():
@@ -121,16 +138,8 @@ def client_start(ctx: "PathOfExileContext"):
     validationLogic.defaultContext = ctx
     path_to_client_txt = ctx.client_text_path if ctx.client_text_path else path_to_client_txt
     path_to_client_txt = Path(path_to_client_txt)
-
-    #start a thread to run generate_tts_from_missing_locations
-    if _generate_wav:
-        if not ctx.locations_info:
-            print("[DEBUG] No locations info available, skipping TTS generation.")
-        else:
-            print("[DEBUG] Generating TTS files for missing locations...")
-            tts.generate_tts_from_missing_locations(ctx)
             
-    itemFilter.base_item_filter = ctx.base_item_filter if ctx.base_item_filter else itemFilter.base_item
+    itemFilter.base_item_filter = ctx.base_item_filter if ctx.base_item_filter else itemFilter.base_item_filter
 
     run()
     
@@ -138,13 +147,7 @@ async def main_async():
     import time
 
     try:
-        start_time = time.time()
-        await load_async()
-
-        elapsed_time = time.time() - start_time
-        print(f"Generated item filter and TTS files in {elapsed_time:.2f} seconds.")
-        print(f"Starting polling, watching for changes at {path_to_client_txt}...")
-
+        await async_load(context)
         async def enter_new_zone_callback(line: str):
             await validationLogic.when_enter_new_zone(line, context) # add the context to the callback
 
@@ -157,10 +160,12 @@ async def main_async():
             from worlds.poe.poeClient.textUpdate import self_goal_callback
             await self_goal_callback(line, context)
 
-        await fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, whisper_callback, goal_callback])
 
-        print(f"Starting Main Loop...")
-        await timer_loop()
+        print("Starting Main Loop...")
+        tasks = [
+            fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, whisper_callback, goal_callback]),
+            timer_loop()]
+        await asyncio.gather(*tasks)
     except KeyboardInterrupt:
         print("Main Loop stopped by user.")
 

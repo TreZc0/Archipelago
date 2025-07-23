@@ -75,7 +75,7 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
 
     def _cmd_t(self):
         """A test command to check if the command processor is working. -- This is a placeholder for testing purposes."""
-        self._cmd_connect("Player1:@localhost:38281")
+#        self._cmd_connect("Player1:@localhost:38281")
         # wait 4 seconds to allow the character name to be set
         self._cmd_poe_char_name("_ap_test_one")
 

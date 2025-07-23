@@ -18,7 +18,7 @@ from pathlib import Path
 
 _debug = True
 WPM = 250  # Default words per minute for TTS
-
+tasks = []  # List to hold async tasks for TTS generation
 def get_item_name_tts_text(ctx: "PathOfExileContext", network_item) -> str:
     return ctx.player_names[network_item.player] + " ... " + ctx.item_names.lookup_in_slot(network_item.item,
                                                                                                network_item.player)
@@ -51,7 +51,6 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
         print(f"[ERROR] Exception during TTS: {e}")
 
 async def safe_tts_async(text, filename, rate=250, volume=1, voice_id=None):
-    # Run sequentially to avoid COM/threading issues
     if _debug:
         print(f"[DEBUG] Async TTS: text='{text}', filename='{filename}'")
 
@@ -80,6 +79,32 @@ def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WP
                     filename=full_path
                 )
         itemFilter.base_item_id_to_relative_wav_path[base_item_location_id] = relative_path
+
+
+def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WPM) -> None:
+    """Generate TTS files for missing locations."""
+    if not ctx or not ctx.missing_locations:
+        print("[DEBUG] No missing locations to generate TTS for.")
+        return
+
+    missing_location_ids = ctx.missing_locations
+    for base_item_location_id in missing_location_ids:
+        network_item = ctx.locations_info[base_item_location_id]
+        item_text = get_item_name_tts_text(ctx, network_item)
+        filename = fileHelper.safe_filename(f"{item_text.lower()}_{WPM}.wav")
+
+        relative_path = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
+        full_path = itemFilter.filter_sounds_path / f"{filename}"
+
+        if not os.path.exists(full_path):
+            if _debug:
+                print(f"[DEBUG] Generating TTS for item: {item_text} at {full_path}")
+                tasks.append(safe_tts_async(
+                    text=item_text,
+                    filename=full_path
+                ))
+        itemFilter.base_item_id_to_relative_wav_path[base_item_location_id] = relative_path
+
 
 async def async_test():
     tasks = []
