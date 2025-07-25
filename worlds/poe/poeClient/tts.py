@@ -20,8 +20,9 @@ from pathlib import Path
 
 
 _debug = True
+_engine = None  # Global TTS engine instance
 WPM = 250  # Default words per minute for TTS
-tasks = []  # List to hold async tasks for TTS generation
+tasks: list[typing.Tuple[str, str, int]] = []  # List to hold async tasks for TTS generation
 
 tts_lock = threading.Lock()  # Lock to ensure thread-safe access to TTS generation
 def get_item_name_tts_text(ctx: "PathOfExileContext", network_item) -> str:
@@ -105,11 +106,44 @@ def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", WPM: in
         if not os.path.exists(full_path):
             if _debug:
                 print(f"[DEBUG] Generating TTS for item: {item_text} at {full_path}")
-                tasks.append(safe_tts_async(
-                    text=item_text,
-                    filename=full_path
+                tasks.append((
+                    item_text,
+                    full_path,
+                    WPM
                 ))
         itemFilter.base_item_id_to_relative_wav_path[base_item_location_id] = relative_path
+
+
+running_tasks = False  # Flag to indicate if TTS tasks are running
+def run_tts_tasks():
+    """Run all TTS tasks"""
+    global tasks, running_tasks, _engine
+    if not tasks or len(tasks) == 0:
+        print("[DEBUG] No TTS tasks to run.")
+        return
+
+    if _engine is None:
+        _engine = pyttsx3.init()
+
+    if len(tasks) > 0:
+        for text, filename, rate in tasks:
+            if not os.path.exists(filename):
+                if _debug:
+                    print(f"[DEBUG] Generating TTS for text: {text} at {filename}")
+                _engine.setProperty('rate', rate)
+                _engine.save_to_file(text, str(filename))
+        tasks.clear()
+    #_engine.runAndWait()
+
+
+def itterate_tts_tasks():
+    """Iterate through TTS tasks and run them one by one."""
+    global _engine
+    if _engine:
+        _engine.runAndWait()  # Process the TTS queue
+    else:
+        if _debug:
+            print("[DEBUG] TTS engine not initialized, cannot iterate tasks.")
 
 
 async def async_test():
@@ -144,8 +178,11 @@ if __name__ == "__main__":
 
     ctx = mockCtx()
 
-    thread = threading.Thread(target=generate_tts_from_missing_locations, args=(ctx,))  # comma to make it a tuple
-    thread.start()
+    generate_tts_tasks_from_missing_locations(ctx, WPM)
+    run_tts_tasks()
+
+    #thread = threading.Thread(target=generate_tts_from_missing_locations, args=(ctx,))  # comma to make it a tuple
+    #thread.start()
 
 #working??
 #    asyncio.run(async_test())

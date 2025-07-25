@@ -92,6 +92,7 @@ async def async_load(ctx: "PathOfExileContext" = None):
     #thread = threading.Thread(target=tts.generate_tts_from_missing_locations, args=(ctx,)) # comma to make it a tuple
     #thread.start()
     tts.generate_tts_tasks_from_missing_locations(ctx)
+    threading.Thread(target=tts.run_tts_tasks, daemon=True).start()  # Run TTS tasks in a separate thread
 
     itemFilter.update_item_filter_from_context(ctx)
 
@@ -114,11 +115,7 @@ async def timer_loop():
 
 
         if ticks % 1 < 0.1:
-            if tts.tasks:
-                if _debug:
-                    print(f"[DEBUG] Running TTS tasks: {len(tts.tasks)} tasks pending.")
-                await asyncio.gather(*tts.tasks[:batch_size])
-                tts.tasks = tts.tasks[batch_size:]
+            pass
             
             
 
