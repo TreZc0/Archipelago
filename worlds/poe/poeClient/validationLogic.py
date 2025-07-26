@@ -5,7 +5,6 @@ if TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
     from worlds.poe import PathOfExileWorld
 from . import itemFilter
-from . import baseItemTypes
 from . import gggAPI
 from . import fileHelper
 from . import inputHelper
@@ -17,12 +16,11 @@ import worlds.poe.Locations as Locations
 found_items_dict = {}
 found_items_set = set()
 save_path = "found_items.txt"
-total_items = set()
 is_char_in_logic = True
 
 _debug = True
 _verbose_debug = False
-total_items.update(baseItemTypes.get_base_item_types())
+
 
 async def when_enter_new_zone(line: str, context: "PathOfExileContext" = None):
     """

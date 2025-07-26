@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
 
 from . import itemFilter
-from . import baseItemTypes
 from . import inputHelper
 from . import validationLogic
 from . import gggAPI

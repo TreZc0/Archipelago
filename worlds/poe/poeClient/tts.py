@@ -40,11 +40,17 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
     tasks.append((text, filename, rate))
     run_tts_tasks()
 
-async def safe_tts_async(text, filename, rate=250, volume=1, voice_id=None):
+async def safe_tts_async(text, filename, rate=250, volume=1, voice_id=None, overwrite=False):
     if _debug:
         print(f"[DEBUG] Async TTS: text='{text}', filename='{filename}'")
 
-    safe_tts(text, filename, rate, volume, voice_id)
+    if not overwrite and Path(filename).exists():
+        if _debug:
+            print(f"[DEBUG] File already exists: {filename}")
+        return
+    Path(filename).parent.mkdir(parents=True, exist_ok=True)
+    tasks.append((text, filename, rate))
+    await async_run_tts_tasks()
 
 def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WPM) -> None:
     """Generate TTS files for missing locations."""
@@ -97,8 +103,7 @@ def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", WPM: in
         itemFilter.base_item_id_to_relative_wav_path[base_item_location_id] = relative_path
 
 
-running_tasks = False  # Flag to indicate if TTS tasks are running
-def run_tts_tasks():
+def run_tts_tasks(use_daemon: bool = True):
     """Run all TTS tasks"""
     try:
         # Disable specific loggers to avoid crashes. Something about these logs causes crashes in pyttsx3
@@ -106,7 +111,7 @@ def run_tts_tasks():
             logging.getLogger(logger_name).disabled = True
             logging.getLogger(logger_name).setLevel(logging.CRITICAL + 1)
 
-        global tasks, running_tasks, _engine
+        global tasks, _engine
         if not tasks or len(tasks) == 0:
             print("[DEBUG] No TTS tasks to run.")
             return
@@ -122,11 +127,39 @@ def run_tts_tasks():
                     _engine.setProperty('rate', rate)
                     _engine.save_to_file(text, str(filename))
             tasks.clear()
-        thread = threading.Thread(target=_engine.runAndWait, daemon=True)
+        thread = threading.Thread(target=_engine.runAndWait, daemon=use_daemon)
         thread.start()
     except Exception as e:
         print(f"[ERROR] Exception during TTS tasks: {e}")
 
+async def async_run_tts_tasks():
+    """Run all TTS tasks"""
+    try:
+        # Disable specific loggers to avoid crashes. Something about these logs causes crashes in pyttsx3
+        for logger_name in ['pyttsx3', 'comtypes', 'win32com']:
+            logging.getLogger(logger_name).disabled = True
+            logging.getLogger(logger_name).setLevel(logging.CRITICAL + 1)
+
+        global tasks, _engine
+        if not tasks or len(tasks) == 0:
+            print("[DEBUG] No TTS tasks to run.")
+            return
+
+        if _engine is None:
+            _engine = pyttsx3.init()
+
+        if len(tasks) > 0:
+            for text, filename, rate in tasks:
+                if not os.path.exists(filename):
+                    if _debug:
+                        print(f"[DEBUG] Generating TTS for text: {text} at {filename}")
+                    _engine.setProperty('rate', rate)
+                    _engine.save_to_file(text, str(filename))
+            tasks.clear()
+        await asyncio.to_thread(_engine.runAndWait)
+        
+    except Exception as e:
+        print(f"[ERROR] Exception during TTS tasks: {e}")
 
 def itterate_tts_tasks():
     """Iterate through TTS tasks and run them one by one."""
