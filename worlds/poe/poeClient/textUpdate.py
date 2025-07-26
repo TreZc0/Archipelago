@@ -40,7 +40,7 @@ async def self_whisper_callback(line: str, ctx: "PathOfExileContext"):
         gems = [item for item in Items.get_utility_skill_gem_items() if item["id"] in item_ids]
         await inputHelper.send_poe_text(f"@{ctx.character_name} {', '.join(gem['name'] for gem in gems)}")
         
-    if "!all gems" in line:
+    if "!all gems" in line or "!gems" in line:
         # Get all gem items in item_ids
         gems = [item for item in Items.get_all_gems() if item["id"] in item_ids]
         await inputHelper.send_poe_text(f"@{ctx.character_name} {', '.join(gem['name'] for gem in gems)}")

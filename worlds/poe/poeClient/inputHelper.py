@@ -12,7 +12,7 @@ from pynput.keyboard import Controller, Key
 keyboard_controller = Controller()
 _debug = True
 _last_called = None
-_debounce_time = 5  # seconds
+_debounce_time = 2  # seconds
 
 def get_clipboard():
     import tkinter as tk
@@ -61,7 +61,7 @@ async def send_poe_text(command:str, retry_times:int = 0, retry_delay:float = 0)
             print("[DEBUG] Found active Path of Exile window")
 
         now = time.monotonic()
-        if _last_called is not None and now - _last_called < 5:
+        if _last_called is not None and now - _last_called < _debounce_time:
             if _debug:
                 print("[DEBUG] Debounced: send_poe_text called too soon.")
             return

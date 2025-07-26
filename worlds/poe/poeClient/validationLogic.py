@@ -36,8 +36,8 @@ async def when_enter_new_zone(line: str, context: "PathOfExileContext" = None):
         return
     global is_char_in_logic
     await validate_and_update(ctx=context)
-    await asyncio.sleep(0.5)  # Allow some time for the filter to update
-    await inputHelper.send_poe_text("/itemfilter __ap")
+    await asyncio.sleep(0.1)  # Allow some time for the filter to update
+    await inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5)
 
 async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
     if ctx is None:

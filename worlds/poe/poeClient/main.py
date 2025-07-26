@@ -15,6 +15,7 @@ from . import gggAPI
 from . import tts
 import asyncio
 import threading
+import time
 from pynput import keyboard
 from pathlib import Path
 
@@ -75,7 +76,7 @@ def validate_char(ctx: "PathOfExileContext" = context):
 
     if _debug:
         print(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
-    sync_run_async(validationLogic.validate_and_update(ctx.character_name, ctx))
+    sync_run_async(validationLogic.validate_and_update(ctx))
     last_ran_validate_char = time.time()
 
 async def async_load(ctx: "PathOfExileContext" = None):
@@ -99,7 +100,7 @@ async def async_load(ctx: "PathOfExileContext" = None):
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
 
-#    await inputHelper.important_send_poe_text("/itemfilter __ap")
+    await inputHelper.important_send_poe_text("/itemfilter __ap")
 
 
 # make a loop that runs every 5 seconds to loop the item filter command

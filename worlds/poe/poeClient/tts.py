@@ -37,27 +37,8 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
             print(f"[DEBUG] File already exists: {filename}")
         return
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
-    with tts_lock:  # Ensure thread-safe access to TTS generation
-        try:
-            if _debug:
-                print(f"[DEBUG] Initializing TTS engine for text: {text}")
-            engine: Engine = pyttsx3.init()  # No driver specified
-            if _debug:
-                print(f"[DEBUG] TTS: text='{text}', filename='{filename}'")
-            engine.setProperty('rate', rate)
-            engine.setProperty('volume', volume)
-            if voice_id is not None:
-                engine.setProperty('voice', voice_id)
-            engine.save_to_file(text, str(filename))
-            engine.runAndWait()
-            engine.stop()
-            del engine
-            if Path(filename).exists():
-                print(f"[DEBUG] File created: {filename}")
-            else:
-                print(f"[ERROR] File NOT created: {filename}")
-        except Exception as e:
-            print(f"[ERROR] Exception during TTS: {e}")
+    tasks.append((text, filename, rate))
+    run_tts_tasks()
 
 async def safe_tts_async(text, filename, rate=250, volume=1, voice_id=None):
     if _debug:

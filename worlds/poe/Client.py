@@ -54,6 +54,17 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         tts.generate_tts_tasks_from_missing_locations(mctx)
         tts.run_tts_tasks()
 
+    def _cmd_generate_tts(self) -> bool:
+        """Generate TTS for missing locations."""
+        from .poeClient import tts
+
+        if not self.ctx.missing_locations:
+            self.output("No missing locations to generate TTS for, are you connected to the server?")
+            return False
+
+        tts.generate_tts_tasks_from_missing_locations(self.ctx)
+        tts.run_tts_tasks()
+        return True
     def _cmd_testing(self) -> bool:
         """A test command to check if the command processor is working."""
         return True
