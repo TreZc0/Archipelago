@@ -24,6 +24,35 @@ def sync_run_async(coroutine):
 
 class PathOfExileCommandProcessor(ClientCommandProcessor):
 
+    def _cmd_test_tts(self) -> bool:
+        from .poeClient import tts
+
+        import worlds.poe.Items as Items
+        # mock a context with missing locations, player names, and item lookup and such
+        class mockCtx:
+            class mock_network_item:
+                def __init__(self, item, player):
+                    self.item = item
+                    self.player = player
+
+            class mock_item_names:
+                def lookup_in_slot(self, item, player):
+                    # Mock item names lookup
+                    return f"ItemName_{str(item)} for Player{player}"
+
+            def __init__(self):
+                self.missing_locations = list(Items.item_table.keys())
+                self.locations_info = {
+                    loc_id: self.mock_network_item(item, player)
+                    for (loc_id, item), player in zip(Items.item_table.items(), range(1, len(Items.item_table) + 1))
+                }
+                self.player_names = {player_id: f"Player{player_id}" for player_id in
+                                     range(1, len(Items.item_table) + 1)}
+                self.item_names = self.mock_item_names()
+
+        mctx = mockCtx()
+        tts.generate_tts_tasks_from_missing_locations(mctx)
+        tts.run_tts_tasks()
 
     def _cmd_testing(self) -> bool:
         """A test command to check if the command processor is working."""

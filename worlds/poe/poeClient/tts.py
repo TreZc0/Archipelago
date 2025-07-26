@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import sys
 import threading
 
 from worlds.poe.poeClient import fileHelper
@@ -117,23 +119,32 @@ def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", WPM: in
 running_tasks = False  # Flag to indicate if TTS tasks are running
 def run_tts_tasks():
     """Run all TTS tasks"""
-    global tasks, running_tasks, _engine
-    if not tasks or len(tasks) == 0:
-        print("[DEBUG] No TTS tasks to run.")
-        return
+    try:
+        # Disable specific loggers to avoid crashes. Something about these logs causes crashes in pyttsx3
+        for logger_name in ['pyttsx3', 'comtypes', 'win32com']:
+            logging.getLogger(logger_name).disabled = True
+            logging.getLogger(logger_name).setLevel(logging.CRITICAL + 1)
 
-    if _engine is None:
-        _engine = pyttsx3.init()
+        global tasks, running_tasks, _engine
+        if not tasks or len(tasks) == 0:
+            print("[DEBUG] No TTS tasks to run.")
+            return
 
-    if len(tasks) > 0:
-        for text, filename, rate in tasks:
-            if not os.path.exists(filename):
-                if _debug:
-                    print(f"[DEBUG] Generating TTS for text: {text} at {filename}")
-                _engine.setProperty('rate', rate)
-                _engine.save_to_file(text, str(filename))
-        tasks.clear()
-    #_engine.runAndWait()
+        if _engine is None:
+            _engine = pyttsx3.init()
+
+        if len(tasks) > 0:
+            for text, filename, rate in tasks:
+                if not os.path.exists(filename):
+                    if _debug:
+                        print(f"[DEBUG] Generating TTS for text: {text} at {filename}")
+                    _engine.setProperty('rate', rate)
+                    _engine.save_to_file(text, str(filename))
+            tasks.clear()
+        thread = threading.Thread(target=_engine.runAndWait, daemon=True)
+        thread.start()
+    except Exception as e:
+        print(f"[ERROR] Exception during TTS tasks: {e}")
 
 
 def itterate_tts_tasks():
