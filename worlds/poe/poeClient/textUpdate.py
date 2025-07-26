@@ -49,7 +49,12 @@ async def self_whisper_callback(line: str, ctx: "PathOfExileContext"):
         # Get all gear items in item_ids
         gear = [item for item in Items.get_gear_items() if item["id"] in item_ids]
         await inputHelper.send_poe_text(f"@{ctx.character_name} {', '.join(gear['name'] for gear in gear)}")
-        
+
+    if "!links" in line:
+        # Get all linked items in item_ids
+        links = [item for item in Items.get_max_links_items() if item["id"] in item_ids]
+        await inputHelper.send_poe_text(f"@{ctx.character_name} {', '.join(link['name'] for link in links)}")
+
     if "!flasks" in line:
         # Get all flask items in item_ids
         flasks = [item for item in Items.get_flask_items() if item["id"] in item_ids]

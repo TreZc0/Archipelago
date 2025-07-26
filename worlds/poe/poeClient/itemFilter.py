@@ -5,6 +5,9 @@
 # blue = 118 126 189 255
 # purp = 201 148 194 255
 #orange = 216 160 125 255
+import typing
+if typing.TYPE_CHECKING:
+    from worlds.poe.Client import PathOfExileContext
 from pathlib import Path
 from worlds.poe.Locations import base_item_types_by_name
 filter_file_dir = Path.home() / "Documents" / "My Games" / "Path of Exile"
@@ -23,21 +26,23 @@ MinimapIcon 0 Green UpsideDownHouse
 PlayEffect Cyan
 """
 invalid_style_string = f"""SetFontSize 45
-SetTextColor 255 255 0 0
-SetBorderColor 255 255 0 0
-SetBackgroundColor 255 255 0 0
+SetTextColor 255 0 0 255
+SetBorderColor 255 0 0 255
+SetBackgroundColor 255 0 0 255
 """
 _debug = True
 base_item_id_to_relative_wav_path = {}
 
 
-def update_item_filter_from_context(ctx, item_filter_import=base_item_filter):
+def update_item_filter_from_context(ctx : "PathOfExileContext", item_filter_import=base_item_filter):
     """
     Generates an item filter based on the current context.
     This function will create a filter that shows items based on their base type and alert sound.
     """
     item_filter_str = ""
     for base_item_location_id in ctx.locations_info:
+        if base_item_location_id in ctx.checked_locations:
+            continue
         base_type_name = ctx.location_names.lookup_in_game(base_item_location_id)
         if not base_type_name:
             continue

@@ -21,10 +21,10 @@ from pathlib import Path
 
 _generate_wav = True  # Set to True if you want to generate the wav files
 _debug = True  # Set to True for debug output, False for production
-validate_char_debounce_time = 5  # seconds
+validate_char_debounce_time = 2  # seconds
 loop_timer = 0.1  # Time in seconds to wait before reloading the item filter
 context = {}
-
+_run_update_item_filter = False
 possible_paths_to_client_txt = [
     Path("C:/Program Files (x86)/Grinding Gear Games/Path of Exile/logs/client.txt"),
     Path("C:/Program Files (x86)/Steam/steamapps/common/Path of Exile/logs/client.txt"),
@@ -66,7 +66,7 @@ last_ran_validate_char = 0
 def validate_char(ctx: "PathOfExileContext" = context):
     
     # add a debounce timer to the validate_char function. I want this function to run at most every 5 seconds
-    global last_ran_validate_char
+    global last_ran_validate_char, _run_update_item_filter
     current_time = time.time()
     if current_time - last_ran_validate_char < validate_char_debounce_time:
         if _debug:
@@ -76,6 +76,7 @@ def validate_char(ctx: "PathOfExileContext" = context):
     if _debug:
         print(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
     sync_run_async(validationLogic.validate_and_update(ctx))
+    _run_update_item_filter = True
     last_ran_validate_char = time.time()
 
 async def async_load(ctx: "PathOfExileContext" = None):
@@ -105,13 +106,13 @@ async def async_load(ctx: "PathOfExileContext" = None):
 # make a loop that runs every 5 seconds to loop the item filter command
 async def timer_loop():
     ticks = 0.1
-    batch_size = 1  # Number of TTS tasks to run at a time
+    global _run_update_item_filter
     while True:
         await asyncio.sleep(loop_timer)  # Adjust the sleep time as needed
         ticks += 0.1
-        if ticks % 3600 < 0.1: # every hour
-            validate_char()
+        if _run_update_item_filter: # every hour
             await inputHelper.send_poe_text("/itemfilter __ap")
+            _run_update_item_filter = False
 
 
         if ticks % 1 < 0.1:
