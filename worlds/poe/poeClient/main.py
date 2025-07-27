@@ -103,7 +103,7 @@ async def async_load(ctx: "PathOfExileContext" = None):
     await inputHelper.important_send_poe_text("/itemfilter __ap")
 
 
-# make a loop that runs every 5 seconds to loop the item filter command
+
 async def timer_loop():
     ticks = 0.1
     global _run_update_item_filter

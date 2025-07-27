@@ -1,3 +1,6 @@
+import base64
+import random
+import re
 from NetUtils import ClientStatus
 from worlds.poe import Items
 from worlds.poe.poeClient import inputHelper
@@ -8,6 +11,7 @@ if TYPE_CHECKING:
     from worlds.poe import PathOfExileWorld
 
 _debug = True
+_random_string = ""
 
 async def self_goal_callback(line: str, ctx: "PathOfExileContext"):
     # Implement the logic for handling self goals here
@@ -20,6 +24,25 @@ async def self_goal_callback(line: str, ctx: "PathOfExileContext"):
 
 async def self_whisper_callback(line: str, ctx: "PathOfExileContext"):
     # Implement the logic for handling self whispers here
+    global  _random_string
+    if "!ap char" in line:
+        _random_string = base64.b64encode(random.randbytes(8)).strip(b'=').decode('utf-8')
+        await inputHelper.send_poe_text(f"apchar_{_random_string}")
+    if "apchar_" in line:
+        line = line.split("apchar_")
+        if line[1] == _random_string:
+            if _debug:
+                print(f"[DEBUG] self_whisper_callback: {line}")
+            match = re.search(r'\] (\S+):', line[0])
+            if match:
+                ctx.character_name = match.group(1).strip()
+                await inputHelper.send_poe_text(f"@{ctx.character_name} Welcome to Archipelago!",5)
+            else:
+                if _debug:
+                    print("[DEBUG] No char found in line:", line[0])
+            return
+        
+
     if not f"] @From {ctx.character_name}: " in line:
         return
     item_ids = [item.item for item in ctx.items_received]
