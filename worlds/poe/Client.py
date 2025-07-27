@@ -17,36 +17,7 @@ from .poeClient import gggAPI
 class PathOfExileCommandProcessor(ClientCommandProcessor):
     if TYPE_CHECKING:
         ctx: "PathOfExileContext"
-        
-#    def _cmd_test_tts(self) -> bool:
-#        from .poeClient import tts
-#
-#        import worlds.poe.Items as Items
-#        # mock a context with missing locations, player names, and item lookup and such
-#        class mockCtx:
-#            class mock_network_item:
-#                def __init__(self, item, player):
-#                    self.item = item
-#                    self.player = player
-#
-#            class mock_item_names:
-#                def lookup_in_slot(self, item, player):
-#                    # Mock item names lookup
-#                    return f"ItemName_{str(item)} for Player{player}"
-#
-#            def __init__(self):
-#                self.missing_locations = list(Items.item_table.keys())
-#                self.locations_info = {
-#                    loc_id: self.mock_network_item(item, player)
-#                    for (loc_id, item), player in zip(Items.item_table.items(), range(1, len(Items.item_table) + 1))
-#                }
-#                self.player_names = {player_id: f"Player{player_id}" for player_id in
-#                                     range(1, len(Items.item_table) + 1)}
-#                self.item_names = self.mock_item_names()
-#
-#        mctx = mockCtx()
-#        tts.generate_tts_tasks_from_missing_locations(mctx)
-#        tts.run_tts_tasks()
+
 
     def _cmd_generate_tts(self) -> bool:
         """Generate TTS for missing locations."""
@@ -151,6 +122,7 @@ class PathOfExileContext(CommonContext):
     character_name: str = ""
     client_text_path: Path = ""
     base_item_filter: str = ""
+    slot_data = {}
     _debug = True  # Enable debug mode for poe client
 
     def __init__(self, *args, **kwargs):
@@ -165,31 +137,44 @@ class PathOfExileContext(CommonContext):
 
     def on_package(self, cmd: str, args: dict):
         super().on_package(cmd, args)
+
         if cmd == 'Connected':
+            self.slot_data = args.get('slot_data', {})
+
             # Request info for all locations after connecting
             location_ids = list(self.missing_locations)
             
             asyncio.create_task(self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}]))
 
         if cmd == 'RoomInfo':
-            if not self.seed_name:
-                if not self.seed_name:
-                    self.command_processor.output(self.command_processor ,text="ERROR: No seed name found in RoomInfo. IDK WHY.")
-                    return
-            def load_client_settings(task):
-                try: 
+            def injest_load_client_settings(task):
+                try:
                     settings = task.result()
                     if settings:
                         self.client_text_path = settings.get("client_txt", self.client_text_path)
                         self.character_name = settings.get("last_char", self.character_name)
                         self.base_item_filter = settings.get("base_item_filter", self.base_item_filter)
                         if self._debug:
-                            self.command_processor.output(f"[DEBUG] Loaded settings: {settings}")
+                            print(f"[DEBUG] Loaded settings: {settings}")
                 except Exception as e:
-                    self.command_processor.output(f"[ERROR] Failed to load settings: {e}")
+                    print(f"[ERROR] Failed to load settings: {e}")
+            def load_client_settings(task=None):
+                if not self.seed_name:
+                    print("ERROR: No seed name found in RoomInfo!!!!! STILL IDK WHY.")
 
-            task = asyncio.create_task(load_settings(self))
-            task.add_done_callback(load_client_settings)
+
+                task = asyncio.create_task(load_settings(self, (self.slot_data['poe-uuid'] if self.slot_data['poe-uuid'] else "") ))
+                task.add_done_callback(injest_load_client_settings)
+
+            if not self.seed_name:
+
+                print("ERROR: No seed name found in RoomInfo. IDK WHY.")
+                asyncio.create_task(asyncio.sleep(2)).add_done_callback(load_client_settings)
+
+            else:
+                if self._debug:
+                    print(f"[DEBUG] RoomInfo received with seed name: {self.seed_name}")
+                load_client_settings()
 
     def update_settings(self):
         """Update a setting and save it to the settings file."""
@@ -198,11 +183,11 @@ class PathOfExileContext(CommonContext):
             try:
                 task.result()  # Will raise if save failed
                 if self._debug:
-                    self.command_processor.output(text=f"[DEBUG] Settings saved successfully.")
+                    print(f"[DEBUG] Settings saved successfully.")
             except Exception as e:
-                self.command_processor.output(text=f"[ERROR] Failed to save settings: {e}")
+                print(f"[ERROR] Failed to save settings: {e}")
         
-        task = asyncio.create_task(save_settings(self))
+        task = asyncio.create_task(save_settings(self, (self.slot_data['poe-uuid'] if self.slot_data['poe-uuid'] else "")))
         task.add_done_callback(set_settings)
 
 
@@ -235,3 +220,61 @@ def launch():
     colorama.just_fix_windows_console()
     asyncio.run(main())
     colorama.deinit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#    def _cmd_test_tts(self) -> bool:
+#        from .poeClient import tts
+#
+#        import worlds.poe.Items as Items
+#        # mock a context with missing locations, player names, and item lookup and such
+#        class mockCtx:
+#            class mock_network_item:
+#                def __init__(self, item, player):
+#                    self.item = item
+#                    self.player = player
+#
+#            class mock_item_names:
+#                def lookup_in_slot(self, item, player):
+#                    # Mock item names lookup
+#                    return f"ItemName_{str(item)} for Player{player}"
+#
+#            def __init__(self):
+#                self.missing_locations = list(Items.item_table.keys())
+#                self.locations_info = {
+#                    loc_id: self.mock_network_item(item, player)
+#                    for (loc_id, item), player in zip(Items.item_table.items(), range(1, len(Items.item_table) + 1))
+#                }
+#                self.player_names = {player_id: f"Player{player_id}" for player_id in
+#                                     range(1, len(Items.item_table) + 1)}
+#                self.item_names = self.mock_item_names()
+#
+#        mctx = mockCtx()
+#        tts.generate_tts_tasks_from_missing_locations(mctx)
+#        tts.run_tts_tasks()

@@ -7,6 +7,7 @@ from worlds.AutoWorld import World, WebWorld
 from Utils import visualize_regions
 import yaml
 import logging
+import base64
 
 from .Options import PathOfExileOptions
 from . import Items
@@ -226,6 +227,7 @@ class PathOfExileWorld(World):
         }
         return {
             "client_options": client_options,
+            "poe-uuid": base64.urlsafe_b64encode(self.random.randbytes(8)).strip(b'=').decode('utf-8'), # used for generation id
         }
         
         
