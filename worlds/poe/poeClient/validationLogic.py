@@ -253,19 +253,3 @@ def get_found_items(char: gggAPI.Character) -> set:
         print(f"Error fetching found items: {e}")
         raise e
     return found_items_set
-
-async def load_found_items_from_file(file_path: str = save_path ) -> set:
-    """
-    Loads the found items from a file.
-    Returns:
-        set: A set containing the found items.
-    """
-    global found_items_set
-    found_set = set()
-    try:
-        found_set = await fileHelper.read_set_from_file(file_path)
-    except Exception as e:
-        print(f"Error loading found items: {e}")
-
-    found_items_set.update(found_set)
-    return found_items_set

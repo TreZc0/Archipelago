@@ -34,11 +34,12 @@ _debug = True
 base_item_id_to_relative_wav_path = {}
 
 
-def update_item_filter_from_context(ctx : "PathOfExileContext", item_filter_import=base_item_filter):
+def update_item_filter_from_context(ctx : "PathOfExileContext"):
     """
     Generates an item filter based on the current context.
     This function will create a filter that shows items based on their base type and alert sound.
     """
+    global base_item_filter, base_item_id_to_relative_wav_path
     item_filter_str = ""
     for base_item_location_id in ctx.locations_info:
         if base_item_location_id in ctx.checked_locations:
@@ -51,6 +52,11 @@ def update_item_filter_from_context(ctx : "PathOfExileContext", item_filter_impo
             print(f"[ERROR] No wav path found for base item location ID {base_item_location_id}.")
             continue
         item_filter_str += generate_item_filter_block(base_type_name, relative_wav_path) + "\n\n"
+    
+    if ctx.base_item_filter != "":
+        item_filter_import = ctx.base_item_filter
+    else:
+        item_filter_import = base_item_filter
     write_item_filter(item_filter_str, item_filter_import=item_filter_import)
 
 def generate_item_filter_block(base_type_name, alert_sound, style_string=default_style_string) -> str:

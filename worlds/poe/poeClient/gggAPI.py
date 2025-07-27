@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 # if gggOAuth.access_token does not exist, run get_access_token to set it
 
 access_token = gggOAuth.access_token if gggOAuth.access_token else None
-access_token_file = Path("access_token.txt")
+access_token_file = Path("poe_access_token")
 API_BASE = "https://api.pathofexile.com"
 _debug = True
 
@@ -443,7 +443,7 @@ async def read_access_token() -> dict | None:
     global access_token_file
     if access_token_file.exists():
         try:
-            token_dict = await fileHelper.read_dict_from_file(access_token_file)
+            token_dict = await fileHelper.read_dict_from_pickle_file(access_token_file)
             if token_dict and "access_token" in token_dict and "expires_at" in token_dict:
                 if _debug:
                     print(f"[DEBUG] Read access token from file: {access_token_file}")
@@ -472,7 +472,7 @@ async def write_access_token(token: dict):
         print("Error: Token dictionary must contain 'access_token' and 'expires_at'.")
         return
     try:
-        await fileHelper.write_dict_to_file(token, access_token_file)
+        await fileHelper.write_dict_to_pickle_file(token, access_token_file)
         if _debug:
             print(f"[DEBUG] Access token written to file: {access_token_file}")
     except Exception as e:
