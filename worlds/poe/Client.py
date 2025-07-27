@@ -14,21 +14,6 @@ from .poeClient.fileHelper import load_settings, save_settings
 from .poeClient import main as poe_main
 from .poeClient import gggAPI
 
-
-def sync_run_async(coroutine):
-    """Run an async coroutine in a synchronous context.
-    If an event loop is already running, it creates a task and returns a Future.
-    If no event loop is running, it uses asyncio.run to execute the coroutine.
-    """
-    try:
-        loop = asyncio.get_running_loop() # this will raise RuntimeError if no event loop is running.
-        # Use the thread-safe method
-        future = asyncio.run_coroutine_threadsafe(coroutine, loop)
-        return future.result(timeout=60)
-    except RuntimeError:
-        # No event loop running, safe to use asyncio.run
-        return asyncio.run(coroutine)
-
 class PathOfExileCommandProcessor(ClientCommandProcessor):
     if TYPE_CHECKING:
         ctx: "PathOfExileContext"
@@ -75,12 +60,22 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         tts.run_tts_tasks()
         return True
 
-    def _cmd_poe_auth(self) -> bool:
+    def _cmd_poe_auth(self) -> bool:        
         """Authenticate with Path of Exile's OAuth2 service."""
-        sync_run_async(gggAPI.request_new_access_token())
+        def on_complete(task):
+            try:
+                task.result()  # Will raise if auth failed
+                self.output("Authentication successful!")
+            except Exception as e:
+                self.output(f"Authentication failed: {e}")
+        
+        task = asyncio.create_task(gggAPI.request_new_access_token()) # request_new_access_token is an async function, and will return a Task object.
+        task.add_done_callback(on_complete)
+        self.output("Authentication started...")
+        return True
 
-    def _cmd_set_client_text_path(self, path: str) -> bool:
-        """Set the path to the Path of Exile client text file. (Use )"""
+    def _cmd_set_client_text_path(self, path: str = "") -> bool:
+        """Set the path to the Path of Exile client text file."""
         if not path:
             self.output("ERROR: Please provide a valid path to the client text file.")
             return False
@@ -107,8 +102,8 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
     #def _cmd_set_current_character(self) -> bool:
     #    self.ctx.player_verify_code = Random.randint()
 
-    def _cmd_base_item_filter(self, filter_name: str) -> bool:
-        """Set the base item filter. (do not add the .filter extension)"""
+    def _cmd_base_item_filter(self, filter_name: str = "FilterBlade") -> bool:
+        """Set the base item filter. (this needs to be a local file, do not add the .filter extension)"""
         if not filter_name:
             self.output("ERROR: Please provide a valid item filter name.")
             return False
@@ -173,21 +168,43 @@ class PathOfExileContext(CommonContext):
         if cmd == 'Connected':
             # Request info for all locations after connecting
             location_ids = list(self.missing_locations)
-            sync_run_async(self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}]))
+            
+            asyncio.create_task(self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}]))
 
-            # load the client settings
-            settings = sync_run_async(load_settings(self))
-            if settings:
-                self.client_text_path = settings.get("client_txt", self.client_text_path)
-                self.character_name = settings.get("last_char", self.character_name)
-                self.base_item_filter = settings.get("base_item_filter", self.base_item_filter)
-                if self._debug:
-                    print(f"[DEBUG] Loaded settings: {settings}")
-    
+        if cmd == 'RoomInfo':
+            if not self.seed_name:
+                if not self.seed_name:
+                    self.command_processor.output(self.command_processor ,text="ERROR: No seed name found in RoomInfo. IDK WHY.")
+                    return
+            def load_client_settings(task):
+                try: 
+                    settings = task.result()
+                    if settings:
+                        self.client_text_path = settings.get("client_txt", self.client_text_path)
+                        self.character_name = settings.get("last_char", self.character_name)
+                        self.base_item_filter = settings.get("base_item_filter", self.base_item_filter)
+                        if self._debug:
+                            self.command_processor.output(f"[DEBUG] Loaded settings: {settings}")
+                except Exception as e:
+                    self.command_processor.output(f"[ERROR] Failed to load settings: {e}")
+
+            task = asyncio.create_task(load_settings(self))
+            task.add_done_callback(load_client_settings)
+
     def update_settings(self):
         """Update a setting and save it to the settings file."""
-        sync_run_async(save_settings(self))
         
+        def set_settings(task):
+            try:
+                task.result()  # Will raise if save failed
+                if self._debug:
+                    self.command_processor.output(text=f"[DEBUG] Settings saved successfully.")
+            except Exception as e:
+                self.command_processor.output(text=f"[ERROR] Failed to save settings: {e}")
+        
+        task = asyncio.create_task(save_settings(self))
+        task.add_done_callback(set_settings)
+
 
     def run_gui(self) -> None:
         #from .ClientGui import start_gui # custom UI
