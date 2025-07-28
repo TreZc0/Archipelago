@@ -16,7 +16,6 @@ filter_sounds_dir_name = "apsound"
 filter_sounds_path = filter_file_dir / filter_sounds_dir_name
 start_item_filter_block = "# <Base Item Hunt item>"
 end_item_filter_block = "# </Base Item Hunt item>"
-base_item_filter = "normalLocal.filter"
 default_style_string = f"""SetFontSize 45
 SetFontSize 45
 SetTextColor 201 117 130 255
@@ -33,13 +32,14 @@ SetBackgroundColor 255 0 0 255
 _debug = True
 base_item_id_to_relative_wav_path = {}
 
+_valid_base_item_filter_paths = set() # just to speed up the check
 
 def update_item_filter_from_context(ctx : "PathOfExileContext"):
     """
     Generates an item filter based on the current context.
     This function will create a filter that shows items based on their base type and alert sound.
     """
-    global base_item_filter, base_item_id_to_relative_wav_path
+    global base_item_id_to_relative_wav_path
     item_filter_str = ""
     for base_item_location_id in ctx.locations_info:
         if base_item_location_id in ctx.checked_locations:
@@ -52,12 +52,7 @@ def update_item_filter_from_context(ctx : "PathOfExileContext"):
             print(f"[ERROR] No wav path found for base item location ID {base_item_location_id}.")
             continue
         item_filter_str += generate_item_filter_block(base_type_name, relative_wav_path) + "\n\n"
-    
-    if ctx.base_item_filter != "":
-        item_filter_import = ctx.base_item_filter
-    else:
-        item_filter_import = base_item_filter
-    write_item_filter(item_filter_str, item_filter_import=item_filter_import)
+    write_item_filter(item_filter_str, item_filter_import=ctx.base_item_filter)
 
 def generate_item_filter_block(base_type_name, alert_sound, style_string=default_style_string) -> str:
     if base_type_name not in base_item_types_by_name:
@@ -99,8 +94,22 @@ def generate_invalid_item_filter_block_without_sound() -> str:
     {invalid_style_string}
     """
 
-def write_item_filter(item_filter:str, item_filter_import=base_item_filter, file_path: Path = filter_file_path) -> None:
-    if item_filter_import is not None:
+def write_item_filter(item_filter:str, item_filter_import:str|None=None, file_path: Path = filter_file_path) -> None:
+    write_filter = False
+    if item_filter_import is None:
+        item_filter_import = ""
+
+    if item_filter_import and item_filter_import in _valid_base_item_filter_paths:
+        write_filter = True
+
+    if not write_filter and item_filter_import and Path.exists(filter_file_dir / item_filter_import):
+        # If the import path exists, we can use it
+        _valid_base_item_filter_paths.add(item_filter_import)
+        write_filter = True
+
+    if _debug and not write_filter:
+            print(f"[DEBUG] Not writing base item filter because import path '{item_filter_import}' is not valid or does not exist.")
+    if write_filter:
         item_filter = f"""{item_filter}
     Import "{item_filter_import}"
     """

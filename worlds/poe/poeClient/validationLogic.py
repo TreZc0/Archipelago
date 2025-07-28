@@ -32,27 +32,33 @@ async def when_enter_new_zone(line: str, context: "PathOfExileContext" = None):
     """
     if not "] : You have entered" in line:
         return
-    global is_char_in_logic
     await validate_and_update(ctx=context)
     await asyncio.sleep(0.1)  # Allow some time for the filter to update
     await inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5)
 
 async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
+    global is_char_in_logic
+    validate_errors = []
     if ctx is None:
         # something is wrong, are we not connected?
         print("Context is None, cannot validate character.")
-        return False
+        validate_errors.append("Context is None, cannot validate character.")
+        
     character_name = ctx.character_name
-    char = {}
-    try: 
-        char = (await gggAPI.get_character(character_name)).character
-        ctx.last_response_from_api.setdefault("character",{})[ctx.character_name] = char
-    except Exception as e:
-        print(f"Error fetching character {character_name}: {e}")
-        raise e
+    if character_name is None or character_name == "":
+        print("Character name is not set, cannot validate.")
+        validate_errors.append("Character name is not set, cannot validate.")
+        
     
-    global is_char_in_logic
-    validate_errors = await validate_char(char, ctx)
+    else: # we have a character name, and ctx is not None -- because we get the character name from ctx
+        char = {}
+        try:
+            char = (await gggAPI.get_character(character_name)).character
+            ctx.last_response_from_api.setdefault("character",{})[ctx.character_name] = char
+        except Exception as e:
+            print(f"Error fetching character {character_name}: {e}")
+            raise e
+        validate_errors = await validate_char(char, ctx)
 
     is_char_in_logic = True if len(validate_errors) == 0 else False
 

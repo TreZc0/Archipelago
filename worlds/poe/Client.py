@@ -87,7 +87,7 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         """Start the Path of Exile client."""
         #required
         if not self.ctx.client_text_path:
-            self.output("Please set the client text path using the 'poe_client_text_path <path>' command.")
+            self.output("Please set the client text path using the 'set_client_text_path <path>' command.")
             return False
         
         #optional to start

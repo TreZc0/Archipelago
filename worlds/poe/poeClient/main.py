@@ -136,8 +136,6 @@ def client_start(ctx: "PathOfExileContext"):
     validationLogic.defaultContext = ctx
     path_to_client_txt = ctx.client_text_path if ctx.client_text_path else path_to_client_txt
     path_to_client_txt = Path(path_to_client_txt)
-            
-    itemFilter.base_item_filter = ctx.base_item_filter if ctx.base_item_filter else itemFilter.base_item_filter
 
     run()
     
