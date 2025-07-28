@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import colorama
 import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui_enabled
-from settings import Path
+from pathlib import Path
 
 from .poeClient.fileHelper import load_settings, save_settings
 from .poeClient import main as poe_main
@@ -50,14 +50,26 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         if not path:
             self.output("ERROR: Please provide a valid path to the client text file.")
             return False
-        if not Path(path).exists():
+        client_path = Path(path)
+        if not client_path.exists():
             self.output(f"ERROR: The provided path does not exist: {path}")
             return False
-        
-        self.ctx.client_text_path = Path(path)
+        if not client_path.is_file():
+            if client_path.is_dir():
+                self.output(f"The provided path is a dir: {path}, looking for a file with the name 'Client.txt' in the directory.")
+                client_path = client_path / "Client.txt"
+                if not client_path.exists() or not client_path.is_file():
+                    self.output(f"ERROR: The file 'Client.txt' does not exist in the provided directory: {path}")
+                    return False
+            else:
+                self.output(f"ERROR: The provided path is not a file, or a directory but it... exists? no idea what you are doing here: {path}")
+                return False
+
+
+        self.ctx.client_text_path = client_path
         poe_main.path_to_client_txt = self.ctx.client_text_path
         self.ctx.update_settings()
-        self.output(f"Client text path set to: {path}")
+        self.output(f"Client text path set to: {client_path}")
         return True
 
     def _cmd_char_name(self, character_name: str = "") -> bool:
@@ -169,7 +181,7 @@ class PathOfExileContext(CommonContext):
             if not self.seed_name:
 
                 print("ERROR: No seed name found in RoomInfo. IDK WHY.")
-                asyncio.create_task(asyncio.sleep(1)).add_done_callback(load_client_settings)
+                asyncio.create_task(asyncio.sleep(0)).add_done_callback(load_client_settings)
 
             else:
                 if self._debug:
