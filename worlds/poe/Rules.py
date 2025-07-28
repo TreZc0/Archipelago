@@ -1,7 +1,10 @@
 from worlds.poe.Options import PathOfExileOptions
 from .Locations import PathOfExileLocation, base_item_types, acts
-from . import Items
 from BaseClasses import CollectionState, Region
+from . import Items
+import typing
+if typing.TYPE_CHECKING:
+    from . import PathOfExileWorld
 
 MAX_GEAR_UPGRADES   = 50
 MAX_FLASK_SLOTS     = 10
@@ -15,6 +18,14 @@ req_to_use_weapon_types = ["Axe","Bow","Claw","Dagger","Mace","Sceptre","Staff",
                             #"Fishing Rod", # yeahhhh no
                             #"Unarmed" # every character can use unarmed, so no need to check this
                             ]
+
+def completion_condition(world: "PathOfExileWorld",  state: CollectionState) -> bool:
+    #opt: PathOfExileOptions = world.options
+    # TODO: configurable completion condition
+    goal_act = 10
+    return can_reach(goal_act, world, state)
+
+
 
 def can_reach(act: int, world , state: CollectionState) -> bool:
     opt : PathOfExileOptions = world.options

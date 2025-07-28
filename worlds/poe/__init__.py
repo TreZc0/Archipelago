@@ -13,7 +13,7 @@ from .Options import PathOfExileOptions
 from . import Items
 from . import Locations
 from . import Regions as poeRegions
-
+from . import Rules as poeRules
 
 # ----- Configure the POE client ----- #
 logger = logging.getLogger("poe")
@@ -201,6 +201,8 @@ class PathOfExileWorld(World):
                                                locations=locations_to_place,
                                                act_regions=poeRegions.acts)
         #poeRegions.create_and_populate_regions(self, self.multiworld, self.player, locations_to_place, poeRegions.acts)
+
+        self.multiworld.completion_condition[self.player] = lambda state: (Rules.completion_condition(self, state))
 
     def create_items(self):
         """Create the items for the Path of Exile world.
