@@ -74,7 +74,7 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
     #    self.ctx.player_verify_code = Random.randint()
 
     def _cmd_base_item_filter(self, filter_name: str = "FilterBlade") -> bool:
-        """Set the base item filter. (this needs to be a local file, do not add the .filter extension)"""
+        """Set the base item filter. (this needs to be a local file, and remember to add the .filter extension)"""
         if not filter_name:
             self.output("ERROR: Please provide a valid item filter name.")
             return False
@@ -163,13 +163,13 @@ class PathOfExileContext(CommonContext):
                     print("ERROR: No seed name found in RoomInfo!!!!! STILL IDK WHY.")
 
 
-                task = asyncio.create_task(load_settings(self, (self.slot_data['poe-uuid'] if self.slot_data['poe-uuid'] else "") ))
+                task = asyncio.create_task(load_settings(self))
                 task.add_done_callback(injest_load_client_settings)
 
             if not self.seed_name:
 
                 print("ERROR: No seed name found in RoomInfo. IDK WHY.")
-                asyncio.create_task(asyncio.sleep(2)).add_done_callback(load_client_settings)
+                asyncio.create_task(asyncio.sleep(1)).add_done_callback(load_client_settings)
 
             else:
                 if self._debug:
@@ -187,7 +187,7 @@ class PathOfExileContext(CommonContext):
             except Exception as e:
                 print(f"[ERROR] Failed to save settings: {e}")
         
-        task = asyncio.create_task(save_settings(self, (self.slot_data['poe-uuid'] if self.slot_data['poe-uuid'] else "")))
+        task = asyncio.create_task(save_settings(self))
         task.add_done_callback(set_settings)
 
 

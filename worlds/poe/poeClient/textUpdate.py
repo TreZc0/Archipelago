@@ -4,6 +4,7 @@ import re
 from NetUtils import ClientStatus
 from worlds.poe import Items
 from worlds.poe.poeClient import inputHelper
+from worlds.poe.poeClient import fileHelper
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -37,6 +38,7 @@ async def self_whisper_callback(line: str, ctx: "PathOfExileContext"):
             if match:
                 ctx.character_name = match.group(1).strip()
                 await inputHelper.send_poe_text(f"@{ctx.character_name} Welcome to Archipelago!",5)
+                await fileHelper.save_settings(ctx)
             else:
                 if _debug:
                     print("[DEBUG] No char found in line:", line[0])

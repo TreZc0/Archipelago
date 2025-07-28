@@ -143,13 +143,22 @@ def short_hash(s: str) -> str:
     return hashlib.sha256(s.encode()).hexdigest()[:8]
 
 
-async def save_settings(ctx: "PathOfExileContext", world_prefix:str = "", path: Path = settings_file_path):
+
+def build_world_key(ctx: "PathOfExileContext") -> str:
+    """
+    Build a unique key for the world based on the context.
+    This key is used to store and retrieve settings for the specific world.
+    """
+    world_prefix = ctx.slot_data.get('poe-uuid', '')
+    return f"world {str((ctx.seed_name if ctx.seed_name is not None else '') + world_prefix + ctx.username)}"
+
+async def save_settings(ctx: "PathOfExileContext", path: Path = settings_file_path):
     # Read existing settings first
     async with lock:
         existing_settings = await read_dict_from_pickle_file(path)
     
         # Create new world entry
-        world_key = f"world {str( (ctx.seed_name if ctx.seed_name is not None else "") + world_prefix + ctx.username)}"
+        world_key = build_world_key(ctx)
         new_world_data = {
             "client_txt": str(ctx.client_text_path),
             "last_char": str(ctx.character_name),
@@ -165,7 +174,7 @@ async def save_settings(ctx: "PathOfExileContext", world_prefix:str = "", path: 
     if _debug:
         print(f"[DEBUG] Saved settings for {world_key}. Total worlds: {len(existing_settings)}")
 
-async def load_settings(ctx: "PathOfExileContext", world_prefix:str = "", path: Path = settings_file_path,) -> dict:
+async def load_settings(ctx: "PathOfExileContext", path: Path = settings_file_path,) -> dict:
 
     if not path.exists():
         if _debug:
@@ -175,7 +184,7 @@ async def load_settings(ctx: "PathOfExileContext", world_prefix:str = "", path: 
         async with lock:
             all_settings = await read_dict_from_pickle_file(path)
         # Get settings for the specific world
-        world_key = f"world {str( (ctx.seed_name if ctx.seed_name is not None else "") + world_prefix + ctx.username)}"
+        world_key = build_world_key(ctx)
         world_settings = all_settings.get(world_key, {})
         if _debug:
             print(f"[DEBUG] Loaded settings from {path}.")
