@@ -30,18 +30,18 @@ async def self_whisper_callback(line: str, ctx: "PathOfExileContext"):
         _random_string = base64.b64encode(random.randbytes(8)).strip(b'=').decode('utf-8')
         await inputHelper.send_poe_text(f"apchar_{_random_string}")
     if "apchar_" in line:
-        line = line.split("apchar_")
-        if line[1] == _random_string:
+        parts = line.split("apchar_")
+        if parts[1] == _random_string:
             if _debug:
-                print(f"[DEBUG] self_whisper_callback: {line}")
-            match = re.search(r'\] (\S+):', line[0])
+                print(f"[DEBUG] self_whisper_callback: {parts}")
+            match = re.search(r']\s?(<.*>)?\s?(.+): (\\x00)?', parts[0])
             if match:
-                ctx.character_name = match.group(1).strip()
+                ctx.character_name = match.group(2)
                 await inputHelper.send_poe_text(f"@{ctx.character_name} Welcome to Archipelago!",5)
                 await fileHelper.save_settings(ctx)
             else:
                 if _debug:
-                    print("[DEBUG] No char found in line:", line[0])
+                    print("[DEBUG] No char found in line:", parts[0])
             return
         
 
