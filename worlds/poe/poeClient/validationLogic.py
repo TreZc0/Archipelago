@@ -107,12 +107,11 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         if len(locations_to_check) > 0:
             if _debug:
                 logger.info(f"[DEBUG] Locations to check: {locations_to_check}")
-            await ctx.check_locations(locations_to_check)
-#           await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": tuple(locations_to_check)}])
+            locations_to_check = await ctx.check_locations(locations_to_check)
         else:
             if _debug:
                 logger.info("[DEBUG] No locations to check, skipping check_locations.")
-        itemFilter.update_item_filter_from_context(ctx)
+        itemFilter.update_item_filter_from_context(ctx, recently_checked_locations=locations_to_check)
         return True
 
     else:

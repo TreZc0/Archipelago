@@ -38,7 +38,7 @@ base_item_id_to_relative_wav_path = {}
 
 _valid_base_item_filter_paths = set() # just to speed up the check
 
-def update_item_filter_from_context(ctx : "PathOfExileContext"):
+def update_item_filter_from_context(ctx : "PathOfExileContext", recently_checked_locations: set[int]|None = None) -> None:
     """
     Generates an item filter based on the current context.
     This function will create a filter that shows items based on their base type and alert sound.
@@ -46,7 +46,8 @@ def update_item_filter_from_context(ctx : "PathOfExileContext"):
     global base_item_id_to_relative_wav_path
     item_filter_str = ""
     for base_item_location_id in ctx.locations_info:
-        if base_item_location_id in ctx.checked_locations:
+        if base_item_location_id in ctx.checked_locations or \
+           (recently_checked_locations and base_item_location_id in recently_checked_locations):
             continue
         base_type_name = ctx.location_names.lookup_in_game(base_item_location_id)
         if not base_type_name:

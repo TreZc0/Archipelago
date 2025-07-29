@@ -105,11 +105,28 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
         gems = [item for item in Items.get_all_gems() if item["id"] in item_ids]
         await split_send_message(ctx,', '.join(gem['name'] for gem in gems))
 
-    if "!usable gems" in message:
+    if "!usable skill gems" in message:
         # Get all usable skill gems in item_ids
         usable_gems = [item for item in Items.get_main_skill_gems_by_required_level(0, ctx.last_character_level) if item["id"] in item_ids]
         usable_gems.sort(key=lambda x: x.get("requiredLevel", 0), reverse=True)  # Sort by required level descending
         await split_send_message(ctx,', '.join(gem['name'] for gem in usable_gems))
+
+    if "!usable support gems" in message:
+        # Get all usable skill gems in item_ids
+        usable_gems = [item for item in Items.get(0, ctx.last_character_level) if item["id"] in item_ids]
+        usable_gems.sort(key=lambda x: x.get("requiredLevel", 0), reverse=True)  # Sort by required level descending
+        await split_send_message(ctx,', '.join(gem['name'] for gem in usable_gems))
+
+    if "!usable utility gems" in message:
+        # Get all usable utility gems in item_ids
+        usable_gems = [item for item in Items.get_utility_skill_gems_by_required_level(0, ctx.last_character_level) if item["id"] in item_ids]
+        usable_gems.sort(key=lambda x: x.get("requiredLevel", 0), reverse=True)  # Sort by required level descending
+        await split_send_message(ctx,', '.join(gem['name'] for gem in usable_gems))
+
+    if "!usable gems" in message:
+        # Get all usable gems in item_ids
+        usable_gems = [item for item in Items.get_all_usable_gems_by_required_level(0, ctx.last_character_level) if item["id"] in item_ids]
+        usable_gems.sort(key=lambda x: x.get("requiredLevel", 0), reverse=True)  # Sort by required level descending
 
     if "!gear" in message:
         # Get all gear items in item_ids
@@ -141,6 +158,30 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
         armor = [item for item in Items.get_armor_items() if item["id"] in item_ids]
         await split_send_message(ctx,', '.join(armor['name'] for armor in armor))
         
+    if "!help" in message or "!commands" in message:
+            help_message = """
+!ap char - Set your character
+
+!main gems
+!support gems
+!utility gems
+!all gems or !gems
+!usable skill gems - Usable by level
+!usable support gems - Usable by level
+!usable utility gems - Usable by level
+!usable gems - Usable by level
+
+!gear
+!weapons
+!armor
+!links
+!flasks
+
+!ascendancy
+!help
+
+Note: use @yourname followed a command."""
+            await split_send_message(ctx, help_message)
 async def split_send_message(ctx, message: str, max_length: int = 500):
     """
     Splits a message into chunks and sends each chunk separately.
