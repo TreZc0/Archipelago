@@ -125,8 +125,9 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
 
     if "!usable gems" in message:
         # Get all usable gems in item_ids
-        usable_gems = [item for item in Items.get_all_usable_gems_by_required_level(0, ctx.last_character_level) if item["id"] in item_ids]
+        usable_gems = [item for item in Items.get_all_gems_by_required_level(0, ctx.last_character_level) if item["id"] in item_ids]
         usable_gems.sort(key=lambda x: x.get("requiredLevel", 0), reverse=True)  # Sort by required level descending
+        await split_send_message(ctx,', '.join(gem['name'] for gem in usable_gems))
 
     if "!gear" in message:
         # Get all gear items in item_ids
