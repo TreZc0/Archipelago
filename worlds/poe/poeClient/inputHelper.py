@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 vendor_dir = os.path.join(os.path.dirname(__file__), "vendor")
@@ -8,6 +9,8 @@ import asyncio
 import pygetwindow as gw
 import time
 from pynput.keyboard import Controller, Key
+
+logger = logging.getLogger("poeClient")
 
 keyboard_controller = Controller()
 _debug = True
@@ -64,7 +67,7 @@ async def send_poe_text(command:str, retry_times:int = 1, retry_delay:float = 0)
     now = time.monotonic()
     if window is not None and window.title == "Path of Exile" and not (_last_called is not None and now - _last_called < _debounce_time):
         if _debug:
-            print("[DEBUG] Found active Path of Exile window")
+            logger.info("[DEBUG] Found active Path of Exile window")
         _last_called = now
 
         clipboard_value = get_then_set_clipboard(command)
@@ -87,23 +90,23 @@ async def send_poe_text(command:str, retry_times:int = 1, retry_delay:float = 0)
 
         set_clipboard(clipboard_value)
         if _debug:
-            print("[DEBUG] Sent command to Path of Exile:", command)
+            logger.info("[DEBUG] Sent command to Path of Exile:", command)
     else:
         if retry_times > 0:
             if _debug:
-                print(f"Path of Exile window not active, retrying {retry_times} times with {retry_delay} seconds delay")
+                logger.info(f"Path of Exile window not active, retrying {retry_times} times with {retry_delay} seconds delay")
 
             delay = retry_delay
 
             if _last_called is not None and now - _last_called < _debounce_time:
                 delay += _debounce_time - (now - _last_called)
                 if _debug:
-                    print(f"[DEBUG] Debounced: Waiting {delay} seconds before retrying")
+                    logger.info(f"[DEBUG] Debounced: Waiting {delay} seconds before retrying")
 
             await asyncio.sleep(delay)
             return await send_poe_text(command, retry_times - 1, retry_delay)
         else:
             if _debug:
-                print("[DEBUG] Path of Exile window not active, will not retry, will not send command")
+                logger.info("[DEBUG] Path of Exile window not active, will not retry, will not send command")
 
 

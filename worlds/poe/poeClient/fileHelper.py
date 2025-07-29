@@ -1,5 +1,6 @@
 import asyncio
 import hashlib
+import logging
 import re
 import pickle
 import asyncio
@@ -18,7 +19,7 @@ lock = asyncio.Lock()  # Lock to ensure thread-safe access to settings file
 settings_file_path = Path("poe_settings")
 client_txt_last_modified_time = None
 callbacks_on_file_change: list[callable] = []
-
+logger = logging.getLogger("poeClient")
 
 def load_vendor_modules():
     import os
@@ -48,7 +49,7 @@ def load_vendor_modules():
             archive_path = os.path.dirname(archive_path)
 
         if zipfile.is_zipfile(archive_path):
-            print(f"[vendor] Extracting vendor from zip: {archive_path}")
+            logger.info(f"[vendor] Extracting vendor from zip: {archive_path}")
 
             # Clean up the temp dir first
             if os.path.exists(temp_dir):
@@ -83,7 +84,7 @@ def load_vendor_modules():
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
             sys.modules[modname] = mod
-            print(f"[vendor] Loaded single-file module '{modname}' from {entry_path}")
+            logger.info(f"[vendor] Loaded single-file module '{modname}' from {entry_path}")
 
         # Single-layer or double-layer package
         elif os.path.isdir(entry_path):
@@ -97,7 +98,7 @@ def load_vendor_modules():
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
                 sys.modules[entry] = mod
-                print(f"[vendor] Loaded double-layer package '{entry}' from {double_layer}")
+                logger.info(f"[vendor] Loaded double-layer package '{entry}' from {double_layer}")
 
             elif os.path.isfile(single_layer):
                 if base_vendor_dir not in sys.path:
@@ -106,7 +107,7 @@ def load_vendor_modules():
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
                 sys.modules[entry] = mod
-                print(f"[vendor] Loaded single-layer package '{entry}' from {single_layer}")
+                logger.info(f"[vendor] Loaded single-layer package '{entry}' from {single_layer}")
 
 
 def safe_filename(filename: str) -> str:
@@ -172,13 +173,13 @@ async def save_settings(ctx: "PathOfExileContext", path: Path = settings_file_pa
         await write_dict_to_pickle_file(existing_settings, path)
     
     if _debug:
-        print(f"[DEBUG] Saved settings for {world_key}. Total worlds: {len(existing_settings)}")
+        logger.info(f"[DEBUG] Saved settings for {world_key}. Total worlds: {len(existing_settings)}")
 
 async def load_settings(ctx: "PathOfExileContext", path: Path = settings_file_path,) -> dict:
 
     if not path.exists():
         if _debug:
-            print(f"[DEBUG] Settings file {path} does not exist. Returning empty settings.")
+            logger.info(f"[DEBUG] Settings file {path} does not exist. Returning empty settings.")
         return {}
     try:
         async with lock:
@@ -187,37 +188,37 @@ async def load_settings(ctx: "PathOfExileContext", path: Path = settings_file_pa
         world_key = build_world_key(ctx)
         world_settings = all_settings.get(world_key, {})
         if _debug:
-            print(f"[DEBUG] Loaded settings from {path}.")
+            logger.info(f"[DEBUG] Loaded settings from {path}.")
             if world_settings:
-                print(f"[DEBUG] Found settings for {world_key}")
+                logger.info(f"[DEBUG] Found settings for {world_key}")
             else:
-                print(f"[DEBUG] No settings found for {world_key}")
+                logger.info(f"[DEBUG] No settings found for {world_key}")
         
         return world_settings
         
     except Exception as e:
-        print(f"[ERROR] Failed to load settings from {path}: {e}")
+        logger.info(f"[ERROR] Failed to load settings from {path}: {e}")
         return {}
 
 async def write_dict_to_pickle_file(data: dict, file_path: Path):
     with open(file_path, 'wb') as f:
         pickle.dump(data, f)
     if _debug:
-        print(f"[DEBUG] Dictionary with {len(data)} items written to {file_path}")
+        logger.info(f"[DEBUG] Dictionary with {len(data)} items written to {file_path}")
 
 async def read_dict_from_pickle_file(file_path: Path) -> dict:
     data = {}
     if not file_path.exists():
-        print(f"File {file_path} does not exist.")
+        logger.info(f"File {file_path} does not exist.")
         return data
 
     try:
         with open(file_path, 'rb') as f:
             data = pickle.load(f)
         if _debug:
-            print(f"[DEBUG] Dictionary with {len(data)} items read from {file_path}")
+            logger.info(f"[DEBUG] Dictionary with {len(data)} items read from {file_path}")
     except (pickle.PickleError, EOFError, FileNotFoundError) as e:
-        print(f"[ERROR] Failed to read pickle file {file_path}: {e}")
+        logger.info(f"[ERROR] Failed to read pickle file {file_path}: {e}")
         data = {}
     
     return data

@@ -1,4 +1,4 @@
-
+import logging
 # red = 201 117 130 255
 # yellow = 238 227 147 255
 # green = 117 194 116 255
@@ -10,12 +10,16 @@ if typing.TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
 from pathlib import Path
 from worlds.poe.Locations import base_item_types_by_name
+
 filter_file_dir = Path.home() / "Documents" / "My Games" / "Path of Exile"
 filter_file_path = Path.home() / "Documents" / "My Games" / "Path of Exile" / "__ap.filter"
 filter_sounds_dir_name = "apsound"
 filter_sounds_path = filter_file_dir / filter_sounds_dir_name
 start_item_filter_block = "# <Base Item Hunt item>"
 end_item_filter_block = "# </Base Item Hunt item>"
+
+logger = logging.getLogger("poeClient.itemFilter")
+
 default_style_string = f"""SetFontSize 45
 SetFontSize 45
 SetTextColor 201 117 130 255

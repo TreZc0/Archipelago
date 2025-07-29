@@ -19,6 +19,7 @@ from pynput import keyboard
 from pathlib import Path
 
 
+logger = logging.getLogger("poeClient.main")
 _generate_wav = True  # Set to True if you want to generate the wav files
 _debug = True  # Set to True for debug output, False for production
 validate_char_debounce_time = 2  # seconds
@@ -60,7 +61,7 @@ def on_press(key):
         try:
             key_functions[key]()
         except Exception as e:
-            print(f"Error executing function for key {key}: {e}")
+            logger.info(f"Error executing function for key {key}: {e}")
 
 last_ran_validate_char = 0
 def validate_char(ctx: "PathOfExileContext" = context):
@@ -70,11 +71,11 @@ def validate_char(ctx: "PathOfExileContext" = context):
     current_time = time.time()
     if current_time - last_ran_validate_char < validate_char_debounce_time:
         if _debug:
-            print(f"[DEBUG] Debounced: validate_char called too soon. Last ran at {last_ran_validate_char}, current time is {current_time}.")
+            logger.info(f"[DEBUG] Debounced: validate_char called too soon. Last ran at {last_ran_validate_char}, current time is {current_time}.")
         return
 
     if _debug:
-        print(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
+        logger.info(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
     sync_run_async(validationLogic.validate_and_update(ctx))
     _run_update_item_filter = True
     last_ran_validate_char = time.time()
@@ -88,10 +89,6 @@ async def async_load(ctx: "PathOfExileContext" = None):
     global context
     ctx = ctx if ctx is not None else context
 
-
-    # Doesn't work rn  ¯\_(ツ)_/¯
-    #thread = threading.Thread(target=tts.generate_tts_from_missing_locations, args=(ctx,)) # comma to make it a tuple
-    #thread.start()
     tts.generate_tts_tasks_from_missing_locations(ctx)
     threading.Thread(target=tts.run_tts_tasks, daemon=True).start()  # Run TTS tasks in a separate thread
 
@@ -128,7 +125,7 @@ def run():
         else:
             asyncio.run(main_async())
     except KeyboardInterrupt:
-        print("Main Loop stopped by user.")
+        logger.info("Main Loop stopped by user.")
 
 def client_start(ctx: "PathOfExileContext"):
     global context, path_to_client_txt
@@ -154,13 +151,13 @@ async def main_async():
             
 
 
-        print("Starting Main Loop...")
+        logger.info("Starting Main Loop...")
         tasks = [
             fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, chat_commands]),
             timer_loop()]
         await asyncio.gather(*tasks)
     except KeyboardInterrupt:
-        print("Main Loop stopped by user.")
+        logger.info("Main Loop stopped by user.")
 
 if __name__ == '__main__':
     # Set the character name here or pass it as an argument
@@ -212,11 +209,11 @@ if __name__ == '__main__':
 #         if entered == last_entered:
 #             return #we are done here, no change detected
 #
-#             print(f"Detected change in {path_to_client_txt}, reloading item filter...")
+#             logger.info(f"Detected change in {path_to_client_txt}, reloading item filter...")
 #             validate_char()
 #             await inputHelper.send_poe_text("/itemfilter __ap")
 #             client_txt_last_modified_time = current_mod_time
 #         else:
-#             print(f"Path to client.txt does not exist: {path_to_client_txt}")
+#             logger.info(f"Path to client.txt does not exist: {path_to_client_txt}")
 
 

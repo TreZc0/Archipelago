@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from worlds.poe.poeClient import fileHelper
@@ -18,7 +19,7 @@ CLIENT_ID = "archipelagopoe"
 REDIRECT_URI = "http://127.0.0.1:8234/oauth-callback"
 SCOPES = "account:profile account:characters account:stashes account:leagues"
 PORT = 8234
-
+logger = logging.getLogger("poeClient.gggOAuth")
 
 # === Step 1: Generate PKCE pair ===
 _code_verifier = base64.urlsafe_b64encode(os.urandom(64)).rstrip(b'=').decode()
@@ -52,10 +53,10 @@ class OAuthHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(b"<h1>Authorization successful! You can close this tab.</h1>")
-                print("\n✅ Authorization code received.")
-                print("🔄 Exchanging for access token...")
-                print(f"\n🔑 code_verifier = {_code_verifier}")
-                print(f"\n✅ code = {code}")
+                logger.info("\n✅ Authorization code received.")
+                logger.info("🔄 Exchanging for access token...")
+                logger.info(f"\n🔑 code_verifier = {_code_verifier}")
+                logger.info(f"\n✅ code = {code}")
 
                 # Step 4: Exchange code for token
                 token_response = requests.post(
@@ -75,15 +76,15 @@ class OAuthHandler(http.server.SimpleHTTPRequestHandler):
 
                 if token_response.ok:
                     tokens = token_response.json()
-                    print("\n✅ Access Token:", tokens["access_token"])
+                    logger.info("\n✅ Access Token:", tokens["access_token"])
                     access_token = tokens["access_token"]
                     token_expire_time = tokens["expires_in"] + time.time()
-                    print("⏳ Token expires at:", token_expire_time, "seconds since epoch, or"
+                    logger.info("⏳ Token expires at:", token_expire_time, "seconds since epoch, or"
                           , token_expire_time - time.time(), "seconds from now")
-                    print("🔁 Refresh Token:", tokens.get("refresh_token"))
+                    logger.info("🔁 Refresh Token:", tokens.get("refresh_token"))
                 else:
-                    print("\n❌ Token exchange failed:")
-                    print(token_response.text)
+                    logger.info("\n❌ Token exchange failed:")
+                    logger.info(token_response.text)
 
                 # Shut down server after response
                 def shutdown_server(server):
@@ -126,7 +127,7 @@ async def async_oauth_login() -> dict:
                     self.wfile.write(b"<h1>Error: Missing authorization code</h1>")
 
     webbrowser.open(_auth_url)
-    print(f"🔊 Listening for callback on {REDIRECT_URI} ...")
+    logger.info(f"🔊 Listening for callback on {REDIRECT_URI} ...")
     server = socketserver.TCPServer(("", PORT), AsyncOAuthHandler)
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, server.serve_forever)
@@ -151,8 +152,8 @@ async def async_oauth_login() -> dict:
         tokens = resp.json()
         token_expire_time = tokens["expires_in"] + time.time()
         access_token = tokens["access_token"]
-        print("\n✅ Access Token:", tokens["access_token"])
-        print("⏳ Token expires at:", token_expire_time, "seconds since epoch, or"
+        logger.info("\n✅ Access Token:", tokens["access_token"])
+        logger.info("⏳ Token expires at:", token_expire_time, "seconds since epoch, or"
               , token_expire_time - time.time(), "seconds from now")
 
         # return a dict with expire time and access token
@@ -168,16 +169,16 @@ if __name__ == '__main__':
     # Run the async OAuth login
     loop = asyncio.get_event_loop()
     result = loop.run_until_complete(async_oauth_login())
-    print("OAuth login result:", result)
+    logger.info("OAuth login result:", result)
 
 
 ## === Step 5: Launch browser and serve ===
 #def oauth_login():
 #
-#    print(f"🌐 Opening browser to log in...")
+#    logger.info(f"🌐 Opening browser to log in...")
 #    webbrowser.open(_auth_url)
 #
-#    print(f"🔊 Listening for callback on {REDIRECT_URI} ...")
+#    logger.info(f"🔊 Listening for callback on {REDIRECT_URI} ...")
 #    with socketserver.TCPServer(("", PORT), OAuthHandler) as httpd:
 #        httpd.serve_forever()
 #

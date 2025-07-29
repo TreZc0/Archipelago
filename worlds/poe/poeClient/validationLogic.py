@@ -26,6 +26,7 @@ is_char_in_logic = True
 _debug = True
 _verbose_debug = False
 
+logger = fileHelper.get_logger("poeClient.validationLogic")
 
 async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     zone = textUpdate.get_zone_from_line(ctx, line)
@@ -39,7 +40,7 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
 def check_for_victory(ctx: "PathOfExileContext", zone: str):
     goal = ctx.client_options.get("goal", -1)
     if goal == -1:
-        print("ERROR: No goal set in client options.")
+        logger.info("ERROR: No goal set in client options.")
 
     def send_goal():
         asyncio.create_task(ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}]))
@@ -56,7 +57,7 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str):
         (goal == Options.Goal.option_complete_act_7 and zone == "The Sarn Ramparts") or \
         (goal == Options.Goal.option_complete_act_8 and zone == "The Blood Aqueduct") or \
         (goal == Options.Goal.option_complete_act_9 and zone == "Oriath Docks") or \
-        (goal == Options.Goal.option_complete_act_10 and zone == "Karui Shores"):
+        (goal == Options.Goal.option_complete_the_campaign and zone == "Karui Shores"):
         textUpdate.callback_if_valid_char(ctx, send_goal)
     
     
@@ -69,12 +70,12 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
     validate_errors = []
     if ctx is None:
         # something is wrong, are we not connected?
-        print("Context is None, cannot validate character.")
+        logger.info("Context is None, cannot validate character.")
         validate_errors.append("Context is None, cannot validate character.")
         
     character_name = ctx.character_name
     if character_name is None or character_name == "":
-        print("Character name is not set, cannot validate.")
+        logger.info("Character name is not set, cannot validate.")
         validate_errors.append("Character name is not set, cannot validate.")
         
     
@@ -85,7 +86,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
             ctx.last_response_from_api.setdefault("character",{})[ctx.character_name] = char
             ctx.last_character_level = char.level
         except Exception as e:
-            print(f"Error fetching character {character_name}: {e}")
+            logger.info(f"Error fetching character {character_name}: {e}")
             raise e
         validate_errors = await validate_char(char, ctx)
 
@@ -97,19 +98,19 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         found_items_set = get_found_items(char)
         for item in found_items_set:
             if _debug and _verbose_debug:
-                print(f"[DEBUG] Found item: {item}")
+                logger.info(f"[DEBUG] Found item: {item}")
             location_id = Locations.get_location_id_from_item_name(item)
             if location_id is not None:
                 locations_to_check.add(location_id)
         itemFilter.update_item_filter_from_context(ctx)
         if len(locations_to_check) > 0:
             if _debug:
-                print(f"[DEBUG] Locations to check: {locations_to_check}")
+                logger.info(f"[DEBUG] Locations to check: {locations_to_check}")
             await ctx.check_locations(locations_to_check)
 #           await ctx.send_msgs([{"cmd": 'LocationChecks', "locations": tuple(locations_to_check)}])
         else:
             if _debug:
-                print("[DEBUG] No locations to check, skipping check_locations.")
+                logger.info("[DEBUG] No locations to check, skipping check_locations.")
         itemFilter.update_item_filter_from_context(ctx)
         return True
 
@@ -212,11 +213,11 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
 
     errors = [x for x in errors if x]  # filter out empty strings
     if _debug and errors:
-        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
-        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
-        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
-        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
-        print("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        logger.info("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        logger.info("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        logger.info("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        logger.info("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
+        logger.info("YOU ARE OUT OF LOGIC: " + ", ".join(errors))
     return errors
     
 
@@ -251,7 +252,7 @@ def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> str | N
 #
 #    if item_filter_string:
 #        itemFilter.write_item_filter(item_filter_string)
-#        print(f"Item filter updated with {len(missing_location_ids)} items.")
+#        logger.info(f"Item filter updated with {len(missing_location_ids)} items.")
 #    return True
 
 async def update_filter_to_invalid_char_filter(errors: list[str]):
@@ -270,21 +271,13 @@ async def update_filter_to_invalid_char_filter(errors: list[str]):
 
 
 def get_found_items(char: gggAPI.Character) -> set:
-    """
-    Fetches the found items for a given character from the GGG API.
-
-    Args:
-        char (gggAPI.Character): The character to fetch items for.
-
-    Returns:
-        dict: A dictionary containing the found items.
-    """
     try:
-        for item in char.inventory:
+        full_list = char.inventory + char.equipment
+        for item in full_list:
             found_items_set.add(item.baseType)
             if _debug and _verbose_debug:
-                print(f"[DEBUG] Item in inventory: {item.baseType}")
+                logger.info(f"[DEBUG] Item in inventory: {item.baseType}")
     except Exception as e:
-        print(f"Error fetching found items: {e}")
+        logger.info(f"Error fetching found items: {e}")
         raise e
     return found_items_set

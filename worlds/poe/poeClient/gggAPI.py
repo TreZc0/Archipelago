@@ -1,3 +1,5 @@
+import logging
+
 import httpx
 import asyncio
 import time
@@ -15,7 +17,7 @@ access_token = gggOAuth.access_token if gggOAuth.access_token else None
 access_token_file = Path("poe_access_token")
 API_BASE = "https://api.pathofexile.com"
 _debug = True
-
+logger = logging.getLogger("poeClient.gggAPI")
 # --- Async Rate Limiting ---
 class AsyncRateLimiter:
     """

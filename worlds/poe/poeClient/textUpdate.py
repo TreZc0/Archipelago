@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import logging
 import random
 import re
 from NetUtils import ClientStatus
@@ -12,6 +13,8 @@ if TYPE_CHECKING:
     from worlds.poe import PathOfExileWorld
 
 _debug = True
+_random_string = ""
+logger = logging.getLogger("poeClient.textUpdate")
 
 def get_zone_from_line(ctx: "PathOfExileContext", line: str) -> str:
     # Implement the logic for handling self goals here
@@ -25,23 +28,24 @@ def get_zone_from_line(ctx: "PathOfExileContext", line: str) -> str:
 
 def get_char_name_and_message_from_line(line: str) -> tuple[str, str]:
     # Extract character name from the line
-    match = re.search(r']\s?(<.*>)?\s?(.+): (\\x00)?(.*)', line)
+    match = re.search(r']\s?(<.*>)?\s?(@To|@From)?\s?(.+): (\\x00)?(.*)', line)
     if match:
-        return (match.group(2), match.group(4))
+        return (match.group(3), match.group(5))
     return ("", "")
 
 async def callback_if_valid_char(ctx: "PathOfExileContext", callback: callable):
-    _random_string = base64.b64encode(random.randbytes(8)).strip(b'=').decode('utf-8')
+    global _random_string
+
 
     def verify_character_callback(line: str):
         try:
             if _debug:
-                print(f"[DEBUG] verify_character_callback: {line}")
+                logger.info(f"[DEBUG] verify_character_callback: {line}")
             char_name, message = get_char_name_and_message_from_line(line)
             if not f"{_random_string}" in message:
                 return
             if not char_name == ctx.character_name:
-                print(f"[DEBUG] FALSE ALARM, Chars don't match: char_name={char_name}, ctx.character_name={ctx.character_name}")
+                logger.info(f"[DEBUG] FALSE ALARM, Chars don't match: char_name={char_name}, ctx.character_name={ctx.character_name}")
                 chat_command_external_callbacks.pop(_random_string, None)
                 callback(False)
                 return            
@@ -52,14 +56,16 @@ async def callback_if_valid_char(ctx: "PathOfExileContext", callback: callable):
 
     global chat_command_external_callbacks
     chat_command_external_callbacks[_random_string] = verify_character_callback
+    _random_string = base64.b64encode(random.randbytes(8)).strip(b'=').decode('utf-8')
     await inputHelper.send_poe_text(f"{_random_string}")
 
 
 chat_command_external_callbacks : dict[str, callable]  = dict()
+
 async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
     # Implement the logic for handling self whispers here
+    global _random_string
     char_name, message = get_char_name_and_message_from_line(line)
-
     if "!ap char" in message:
         _random_string = base64.b64encode(random.randbytes(8)).strip(b'=').decode('utf-8')
         await inputHelper.send_poe_text(f"char_{_random_string}")
@@ -67,7 +73,7 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
         parts = line.split("char_")
         if parts[1] == _random_string:
             if _debug:
-                print(f"[DEBUG] self_whisper_callback: {parts}")
+                logger.info(f"[DEBUG] self_whisper_callback: {parts}")
             ctx.character_name = char_name
             await inputHelper.send_poe_text_ignore_debounce(f"@{ctx.character_name} Welcome to Archipelago!")
             await fileHelper.save_settings(ctx)
@@ -139,6 +145,8 @@ async def split_send_message(ctx, message: str, max_length: int = 500):
     """
     Splits a message into chunks and sends each chunk separately.
     """
+    if not message:
+        message = "None"
     prefix = f"@{ctx.character_name} "
     max_length = max_length - len(prefix)  # Adjust for character name prefix
     if len(message) <= max_length:

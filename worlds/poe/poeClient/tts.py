@@ -20,8 +20,9 @@ else:
 
 from pathlib import Path
 
-
+logger = logging.getLogger("poeClient.tts")
 _debug = True
+_verbose = False
 _engine = None  # Global TTS engine instance
 WPM = 250  # Default words per minute for TTS
 tasks: list[typing.Tuple[str, str, int]] = []  # List to hold async tasks for TTS generation
@@ -34,7 +35,7 @@ def get_item_name_tts_text(ctx: "PathOfExileContext", network_item) -> str:
 def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False):
     if not overwrite and Path(filename).exists():
         if _debug:
-            print(f"[DEBUG] File already exists: {filename}")
+            logger.info(f"[DEBUG] File already exists: {filename}")
         return
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
     tasks.append((text, filename, rate))
@@ -42,11 +43,11 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
 
 async def safe_tts_async(text, filename, rate=250, volume=1, voice_id=None, overwrite=False):
     if _debug:
-        print(f"[DEBUG] Async TTS: text='{text}', filename='{filename}'")
+        logger.info(f"[DEBUG] Async TTS: text='{text}', filename='{filename}'")
 
     if not overwrite and Path(filename).exists():
         if _debug:
-            print(f"[DEBUG] File already exists: {filename}")
+            logger.info(f"[DEBUG] File already exists: {filename}")
         return
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
     tasks.append((text, filename, rate))
@@ -55,7 +56,7 @@ async def safe_tts_async(text, filename, rate=250, volume=1, voice_id=None, over
 def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WPM) -> None:
     """Generate TTS files for missing locations."""
     if not ctx or not ctx.missing_locations:
-        print("[DEBUG] No missing locations to generate TTS for.")
+        logger.info("[DEBUG] No missing locations to generate TTS for.")
         return
     
     missing_location_ids = ctx.missing_locations
@@ -69,7 +70,7 @@ def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WP
 
         if not os.path.exists(full_path):
             if _debug:
-                print(f"[DEBUG] Generating TTS for item: {item_text} at {full_path}")
+                logger.info(f"[DEBUG] Generating TTS for item: {item_text} at {full_path}")
                 safe_tts(
                     text=item_text,
                     filename=full_path
@@ -80,7 +81,7 @@ def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WP
 def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WPM) -> None:
     """Generate TTS files for missing locations."""
     if not ctx or not ctx.missing_locations:
-        print("[DEBUG] No missing locations to generate TTS for.")
+        logger.info("[DEBUG] No missing locations to generate TTS for.")
         return
 
     missing_location_ids = ctx.missing_locations
@@ -94,7 +95,7 @@ def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", WPM: in
 
         if not os.path.exists(full_path):
             if _debug:
-                print(f"[DEBUG] Generating TTS for item: {item_text} at {full_path}")
+                logger.info(f"[DEBUG] Generating TTS for item: {item_text} at {full_path}")
                 tasks.append((
                     item_text,
                     full_path,
@@ -113,7 +114,7 @@ def run_tts_tasks(use_daemon: bool = True):
 
         global tasks, _engine
         if not tasks or len(tasks) == 0:
-            print("[DEBUG] No TTS tasks to run.")
+            logger.info("[DEBUG] No TTS tasks to run.")
             return
 
         if _engine is None:
@@ -122,15 +123,15 @@ def run_tts_tasks(use_daemon: bool = True):
         if len(tasks) > 0:
             for text, filename, rate in tasks:
                 if not os.path.exists(filename):
-                    if _debug:
-                        print(f"[DEBUG] Generating TTS for text: {text} at {filename}")
+                    if _debug and _verbose:
+                        logger.info(f"[DEBUG] Generating TTS for text: {text} at {filename}")
                     _engine.setProperty('rate', rate)
                     _engine.save_to_file(text, str(filename))
             tasks.clear()
         thread = threading.Thread(target=_engine.runAndWait, daemon=use_daemon)
         thread.start()
     except Exception as e:
-        print(f"[ERROR] Exception during TTS tasks: {e}")
+        logger.info(f"[ERROR] Exception during TTS tasks: {e}")
 
 async def async_run_tts_tasks():
     """Run all TTS tasks"""
@@ -142,7 +143,7 @@ async def async_run_tts_tasks():
 
         global tasks, _engine
         if not tasks or len(tasks) == 0:
-            print("[DEBUG] No TTS tasks to run.")
+            logger.info("[DEBUG] No TTS tasks to run.")
             return
 
         if _engine is None:
@@ -152,14 +153,14 @@ async def async_run_tts_tasks():
             for text, filename, rate in tasks:
                 if not os.path.exists(filename):
                     if _debug:
-                        print(f"[DEBUG] Generating TTS for text: {text} at {filename}")
+                        logger.info(f"[DEBUG] Generating TTS for text: {text} at {filename}")
                     _engine.setProperty('rate', rate)
                     _engine.save_to_file(text, str(filename))
             tasks.clear()
         await asyncio.to_thread(_engine.runAndWait)
         
     except Exception as e:
-        print(f"[ERROR] Exception during TTS tasks: {e}")
+        logger.info(f"[ERROR] Exception during TTS tasks: {e}")
 
 def itterate_tts_tasks():
     """Iterate through TTS tasks and run them one by one."""
@@ -168,7 +169,7 @@ def itterate_tts_tasks():
         _engine.runAndWait()  # Process the TTS queue
     else:
         if _debug:
-            print("[DEBUG] TTS engine not initialized, cannot iterate tasks.")
+            logger.info("[DEBUG] TTS engine not initialized, cannot iterate tasks.")
 
 
 async def async_test():
