@@ -1,6 +1,8 @@
 import asyncio
 
 from typing import TYPE_CHECKING
+
+from NetUtils import ClientStatus
 if TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
     from worlds.poe import PathOfExileWorld
@@ -9,9 +11,12 @@ from . import gggAPI
 from . import fileHelper
 from . import inputHelper
 from . import tts
+from . import textUpdate
 
 import worlds.poe.Items as Items
 import worlds.poe.Locations as Locations
+
+import worlds.poe.Options as Options
 
 found_items_dict = {}
 found_items_set = set()
@@ -22,19 +27,42 @@ _debug = True
 _verbose_debug = False
 
 
-async def when_enter_new_zone(line: str, context: "PathOfExileContext" = None):
-    """
-    Callback function that is called when a new zone is entered.
-    It validates the character and updates the item filter accordingly.
-
-    Args:
-        line (str): The line from the log file indicating the new zone entry.
-    """
-    if not "] : You have entered" in line:
+async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
+    zone = textUpdate.get_zone_from_line(ctx, line)
+    if not zone:
         return
-    await validate_and_update(ctx=context)
+    check_for_victory(ctx, zone)
+    await validate_and_update(ctx)
     await asyncio.sleep(0.1)  # Allow some time for the filter to update
     await inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5)
+
+def check_for_victory(ctx: "PathOfExileContext", zone: str):
+    goal = ctx.client_options.get("goal", -1)
+    if goal == -1:
+        print("ERROR: No goal set in client options.")
+
+    def send_goal():
+        asyncio.create_task(ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}]))
+        ctx.finished_game = True
+        ctx.victory = True
+    
+
+    if (goal == Options.Goal.option_complete_act_1 and zone == "The Southern Forest") or \
+        (goal == Options.Goal.option_complete_act_2 and zone == "The City of Sarn") or \
+        (goal == Options.Goal.option_complete_act_3 and zone == "The Aqueduct") or \
+        (goal == Options.Goal.option_complete_act_4 and zone == "The Slave Pens") or \
+        (goal == Options.Goal.option_kauri_fortress_act_6 and zone == "The Karui Fortress") or \
+        (goal == Options.Goal.option_complete_act_6 and zone == "The Bridge Encampment") or \
+        (goal == Options.Goal.option_complete_act_7 and zone == "The Sarn Ramparts") or \
+        (goal == Options.Goal.option_complete_act_8 and zone == "The Blood Aqueduct") or \
+        (goal == Options.Goal.option_complete_act_9 and zone == "Oriath Docks") or \
+        (goal == Options.Goal.option_complete_act_10 and zone == "Karui Shores"):
+        textUpdate.callback_if_valid_char(ctx, send_goal)
+    
+    
+    
+
+    
 
 async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
     global is_char_in_logic
@@ -55,6 +83,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         try:
             char = (await gggAPI.get_character(character_name)).character
             ctx.last_response_from_api.setdefault("character",{})[ctx.character_name] = char
+            ctx.last_character_level = char.level
         except Exception as e:
             print(f"Error fetching character {character_name}: {e}")
             raise e
@@ -169,16 +198,16 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     if unique_flask_count > len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive Unique Flask Unlock']):
         errors.append("Unique Flasks")
 
-    gucci_hobo_mode = ctx.slot_info.get("gucci_hobo_mode", False)
+    gucci_hobo_mode = ctx.client_options.get("gucciHobo", False)
     if gucci_hobo_mode == 1 or gucci_hobo_mode == 2 or gucci_hobo_mode ==3:
         normal_gear = gucci_rarity_check.setdefault("Normal", 0)
         magic_gear = gucci_rarity_check.setdefault("Magic", 0)
         rare_gear = gucci_rarity_check.setdefault("Rare", 0)
-        if gucci_hobo_mode == 1 and  normal_gear + magic_gear + rare_gear > 1: #options_allow_one_slot_of_any_rarity
+        if gucci_hobo_mode == Options.GucciHoboMode.option_allow_one_slot_of_any_rarity and  normal_gear + magic_gear + rare_gear > 1: #options_allow_one_slot_of_any_rarity
             errors.append("Gucci Hobo Mode - Only one item allowed of any rarity")
-        if gucci_hobo_mode == 2 and (normal_gear > 1 or magic_gear + rare_gear > 0):  # options_allow_one_slot_of_normal_rarity
+        if gucci_hobo_mode == Options.GucciHoboMode.option_allow_one_slot_of_normal_rarity and (normal_gear > 1 or magic_gear + rare_gear > 0):  # options_allow_one_slot_of_normal_rarity
             errors.append("Gucci Hobo Mode - Only one normal item allowed")
-        if gucci_hobo_mode == 3 and (normal_gear + magic_gear + rare_gear > 0): # option_no_non_unique_items
+        if gucci_hobo_mode == Options.GucciHoboMode.option_no_non_unique_items and (normal_gear + magic_gear + rare_gear > 0): # option_no_non_unique_items
             errors.append("Gucci Hobo Mode - No non-unique items allowed")
 
     errors = [x for x in errors if x]  # filter out empty strings

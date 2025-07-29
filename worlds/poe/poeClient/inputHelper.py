@@ -52,6 +52,11 @@ def get_then_set_clipboard(new_value: str) -> str:
 async def important_send_poe_text(command: str, retry_times: int = 9001, retry_delay: float = 0.5):
     return await send_poe_text(command, retry_times, retry_delay)
 
+async def send_poe_text_ignore_debounce(command:str):
+    global _last_called
+    _last_called = None  # Ignore debounce time
+    return await send_poe_text(command)
+
 async def send_poe_text(command:str, retry_times:int = 1, retry_delay:float = 0):
     window = gw.getActiveWindow()
     global _last_called

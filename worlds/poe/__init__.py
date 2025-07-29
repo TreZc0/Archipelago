@@ -226,6 +226,7 @@ class PathOfExileWorld(World):
             "gucciHobo" : options.gucci_hobo_mode.value,
             "ttsSpeed" : options.tts_speed.value,
             "ttsEnabled": options.enable_tts.value,
+            "goal": options.goal.value,
         }
         return {
             "client_options": client_options,

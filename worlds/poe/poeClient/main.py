@@ -145,21 +145,18 @@ async def main_async():
     try:
         await async_load(context)
         async def enter_new_zone_callback(line: str):
-            await validationLogic.when_enter_new_zone(line, context) # add the context to the callback
+            await validationLogic.when_enter_new_zone(context, line) # add the context to the callback
 
 
-        async def whisper_callback(line: str):
-            from worlds.poe.poeClient.textUpdate import self_whisper_callback
-            await self_whisper_callback(line, context)
+        async def chat_commands(line: str):
+            from worlds.poe.poeClient.textUpdate import chat_commands_callback
+            await chat_commands_callback(context, line)
             
-        async def goal_callback(line: str):
-            from worlds.poe.poeClient.textUpdate import self_goal_callback
-            await self_goal_callback(line, context)
 
 
         print("Starting Main Loop...")
         tasks = [
-            fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, whisper_callback, goal_callback]),
+            fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, chat_commands]),
             timer_loop()]
         await asyncio.gather(*tasks)
     except KeyboardInterrupt:

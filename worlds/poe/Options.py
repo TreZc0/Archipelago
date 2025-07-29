@@ -13,6 +13,28 @@ class GearUnlocks(Toggle):
     display_name = "Gear Unlocks"
     default = False
 
+class Goal(Choice):
+    """
+    Specifies the goal of the world.
+    """
+    display_name = "Goal"
+    option_complete_the_campaign = 0
+    option_complete_act_1 = 1
+    option_complete_act_2 = 2
+    option_complete_act_3 = 3
+    option_complete_act_4 = 4
+    option_kauri_fortress_act_6 = 5
+    option_complete_act_6 = 6
+    option_complete_act_7 = 7
+    option_complete_act_8 = 8
+    option_complete_act_9 = 9
+    option_complete_act_10 = option_complete_the_campaign
+    option_defeat_shaper = 10
+    option_defeat_maven = 11
+    option_defeat_all_uber_bosses = 20
+    
+    default = 0
+
 class GucciHoboMode(Choice):
     """
     Specifies if the world should be in Gucci Hobo Mode, this restricts use of any non-unique equipment to only 1 slot.
@@ -145,6 +167,7 @@ class PathOfExileOptions(PerGameCommonOptions):
     """
     Common options for Path of Exile.
     """
+    goal: Goal
     gear_unlocks: GearUnlocks
     gear_upgrades: GearUpgrades
     gear_upgrades_per_act: GearUpgradesPerAct

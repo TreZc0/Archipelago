@@ -131,14 +131,20 @@ class PathOfExileContext(CommonContext):
     items_handling = 0b111
     
     last_response_from_api = {}
+    last_entered_zone = ""
+    last_character_level: int = 1
     character_name: str = ""
     client_text_path: Path = ""
     base_item_filter: str = ""
     slot_data = {}
+    client_options = {}
     _debug = True  # Enable debug mode for poe client
+
+    instance: PathOfExileContext
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        instance = self
 
 
     async def server_auth(self, password_requested: bool = False):
@@ -152,6 +158,7 @@ class PathOfExileContext(CommonContext):
 
         if cmd == 'Connected':
             self.slot_data = args.get('slot_data', {})
+            self.client_options = self.slot_data.get('client_options', {})
 
             # Request info for all locations after connecting
             location_ids = list(self.missing_locations)

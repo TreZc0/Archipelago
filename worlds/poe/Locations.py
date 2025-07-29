@@ -47,7 +47,7 @@ acts = [
     {"act": 8, "maxMonsterLevel": 60},
     {"act": 9, "maxMonsterLevel": 64},
     {"act": 10, "maxMonsterLevel": 67},
-#    {"act": 11, "maxMonsterLevel": 86}
+#    {"act": 11, "maxMonsterLevel": 86},
 ]
 # based off of baseItemTypes.json
 base_item_types: Dict[int, LocationDict] = LocationTable.location_table
