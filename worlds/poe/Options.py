@@ -28,7 +28,7 @@ class Goal(Choice):
     option_complete_act_7 = 7
     option_complete_act_8 = 8
     option_complete_act_9 = 9
-    option_complete_act_10 = option_complete_the_campaign
+    alias_complete_act_10 = 0
     option_defeat_shaper = 10
     option_defeat_maven = 11
     option_defeat_all_uber_bosses = 20
