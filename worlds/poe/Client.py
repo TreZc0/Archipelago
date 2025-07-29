@@ -140,11 +140,9 @@ class PathOfExileContext(CommonContext):
     client_options = {}
     _debug = True  # Enable debug mode for poe client
 
-    instance: PathOfExileContext
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        instance = self
 
 
     async def server_auth(self, password_requested: bool = False):
