@@ -90,7 +90,7 @@ async def send_poe_text(command:str, retry_times:int = 1, retry_delay:float = 0)
 
         set_clipboard(clipboard_value)
         if _debug:
-            logger.info("[DEBUG] Sent command to Path of Exile:", command)
+            logger.info("[DEBUG] Sent command to Path of Exile:" + command)
     else:
         if retry_times > 0:
             if _debug:

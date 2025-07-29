@@ -1,6 +1,6 @@
 import asyncio
 from random import Random
-
+import logging
 from typing import TYPE_CHECKING
 
     
@@ -17,7 +17,7 @@ from .poeClient import gggAPI
 class PathOfExileCommandProcessor(ClientCommandProcessor):
     if TYPE_CHECKING:
         ctx: "PathOfExileContext"
-    logger = Utils.get_logger("poeClient.PathOfExileCommandProcessor")
+    logger = logging.getLogger("poeClient.PathOfExileCommandProcessor")
 
     def _cmd_generate_tts(self) -> bool:
         """Generate TTS for missing locations."""
@@ -166,6 +166,7 @@ class PathOfExileContext(CommonContext):
 
         if cmd == 'RoomInfo':
             def injest_load_client_settings(task):
+                logger = logging.getLogger("poeClient.PathOfExileContext.injest_load_client_settings")
                 try:
                     settings = task.result()
                     if settings:
@@ -178,18 +179,18 @@ class PathOfExileContext(CommonContext):
                     logger.info(f"[ERROR] Failed to load settings: {e}")
             def load_client_settings(task=None):
                 if not self.seed_name:
-                    logger.info("ERROR: No seed name found in RoomInfo!!!!! STILL IDK WHY.")
+                    self.logger.info("ERROR: No seed name found in RoomInfo!!!!! STILL IDK WHY.")
                 task = asyncio.create_task(load_settings(self))
                 task.add_done_callback(injest_load_client_settings)
 
             if not self.seed_name:
 
-                logger.info("ERROR: No seed name found in RoomInfo. IDK WHY.")
+                self.logger.info("ERROR: No seed name found in RoomInfo. IDK WHY.")
                 asyncio.create_task(asyncio.sleep(1)).add_done_callback(load_client_settings)
 
             else:
                 if self._debug:
-                    logger.info(f"[DEBUG] RoomInfo received with seed name: {self.seed_name}")
+                    self.logger.info(f"[DEBUG] RoomInfo received with seed name: {self.seed_name}")
                 load_client_settings()
 
     def update_settings(self):
@@ -199,9 +200,9 @@ class PathOfExileContext(CommonContext):
             try:
                 task.result()  # Will raise if save failed
                 if self._debug:
-                    logger.info(f"[DEBUG] Settings saved successfully.")
+                    self.logger.info(f"[DEBUG] Settings saved successfully.")
             except Exception as e:
-                logger.info(f"[ERROR] Failed to save settings: {e}")
+                self.logger.error(f"[ERROR] Failed to save settings: {e}")
         
         task = asyncio.create_task(save_settings(self))
         task.add_done_callback(set_settings)

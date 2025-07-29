@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from typing import TYPE_CHECKING
 
@@ -26,7 +27,7 @@ is_char_in_logic = True
 _debug = True
 _verbose_debug = False
 
-logger = fileHelper.get_logger("poeClient.validationLogic")
+logger = logging.getLogger("poeClient.validationLogic")
 
 async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     zone = textUpdate.get_zone_from_line(ctx, line)

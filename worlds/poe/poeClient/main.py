@@ -15,6 +15,7 @@ from . import tts
 import asyncio
 import threading
 import time
+import logging
 from pynput import keyboard
 from pathlib import Path
 
