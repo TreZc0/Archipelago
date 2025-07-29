@@ -56,7 +56,7 @@ async def callback_if_valid_char(ctx: "PathOfExileContext", callback: callable):
 
     global chat_command_external_callbacks
     chat_command_external_callbacks[_random_string] = verify_character_callback
-    _random_string = base64.b64encode(random.randbytes(8)).strip(b'=').decode('utf-8')
+    _random_string = random.randbytes(8).hex()
     await inputHelper.send_poe_text(f"{_random_string}")
 
 
@@ -67,7 +67,7 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
     global _random_string
     char_name, message = get_char_name_and_message_from_line(line)
     if "!ap char" in message:
-        _random_string = base64.b64encode(random.randbytes(8)).strip(b'=').decode('utf-8')
+        _random_string = random.randbytes(8).hex()
         await inputHelper.send_poe_text(f"char_{_random_string}")
     if "char_" in message:
         parts = line.split("char_")

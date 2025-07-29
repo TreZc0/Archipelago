@@ -76,12 +76,11 @@ class OAuthHandler(http.server.SimpleHTTPRequestHandler):
 
                 if token_response.ok:
                     tokens = token_response.json()
-                    logger.info("\n✅ Access Token:", tokens["access_token"])
+                    logger.info(f"\n✅ Access Token: {tokens["access_token"]}")
                     access_token = tokens["access_token"]
                     token_expire_time = tokens["expires_in"] + time.time()
-                    logger.info("⏳ Token expires at:", token_expire_time, "seconds since epoch, or"
-                          , token_expire_time - time.time(), "seconds from now")
-                    logger.info("🔁 Refresh Token:", tokens.get("refresh_token"))
+                    logger.info(f"⏳ Token expires at:{token_expire_time} seconds since epoch, or {token_expire_time - time.time()} seconds from now")
+                    logger.info(f"🔁 Refresh Token: {tokens.get("refresh_token")}")
                 else:
                     logger.info("\n❌ Token exchange failed:")
                     logger.info(token_response.text)
@@ -152,9 +151,8 @@ async def async_oauth_login() -> dict:
         tokens = resp.json()
         token_expire_time = tokens["expires_in"] + time.time()
         access_token = tokens["access_token"]
-        logger.info("\n✅ Access Token:", tokens["access_token"])
-        logger.info("⏳ Token expires at:", token_expire_time, "seconds since epoch, or"
-              , token_expire_time - time.time(), "seconds from now")
+        logger.info("\n✅ Access Token:" + tokens["access_token"])
+        logger.info(f"⏳ Token expires at:{token_expire_time} seconds since epoch, or {token_expire_time - time.time()} seconds from now")
 
         # return a dict with expire time and access token
         return {
@@ -169,7 +167,7 @@ if __name__ == '__main__':
     # Run the async OAuth login
     loop = asyncio.get_event_loop()
     result = loop.run_until_complete(async_oauth_login())
-    logger.info("OAuth login result:", result)
+    logger.info(f"OAuth login result:{result}")
 
 
 ## === Step 5: Launch browser and serve ===
