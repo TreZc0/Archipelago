@@ -62,7 +62,7 @@ def get_gear_amount_for_act(act, opt): return min(opt.gear_upgrades_per_act.valu
 def get_flask_amount_for_act(act, opt): return 0 if not opt.add_flask_slots_to_item_pool else min(opt.flask_slots_per_act.value * (act - 1), MAX_FLASK_SLOTS)
 def get_gem_amount_for_act(act, opt): return 0 if not opt.add_max_links_to_item_pool else min(opt.max_links_per_act.value * (act - 1), MAX_LINK_UPGRADES)
 def get_skill_gem_amount_for_act(act, opt): return min(opt.skill_gems_per_act.value * (act - 1), MAX_SKILL_GEMS)
-def get_passives_amount_for_act(act, opt): return req_passives_for_act.get(act, 0) if opt.add_passives_to_item_pool else 0
+def get_passives_amount_for_act(act, opt): return passives_required_for_act.get(act, 0) if opt.add_passive_skill_points_to_item_pool.value else 0
 
 def completion_condition(world: "PathOfExileWorld",  state: CollectionState) -> bool:
     return can_reach(world.goal_act, world, state)

@@ -177,6 +177,14 @@ def get_by_has_every_category(categories: Set[str], table: Dict[int, ItemDict] =
     if table is item_table: memoize_cache[key] = result
     return result
 
+def get_by_has_any_category(categories: Set[str], table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
+    key = f"has_any_category_{'_'.join(sorted(categories))}"
+    if table is item_table and key in memoize_cache:
+        return memoize_cache[key]
+    result = [item for item in table.values() if any(cat in item["category"] for cat in categories)]
+    if table is item_table: memoize_cache[key] = result
+    return result
+
 def get_by_name(name: str, table: Dict[int, ItemDict] = item_table) -> ItemDict | None:
     return next((item for item in table.values() if item["name"] == name), None)
 

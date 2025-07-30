@@ -119,8 +119,22 @@ class PathOfExileWorld(World):
             if item:
                 self.items_to_place.pop(item["id"], None)
         
-        if options.gear_unlocks.value == False:
-            gear_upgrades = Items.get_gear_items(table=self.items_to_place)
+        if options.gear_upgrades != options.gear_upgrades.option_no_gear_unlocked:
+            categories = set()
+            if options.gear_upgrades in {options.gear_upgrades.option_all_gear_unlocked_at_start,
+                                         options.gear_upgrades.option_all_normal_and_unique_gear_unlocked,
+                                         options.gear_upgrades.option_all_normal_gear_unlocked}:
+                categories.add("Normal")
+            if options.gear_upgrades in {options.gear_upgrades.option_all_gear_unlocked_at_start,
+                                         options.gear_upgrades.option_all_normal_and_unique_gear_unlocked,
+                                         options.gear_upgrades.option_all_uniques_unlocked}:
+                categories.add("Unique")
+            if options.gear_upgrades == options.gear_upgrades.option_all_gear_unlocked_at_start:
+                categories.add("Magic")
+                categories.add("Rare")
+
+            all_gear_items = Items.get_gear_items(table=self.items_to_place)
+            gear_upgrades = [item for item in all_gear_items if set(item["category"]).intersection(categories)]
             for item in gear_upgrades:
                 item_objs = self.remove_and_create_item_by_itemdict(item)
                 for item_obj in item_objs:
@@ -147,7 +161,9 @@ class PathOfExileWorld(World):
             (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
             options.usable_starting_gear.option_starting_weapon_and_gems,
             options.usable_starting_gear.option_starting_weapon):
-                self.multiworld.push_precollected(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["weapon"]))
+                weapon_name = ItemTable.starting_items_table[char]["weapon"]
+                if weapon_name in [item["name"] for item in self.items_to_place.values()]:
+                    self.multiworld.push_precollected(self.remove_and_create_item_by_name(weapon_name))
                 
                 count = self.multiworld.state.count("Progressive max links - Weapon", self.player)
                 if count < 1:
@@ -211,7 +227,7 @@ class PathOfExileWorld(World):
         self.locations_to_place = poeRules.SelectLocationsToAdd(world=self, target_amount=self.total_items_count)
 
 
-        logger.debug(f"[DEBUG]: total items to place: {len(self.items_to_place)} / {len(self.total_items_count)} possible")
+        logger.debug(f"[DEBUG]: total items to place: {len(self.items_to_place)} / {self.total_items_count} possible")
         logger.debug(f"[DEBUG]: total locs in world.: {len(self.locations_to_place)} / {len(Locations.full_locations)} possible")
 
     def create_regions(self):
