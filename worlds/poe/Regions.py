@@ -3,6 +3,10 @@ from BaseClasses import Region, MultiWorld
 from .Locations import LocationDict, PathOfExileLocation, base_item_type_locations, acts, get_lvl_location_name_from_lvl
 from .Rules import can_reach
 
+
+import logging
+logger = logging.getLogger("poe.Regions")
+
 def create_and_populate_regions(world, multiworld: MultiWorld, player: int, locations: list[LocationDict] = base_item_type_locations, act_regions=acts) -> list[Region]:
     locations: list[LocationDict] = locations.copy()
     menu = Region("Menu", player, multiworld)
@@ -31,7 +35,10 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
                     location_name = f"{loc['baseItem']} - Act {act['act']}"
                 #location_name = loc["baseItem"]
                 locationObj = PathOfExileLocation(player, location_name, parent=region, address=loc["id"])
-                region.locations.append(locationObj)
+                try:
+                    region.locations.append(locationObj)
+                except:
+                    logger.error("[ERROR] Failed to add location to region. Location might already exist.")
                 locations[i] = "used"  # Mark the location as used to avoid duplicates
             # act=act["act"] -- this is used to pass the act number to the can_reach function, otherwise it would be the last act number.
 

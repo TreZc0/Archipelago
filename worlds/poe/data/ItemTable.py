@@ -6,6 +6,7 @@ from BaseClasses import ItemClassification
 
 
 item_array = [
+{"category":["SupportGem"],"reqLevel":38,"classification":ItemClassification.filler,"name":"Trauma Support"},
 {"category":["Level"],"classification":ItemClassification.progression,"name":"Progressive passive point","count":128},    
 {"category":["Flask","Normal"],"classification":ItemClassification.progression,"name":"Progressive Flask Unlock Slot","count":5},
 {"category":["Flask","Magic"],"classification":ItemClassification.progression,"name":"Progressive Magic Flask Unlock","count":5},
@@ -457,7 +458,7 @@ item_array = [
 {"category":["SupportGem"],"reqLevel":38,"classification":ItemClassification.filler,"name":"Fist of War Support"},
 {"category":["SupportGem"],"reqLevel":38,"classification":ItemClassification.filler,"name":"Multiple Totems Support"},
 {"category":["SupportGem"],"reqLevel":38,"classification":ItemClassification.filler,"name":"Multistrike Support"},
-{"category":["SupportGem"],"reqLevel":38,"classification":ItemClassification.filler,"name":"Trauma Support"},
+
 {"category":["SupportGem"],"reqLevel": 1,"classification":ItemClassification.filler,"name":"Chance to Poison Support"},
 {"category":["SupportGem"],"reqLevel": 1,"classification":ItemClassification.filler,"name":"Momentum Support"},
 {"category":["SupportGem"],"reqLevel": 4,"classification":ItemClassification.filler,"name":"Mirage Archer Support"},

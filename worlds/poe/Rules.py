@@ -118,7 +118,8 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
            passive_count >= passive_amount
            
     if not reachable:
-        logger.debug (f"[DEBUG] Act {act} not reachable with gear: {gear_count}/{gear_amount}, flask: {flask_count}/{flask_amount}, gem slots: {gem_slot_count}/{gem_slot_amount}, skill gems: {usable_skill_gem_count}/{skill_gem_amount}, ascendancies: {ascedancy_count}/{ascedancy_amount} for {opt.starting_character.current_option_name}")
+        print (f"[DEBUG] Act {act} not reachable with gear: {gear_count}/{gear_amount}, flask: {flask_count}/{flask_amount}, gem slots: {gem_slot_count}/{gem_slot_amount}, \n" +
+               f"skill gems: {usable_skill_gem_count}/{skill_gem_amount}, ascendancies: {ascedancy_count}/{ascedancy_amount} levels:{passive_count}/{passive_amount} for {opt.starting_character.current_option_name}")
         if _very_debug:
             logger.debug(f"[DEBUG] expecting Act {act} - Gear: {gear_amount}, Flask: {flask_amount}, Gem Slots: {gem_slot_amount}, Skill Gems: {skill_gem_amount}, Ascendancies: {ascedancy_amount}")
             logger.debug(f"[DEBUG] we have   Act {act} - Gear: {gear_count}, Flask: {flask_count}, Gem Slots: {gem_slot_count}, Skill Gems: {usable_skill_gem_count}, Ascendancies: {ascedancy_count}")

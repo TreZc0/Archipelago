@@ -228,7 +228,9 @@ class PathOfExileWorld(World):
 
 
         logger.debug(f"[DEBUG]: total items to place: {len(self.items_to_place)} / {self.total_items_count} possible")
+        logger.debug("Here 1")
         logger.debug(f"[DEBUG]: total locs in world.: {len(self.locations_to_place)} / {len(Locations.full_locations)} possible")
+        logger.debug("Here 2")
 
     def create_regions(self):
         """Create the regions for the Path of Exile world.
@@ -255,9 +257,8 @@ class PathOfExileWorld(World):
             list_of_items = self.remove_and_create_item_by_itemdict(item)
             for item in list_of_items:
                 self.multiworld.itempool.append(item)
-        
-        if self._debug:
-            logger.info(f"[DEBUG]: items left to place:{len(self.items_to_place)} /{self.total_items_count}.\n Created {len(self.locations_to_place)} locations.")
+
+        logger.debug(f"[DEBUG]: items left to place:{len(self.items_to_place)} /{self.total_items_count}.\n Created {len(self.locations_to_place)} locations.")
 
 
 

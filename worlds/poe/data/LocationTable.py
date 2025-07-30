@@ -643,7 +643,6 @@ location_array = [
 {"dropLevel": 63, "act": 9, "baseItem": "Meatgrinder", "name": "Meatgrinder"},
 {"dropLevel": 63, "act": 9, "baseItem": "Vaal Greatsword", "name": "Vaal Greatsword"},
 {"dropLevel": 64, "act": 10, "baseItem": "Elegant Ringmail", "name": "Elegant Ringmail"},
-{"dropLevel": 64, "act": 10, "baseItem": "Elegant Ringmail", "name": "Elegant Ringmail"},
 {"dropLevel": 64, "act": 10, "baseItem": "Crusader Boots", "name": "Crusader Boots"},
 {"dropLevel": 64, "act": 10, "baseItem": "Spine Bow", "name": "Spine Bow"},
 {"dropLevel": 64, "act": 10, "baseItem": "Eye Gouger", "name": "Eye Gouger"},

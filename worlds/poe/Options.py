@@ -66,7 +66,7 @@ class AddLevelingUpToLocationPool(Toggle):
     Specifies if leveling up be considered "locations".
     """
     display_name = "Leveling Up locations"
-    default = False
+    default = True
 
 class GearUpgradesPerAct(Range):
     """

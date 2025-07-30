@@ -1,3 +1,8 @@
+import typing
+if typing.TYPE_CHECKING:
+    from worlds.poe import PathOfExileWorld
+    from worlds.poe.Options import PathOfExileOptions
+
 from BaseClasses import Item, ItemClassification
 from typing import TypedDict, Dict, Set
 
@@ -43,6 +48,11 @@ class PathOfExileItem(Item):
 
 item_table: Dict[int, ItemDict] = ItemTable.item_table
 memoize_cache: Dict[str, list[ItemDict]] = {}
+
+
+def deprioritized_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
+    opt: PathOfExileOptions = world.options
+    
 
 def get_flask_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     if table is item_table and "Flask" in memoize_cache:
