@@ -33,12 +33,15 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     zone = textUpdate.get_zone_from_line(ctx, line)
     if not zone:
         return
-    check_for_victory(ctx, zone)
+    victory_task = check_for_victory(ctx, zone)
+    skip_load_filter = True if victory_task else False
+       
     await validate_and_update(ctx)
-    await asyncio.sleep(0.1)  # Allow some time for the filter to update
-    await inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5)
+    #await asyncio.sleep(0.1)  # Allow some time for the game to load
+    if not skip_load_filter:
+        await inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5)
 
-def check_for_victory(ctx: "PathOfExileContext", zone: str):
+def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | None:
     goal = ctx.client_options.get("goal", -1)
     if goal == -1:
         logger.info("ERROR: No goal set in client options.")
@@ -49,22 +52,21 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str):
         ctx.victory = True
     
 
-    if (goal == Options.Goal.option_complete_act_1 and zone == "The Southern Forest") or \
-        (goal == Options.Goal.option_complete_act_2 and zone == "The City of Sarn") or \
-        (goal == Options.Goal.option_complete_act_3 and zone == "The Aqueduct") or \
-        (goal == Options.Goal.option_complete_act_4 and zone == "The Slave Pens") or \
-        (goal == Options.Goal.option_kauri_fortress_act_6 and zone == "The Karui Fortress") or \
-        (goal == Options.Goal.option_complete_act_6 and zone == "The Bridge Encampment") or \
-        (goal == Options.Goal.option_complete_act_7 and zone == "The Sarn Ramparts") or \
-        (goal == Options.Goal.option_complete_act_8 and zone == "The Blood Aqueduct") or \
-        (goal == Options.Goal.option_complete_act_9 and zone == "Oriath Docks") or \
-        (goal == Options.Goal.option_complete_the_campaign and zone == "Karui Shores"):
-        textUpdate.callback_if_valid_char(ctx, send_goal)
+    if \
+    (goal == Options.Goal.option_complete_act_1 and zone == "The Southern Forest") or \
+    (goal == Options.Goal.option_complete_act_2 and zone == "The City of Sarn") or \
+    (goal == Options.Goal.option_complete_act_3 and zone == "The Aqueduct") or \
+    (goal == Options.Goal.option_complete_act_4 and zone == "The Slave Pens") or \
+    (goal == Options.Goal.option_kauri_fortress_act_6 and zone == "The Karui Fortress") or \
+    (goal == Options.Goal.option_complete_act_6 and zone == "The Bridge Encampment") or \
+    (goal == Options.Goal.option_complete_act_7 and zone == "The Sarn Ramparts") or \
+    (goal == Options.Goal.option_complete_act_8 and zone == "The Blood Aqueduct") or \
+    (goal == Options.Goal.option_complete_act_9 and zone == "Oriath Docks") or \
+    (goal == Options.Goal.option_complete_the_campaign and zone == "Karui Shores"):
+        return asyncio.create_task(textUpdate.callback_if_valid_char(ctx, send_goal))
     
-    
-    
+    return None
 
-    
 
 async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
     global is_char_in_logic

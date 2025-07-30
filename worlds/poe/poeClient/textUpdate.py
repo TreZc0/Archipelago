@@ -47,23 +47,30 @@ async def callback_if_valid_char(ctx: "PathOfExileContext", callback: callable):
             if not char_name == ctx.character_name:
                 logger.info(f"[DEBUG] FALSE ALARM, Chars don't match: char_name={char_name}, ctx.character_name={ctx.character_name}")
                 chat_command_external_callbacks.pop(_random_string, None)
-                callback(False)
-                return            
+                #callback(False)
+                return False
             chat_command_external_callbacks.pop(_random_string, None)
-            callback(True)
+            callback()
+            return True
         except Exception as e:
-            callback(False)
+            logger.error(f"[ERROR] verify_character_callback failed: {e}")
+            return False
 
     global chat_command_external_callbacks
     chat_command_external_callbacks[_random_string] = verify_character_callback
-    _random_string = random.randbytes(8).hex()
-    await inputHelper.send_poe_text(f"{_random_string}")
+    _random_string = random.randbytes(2).hex()
+    await inputHelper.send_poe_text(f"@{ctx.character_name} {_random_string}")
 
 
 chat_command_external_callbacks : dict[str, callable]  = dict()
 
 async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
     # Implement the logic for handling self whispers here
+    
+    # call each chat command callback with the line
+    for callback in chat_command_external_callbacks.values():
+        callback(line)
+    
     global _random_string
     char_name, message = get_char_name_and_message_from_line(line)
     if "!ap char" in message:
