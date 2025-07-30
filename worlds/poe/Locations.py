@@ -11,7 +11,7 @@ def get_base_item_locations ():
     Returns a list of all locations based on base items types in the Path of Exile world.
 
     """
-    return base_item_types
+    return base_item_type_locations
 
 
 def get_location_id_from_item_name(item_name: str) -> int | None:
@@ -24,14 +24,16 @@ def get_location_id_from_item_name(item_name: str) -> int | None:
     Returns:
         int | None: The location ID if found, otherwise None.
     """
-    for loc_id, loc in base_item_types.items():
+    for loc_id, loc in base_item_type_locations.items():
         if loc['baseItem'] == item_name:
             return loc_id
     return None
 
 class LocationDict(TypedDict, total=False):
-    baseItem: str
-    dropLevel: int
+    baseItem: str|None
+    dropLevel: int|None
+    level: int|None
+    name: str
     act: int
     id: int
 
@@ -47,8 +49,12 @@ acts = [
     {"act": 8, "maxMonsterLevel": 60},
     {"act": 9, "maxMonsterLevel": 64},
     {"act": 10, "maxMonsterLevel": 67},
-#    {"act": 11, "maxMonsterLevel": 86},
+    {"act": 11, "maxMonsterLevel": 86},
 ]
+
+def get_lvl_location_name_from_lvl(level: int) -> str: return f"Reach Level {level}"
 # based off of baseItemTypes.json
-base_item_types: Dict[int, LocationDict] = LocationTable.location_table
-base_item_types_by_name: Dict[str, LocationDict] = {loc['baseItem']: loc for loc in base_item_types.values()}
+base_item_type_locations: Dict[int, LocationDict] = LocationTable.base_item_location_table
+level_locations: Dict[int, LocationDict] = LocationTable.level_location_table
+full_locations = {**base_item_type_locations, **level_locations}
+base_item_types_by_name: Dict[str, LocationDict] = {loc['baseItem']: loc for loc in base_item_type_locations.values()}

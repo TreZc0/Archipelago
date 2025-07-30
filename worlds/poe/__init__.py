@@ -9,6 +9,8 @@ import yaml
 import logging
 import base64
 
+from worlds.poe.data import ItemTable
+
 from .Options import PathOfExileOptions
 from . import Items
 from . import Locations
@@ -56,17 +58,18 @@ class PathOfExileWorld(World):
     items_to_place = {}
     locations_to_place = {}
     total_items_count = 0
+    
+    goal_act = 0
     #generate the location and item tables from Locations.py and Items.py
     # location_name_to_id = { loc.name: loc.id for loc in Locations.base_item_types }
-    location_name_to_id = { loc["baseItem"]: id for id, loc in Locations.base_item_types.items() }
+    location_name_to_id = { loc["name"]: id for id, loc in Locations.full_locations.items() }
     item_name_to_id = { item["name"]: item["id"] for item in Items.item_table.values() }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.items_to_place = Items.item_table.copy()
-        self.locations_to_place = Locations.base_item_types.copy()
 
-    def remove_and_create_item_by_dict(self, item: Items.ItemDict) -> list[Items.PathOfExileItem]:
+    def remove_and_create_item_by_itemdict(self, item: Items.ItemDict) -> list[Items.PathOfExileItem]:
         item_id = item["id"]
         item_to_place = self.items_to_place.pop(item_id)  # Remove from items to place
         item_objs = []
@@ -83,18 +86,18 @@ class PathOfExileWorld(World):
         return item_obj
     
     def generate_early(self):
-
-        
         options: PathOfExileOptions = self.options
-        # if options.starting_character.value == options.starting_character.option_random:
-        #     options.starting_character.value = self.random.choice(
-        #         [options.starting_character.option_marauder,
-        #          options.starting_character.option_ranger,
-        #          options.starting_character.option_witch,
-        #          options.starting_character.option_duelist,
-        #          options.starting_character.option_templar,
-        #          options.starting_character.option_shadow,
-        #          options.starting_character.option_scion])
+        if   options.goal.value == options.goal.option_complete_act_1: self.goal_act = 1
+        elif options.goal.value == options.goal.option_complete_act_2: self.goal_act = 2
+        elif options.goal.value == options.goal.option_complete_act_3: self.goal_act = 3
+        elif options.goal.value == options.goal.option_complete_act_4: self.goal_act = 4
+        elif options.goal.value == options.goal.option_kauri_fortress_act_6: self.goal_act = 5
+        elif options.goal.value == options.goal.option_complete_act_6: self.goal_act = 6
+        elif options.goal.value == options.goal.option_complete_act_7: self.goal_act = 7
+        elif options.goal.value == options.goal.option_complete_act_8: self.goal_act = 8
+        elif options.goal.value == options.goal.option_complete_act_9: self.goal_act = 9
+        elif options.goal.value == options.goal.option_complete_the_campaign: self.goal_act = 10
+        else: self.goal_act = 11
         
         if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_allow_one_slot_of_normal_rarity
                 or options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
@@ -108,62 +111,84 @@ class PathOfExileWorld(World):
                 if "Normal" in item["category"]:
                     self.items_to_place.pop(item["id"])
 
+        # remove passive skill points from item pool
+        # we don't just add them to precollected items, because that would clutter the item pool.
+        # we are using the slot_data to tell the client to chill out when it comes to passive skill points
+        if options.add_passive_skill_points_to_item_pool.value == False:
+            item = Items.get_by_name("Progressive passive point")
+            if item:
+                self.items_to_place.pop(item["id"], None)
         
         if options.gear_unlocks.value == False:
             gear_upgrades = Items.get_gear_items(table=self.items_to_place)
             for item in gear_upgrades:
-                item_objs = self.remove_and_create_item_by_dict(item)
+                item_objs = self.remove_and_create_item_by_itemdict(item)
                 for item_obj in item_objs:
                     self.multiworld.push_precollected(item_obj)
 
-        if options.flask_slot_upgrades.value == False:
+        if options.add_flask_slots_to_item_pool.value == False:
             flask_slots = Items.get_flask_items(table=self.items_to_place)
             for item in flask_slots:
-                item_objs = self.remove_and_create_item_by_dict(item)
+                item_objs = self.remove_and_create_item_by_itemdict(item)
                 for item_obj in item_objs:
                     self.multiworld.push_precollected(item_obj)
 
-        if options.support_gem_slot_upgrades.value == False:
+        if options.add_max_links_to_item_pool.value == False:
             support_gem_slots = Items.get_max_links_items(table=self.items_to_place)
             for item in support_gem_slots:
-                item_obj = self.remove_and_create_item_by_dict(item)        
+                item_obj = self.remove_and_create_item_by_itemdict(item)
                 self.multiworld.push_precollected(item_obj)
+        
+        def handle_starting_character(char):
+            item_obj = self.remove_and_create_item_by_name(char)
+            self.multiworld.push_precollected(item_obj)
+            
+            if options.usable_starting_gear.value in \
+            (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
+            options.usable_starting_gear.option_starting_weapon_and_gems,
+            options.usable_starting_gear.option_starting_weapon):
+                self.multiworld.push_precollected(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["weapon"]))
                 
+                count = self.multiworld.state.count("Progressive max links - Weapon", self.player)
+                if count < 1:
+                    wep = self.remove_and_create_item_by_name("Progressive max links - Weapon")
+                    self.multiworld.push_precollected(wep)
+
+            if options.usable_starting_gear.value in \
+            (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
+             options.usable_starting_gear.option_starting_weapon_and_gems):
+                self.multiworld.push_precollected(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["gem"]))
+                self.multiworld.push_precollected(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["support"]))
+            
+            STARTING_FLASK_SLOTS = 3    
+            if options.usable_starting_gear.value in \
+            (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
+            options.usable_starting_gear.option_starting_weapon_and_flask_slots):
+                count = self.multiworld.state.count_from_list([item['name'] for item in Items.get_by_has_every_category({"Flask", "Normal"})], self.player)
+                if (STARTING_FLASK_SLOTS - count) > 0:
+                    flasks = Items.get_by_has_every_category({"Flask", "Normal"}, table=self.items_to_place)
+                    for i in range(3 - count):
+                        if len(flasks) == 0:
+                            break
+                        flask = self.remove_and_create_item_by_name(flasks[0]["name"])
+                        self.multiworld.push_precollected(flask)
+            return char
+            
         starting_character = ""
         if options.starting_character.value == options.starting_character.option_scion:
-            item_obj = self.remove_and_create_item_by_name("Scion")
-            self.multiworld.push_precollected(item_obj)
-            starting_character = "Scion"
-
+            starting_character = handle_starting_character("Scion")
         if options.starting_character.value == options.starting_character.option_marauder:
-            item_obj = self.remove_and_create_item_by_name("Marauder")
-            self.multiworld.push_precollected(item_obj)
-            starting_character = "Marauder"
-
+            starting_character = handle_starting_character("Marauder")
         if options.starting_character.value == options.starting_character.option_duelist:
-            item_obj = self.remove_and_create_item_by_name("Duelist")
-            self.multiworld.push_precollected(item_obj)
-            starting_character = "Duelist"
-
+            starting_character = handle_starting_character("Duelist")
         if options.starting_character.value == options.starting_character.option_ranger:
-            item_obj = self.remove_and_create_item_by_name("Ranger")
-            self.multiworld.push_precollected(item_obj)
-            starting_character = "Ranger"
-
+            starting_character = handle_starting_character("Ranger")
         if options.starting_character.value == options.starting_character.option_shadow:
-            item_obj = self.remove_and_create_item_by_name("Shadow")
-            self.multiworld.push_precollected(item_obj)
-            starting_character = "Shadow"
-
+            starting_character = handle_starting_character("Shadow")
         if options.starting_character.value == options.starting_character.option_witch:
-            item_obj = self.remove_and_create_item_by_name("Witch")
-            self.multiworld.push_precollected(item_obj)
-            starting_character = "Witch"
-
+            starting_character = handle_starting_character("Witch")
         if options.starting_character.value == options.starting_character.option_templar:
-            item_obj = self.remove_and_create_item_by_name("Templar")
-            self.multiworld.push_precollected(item_obj)
-            starting_character = "Templar"
+            starting_character = handle_starting_character("Templar")
 
         temp_items_to_place = {}
         # add ascendancy items.
@@ -182,27 +207,27 @@ class PathOfExileWorld(World):
         for item_id, item_obj in temp_items_to_place.items():
             self.items_to_place[item_id] = item_obj
 
+        self.total_items_count = sum(item.get("count", 1) for item in self.items_to_place.values())
+        self.locations_to_place = poeRules.SelectLocationsToAdd(world=self, target_amount=self.total_items_count)
+
+
+        logger.debug(f"[DEBUG]: total items to place: {len(self.items_to_place)} / {len(self.total_items_count)} possible")
+        logger.debug(f"[DEBUG]: total locs in world.: {len(self.locations_to_place)} / {len(Locations.full_locations)} possible")
 
     def create_regions(self):
         """Create the regions for the Path of Exile world.
         This method initializes the regions based on the acts defined in Regions.py.
         """
         options: PathOfExileOptions = self.options
-
-        self.total_items_count = sum(item.get("count", 1) for item in self.items_to_place.values())
-        
-        # and only use the first `total_items_count` items of the Locations.base_item_types, we should have enough locations to place all items
-        locations_to_place = list(Locations.base_item_types.values())[:self.total_items_count]
-        if self._debug:
-            logger.info(f"[DEBUG]: total locations to add: {len(locations_to_place)} / {len(Locations.base_item_types)} possible")
+        acts_to_play = [act for act in poeRegions.acts if act["act"] <= self.goal_act]
         poeRegions.create_and_populate_regions(world = self,
                                                multiworld=self.multiworld,
                                                player= self.player,
-                                               locations=locations_to_place,
-                                               act_regions=poeRegions.acts)
+                                               locations=self.locations_to_place,
+                                               act_regions=acts_to_play)
         #poeRegions.create_and_populate_regions(self, self.multiworld, self.player, locations_to_place, poeRegions.acts)
 
-        self.multiworld.completion_condition[self.player] = lambda state: (Rules.completion_condition(self, state))
+        self.multiworld.completion_condition[self.player] = lambda state: (poeRules.completion_condition(self, state))
 
     def create_items(self):
         """Create the items for the Path of Exile world.
@@ -211,7 +236,7 @@ class PathOfExileWorld(World):
         options: PathOfExileOptions = self.options
         # iterate over a copy to be safe while modifying the dictionary
         for item in list(self.items_to_place.values()):
-            list_of_items = self.remove_and_create_item_by_dict(item)
+            list_of_items = self.remove_and_create_item_by_itemdict(item)
             for item in list_of_items:
                 self.multiworld.itempool.append(item)
         
@@ -222,17 +247,22 @@ class PathOfExileWorld(World):
 
     def fill_slot_data(self):
         options: PathOfExileOptions = self.options
-        client_options = {
-            "gucciHobo" : options.gucci_hobo_mode.value,
-            "ttsSpeed" : options.tts_speed.value,
-            "ttsEnabled": options.enable_tts.value,
+        game_options = {
+            "gucciHobo": options.gucci_hobo_mode.value,
+            "passivePointsAsItems": options.add_passive_skill_points_to_item_pool.value,
+            "LevelingUpAsLocations": options.add_leveling_up_to_location_pool.value,
             "goal": options.goal.value,
         }
+        client_options = {
+            "ttsSpeed" : options.tts_speed.value,
+            "ttsEnabled": options.enable_tts.value,
+        }
         return {
+            "game_options": game_options,
             "client_options": client_options,
             "poe-uuid": base64.urlsafe_b64encode(self.random.randbytes(8)).strip(b'=').decode('utf-8'), # used for generation id
         }
-        
+
         
     def generate_output(self, output_directory: str):
         if self._debug:

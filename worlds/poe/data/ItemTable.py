@@ -5,10 +5,8 @@ from BaseClasses import ItemClassification
 #*/
 
 
-
-
 item_array = [
-{"category":["SupportGem"],"reqLevel": 8,"classification":ItemClassification.filler,"name":"Knockback Support"},
+{"category":["Level"],"classification":ItemClassification.progression,"name":"Progressive passive point","count":128},    
 {"category":["Flask","Normal"],"classification":ItemClassification.progression,"name":"Progressive Flask Unlock Slot","count":5},
 {"category":["Flask","Magic"],"classification":ItemClassification.progression,"name":"Progressive Magic Flask Unlock","count":5},
 {"category":["Flask","Unique"],"classification":ItemClassification.filler,"name":"Progressive Unique Flask Unlock","count":5},
@@ -415,7 +413,7 @@ item_array = [
 {"category":["SupportGem"],"reqLevel": 8,"classification":ItemClassification.filler,"name":"Ballista Totem Support"},
 {"category":["SupportGem"],"reqLevel": 8,"classification":ItemClassification.filler,"name":"Earthbreaker Support"},
 {"category":["SupportGem"],"reqLevel": 8,"classification":ItemClassification.filler,"name":"Flamewood Support"},
-
+{"category":["SupportGem"],"reqLevel": 8,"classification":ItemClassification.filler,"name":"Knockback Support"},
 {"category":["SupportGem"],"reqLevel": 8,"classification":ItemClassification.filler,"name":"Life Gain on Hit Support"},
 {"category":["SupportGem"],"reqLevel": 8,"classification":ItemClassification.filler,"name":"Lifetap Support"},
 {"category":["SupportGem"],"reqLevel": 8,"classification":ItemClassification.filler,"name":"Maim Support"},
@@ -575,7 +573,7 @@ item_array = [
 {"category":["SupportGem"],"reqLevel":38,"classification":ItemClassification.filler,"name":"Unleash Support"}
 ]
 
-
+# we can't really tell the difference between quivers and shields without this.
 quiver_base_type_array = [
 "Serrated Arrow Quiver",
 "Fire Arrow Quiver",
@@ -696,8 +694,46 @@ shield_base_type_array = [
 "Supreme Spiked Shield",
 ]
 
+starting_items_table = {
+    "Scion": {
+        "weapon": "Normal Sword",
+        "gem": "Spectral Throw",
+        "support": "Prismatic Burst Support"
+    },
+    "Marauder": {
+        "weapon": "Normal Mace",
+        "gem": "Heavy Strike",
+        "support": "Ruthless Support"
+    },
+    "Duelist": {
+        "weapon": "Normal Sword",
+        "gem": "Double Strike",
+        "support": "Chance to Bleed Support"
+    },
+    "Ranger": {
+        "weapon": "Normal Bow",
+        "gem": "Burning Arrow",
+        "support": "Momentum Support"
+    },
+    "Shadow": {
+        "weapon": "Normal Dagger",
+        "gem": "Viper Strike",
+        "support": "Chance to Poison Support"
+    },
+    "Witch": {
+        "weapon": "Normal Wand",
+        "gem": "Fireball",
+        "support": "Arcane Surge Support"
+    },
+    "Templar": {
+        "weapon": "Normal Sceptre",
+        "gem": "Glacial Hammer",
+        "support": "Elemental Proliferation Support"
+    },
+}
+
 item_table = {}
-for i, item in enumerate(item_array):
+for i, item in enumerate(item_array, start=1):
     item["id"] = i
     item_table[i] = item
     

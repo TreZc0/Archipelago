@@ -1,11 +1,9 @@
 from typing import Dict
 from BaseClasses import Region, MultiWorld
-from .Locations import LocationDict, PathOfExileLocation, base_item_types, acts
+from .Locations import LocationDict, PathOfExileLocation, base_item_type_locations, acts, get_lvl_location_name_from_lvl
 from .Rules import can_reach
 
-
-
-def create_and_populate_regions(world, multiworld: MultiWorld, player: int, locations: list[LocationDict] = base_item_types, act_regions=acts) -> list[Region]:
+def create_and_populate_regions(world, multiworld: MultiWorld, player: int, locations: list[LocationDict] = base_item_type_locations, act_regions=acts) -> list[Region]:
     locations: list[LocationDict] = locations.copy()
     menu = Region("Menu", player, multiworld)
     multiworld.regions.append(menu)
@@ -22,8 +20,15 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
         last_region = region
 
         for i, loc in enumerate(locations):
-            if loc != "used" and loc["dropLevel"] <= act["maxMonsterLevel"]:
-                location_name = f"{loc['baseItem']} - Act {act['act']}"
+            if loc != "used" and (\
+            loc.get("dropLevel", 9001) <= act["maxMonsterLevel"] or #9001 is just a big number
+            loc.get("level", 9001) <= act["maxMonsterLevel"]):
+                is_level = loc.get("baseItem") is None
+                location_name = ""
+                if is_level:
+                    location_name = loc["name"]
+                else:
+                    location_name = f"{loc['baseItem']} - Act {act['act']}"
                 #location_name = loc["baseItem"]
                 locationObj = PathOfExileLocation(player, location_name, parent=region, address=loc["id"])
                 region.locations.append(locationObj)

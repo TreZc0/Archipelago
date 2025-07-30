@@ -137,6 +137,7 @@ class PathOfExileContext(CommonContext):
     client_text_path: Path = ""
     base_item_filter: str = ""
     slot_data = {}
+    game_options = {}
     client_options = {}
     _debug = True  # Enable debug mode for poe client
 
@@ -157,6 +158,7 @@ class PathOfExileContext(CommonContext):
 
         if cmd == 'Connected':
             self.slot_data = args.get('slot_data', {})
+            self.client_options = self.slot_data.get('game_options', {})
             self.client_options = self.slot_data.get('client_options', {})
 
             # Request info for all locations after connecting

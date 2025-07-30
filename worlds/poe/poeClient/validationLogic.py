@@ -42,7 +42,7 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
         await inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5)
 
 def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | None:
-    goal = ctx.client_options.get("goal", -1)
+    goal = ctx.game_options.get("goal", -1)
     if goal == -1:
         logger.info("ERROR: No goal set in client options.")
 
@@ -98,6 +98,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
 
     if is_char_in_logic:
         locations_to_check = set()
+        #add items to locations_to_check
         found_items_set = get_found_items(char)
         for item in found_items_set:
             if _debug and _verbose_debug:
@@ -106,6 +107,16 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
             if location_id is not None:
                 locations_to_check.add(location_id)
         itemFilter.update_item_filter_from_context(ctx)
+
+        #add levels to locations_to_check
+        if ctx.game_options.get("add_leveling_up_to_location_pool", True):
+            for level in range(2, ctx.last_character_level):
+                if _debug and _verbose_debug:
+                    logger.info(f"[DEBUG] Adding level {level} to locations to check.")
+                location_id = Locations.get_lvl_location_name_from_lvl()
+                if location_id is not None:
+                    locations_to_check.add(location_id)
+
         if len(locations_to_check) > 0:
             if _debug:
                 logger.info(f"[DEBUG] Locations to check: {locations_to_check}")
@@ -142,6 +153,14 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     normal_flask_count = 0
     magic_flask_count = 0
     unique_flask_count = 0
+
+    # --------- VALIDATION LOGIC STARTS HERE ---------
+    if ctx.game_options.get("passivePointsAsItems", True):
+        passive_points = len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive passive point'])
+        passives_used = len(character.passives.hashes) # number of passives allocated
+        if passives_used > passive_points:
+            errors.append(f"{passives_used - passive_points} Over-allocated passive points")
+
 
     if character.class_ not in [i["name"] for i in total_recieved_items]:
         errors.append(f"Class {character.class_}")
@@ -201,7 +220,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     if unique_flask_count > len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive Unique Flask Unlock']):
         errors.append("Unique Flasks")
 
-    gucci_hobo_mode = ctx.client_options.get("gucciHobo", False)
+    gucci_hobo_mode = ctx.game_options.get("gucciHobo", False)
     if gucci_hobo_mode == 1 or gucci_hobo_mode == 2 or gucci_hobo_mode ==3:
         normal_gear = gucci_rarity_check.setdefault("Normal", 0)
         magic_gear = gucci_rarity_check.setdefault("Magic", 0)
