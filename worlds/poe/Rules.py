@@ -9,7 +9,7 @@ if typing.TYPE_CHECKING:
 MAX_GEAR_UPGRADES   = 50
 MAX_FLASK_SLOTS     = 10
 MAX_GEM_SLOTS       = 21
-MAX_SKILL_GEMS      = 20 # you will get more, but this is the max required for "logic"
+MAX_SKILL_GEMS      = 30 # you will get more, but this is the max required for "logic"
 _debug = True
 _very_debug = False
 
