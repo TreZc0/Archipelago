@@ -1,3 +1,5 @@
+import logging
+
 from worlds.poe.Options import PathOfExileOptions
 from .Locations import PathOfExileLocation, base_item_types, acts
 from BaseClasses import CollectionState, Region
@@ -6,6 +8,8 @@ import typing
 if typing.TYPE_CHECKING:
     from . import PathOfExileWorld
 
+logger = logging.getLogger("poe.Rules")
+logger.setLevel(logging.INFO)
 MAX_GEAR_UPGRADES   = 50
 MAX_FLASK_SLOTS     = 10
 MAX_GEM_SLOTS       = 21
@@ -18,7 +22,6 @@ req_to_use_weapon_types = ["Axe","Bow","Claw","Dagger","Mace","Sceptre","Staff",
                             #"Fishing Rod", # yeahhhh no
                             #"Unarmed" # every character can use unarmed, so no need to check this
                             ]
-
 def completion_condition(world: "PathOfExileWorld",  state: CollectionState) -> bool:
     #opt: PathOfExileOptions = world.options
     # TODO: configurable completion condition
@@ -79,11 +82,11 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
            usable_skill_gem_count >= skill_gem_amount
            
     if not reachable:
-        if _debug:
-            print (f"[DEBUG] Act {act} not reachable with gear: {gear_count}/{gear_amount}, flask: {flask_count}/{flask_amount}, gem slots: {gem_slot_count}/{gem_slot_amount}, skill gems: {usable_skill_gem_count}/{skill_gem_amount}, ascendancies: {ascedancy_count}/{ascedancy_amount} for {opt.starting_character.current_option_name}")
+
+        logger.debug (f"[DEBUG] Act {act} not reachable with gear: {gear_count}/{gear_amount}, flask: {flask_count}/{flask_amount}, gem slots: {gem_slot_count}/{gem_slot_amount}, skill gems: {usable_skill_gem_count}/{skill_gem_amount}, ascendancies: {ascedancy_count}/{ascedancy_amount} for {opt.starting_character.current_option_name}")
         if _very_debug:
-            print(f"[DEBUG] expecting Act {act} - Gear: {gear_amount}, Flask: {flask_amount}, Gem Slots: {gem_slot_amount}, Skill Gems: {skill_gem_amount}, Ascendancies: {ascedancy_amount}")
-            print(f"[DEBUG] we have   Act {act} - Gear: {gear_count}, Flask: {flask_count}, Gem Slots: {gem_slot_count}, Skill Gems: {usable_skill_gem_count}, Ascendancies: {ascedancy_count}")
+            logger.debug(f"[DEBUG] expecting Act {act} - Gear: {gear_amount}, Flask: {flask_amount}, Gem Slots: {gem_slot_amount}, Skill Gems: {skill_gem_amount}, Ascendancies: {ascedancy_amount}")
+            logger.debug(f"[DEBUG] we have   Act {act} - Gear: {gear_count}, Flask: {flask_count}, Gem Slots: {gem_slot_count}, Skill Gems: {usable_skill_gem_count}, Ascendancies: {ascedancy_count}")
             #add up all the prog items
 
 
@@ -92,13 +95,9 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
                           state.count_from_list([item["name"] for item in Items.get_max_links_items()], world.player) + \
                           state.count_from_list([item["name"] for item in Items.get_main_skill_gem_items()], world.player) + \
                           state.count_from_list([item["name"] for item in Items.get_ascendancy_class_items(opt.starting_character.current_option_name)], world.player)
-            print(f"[DEBUG] total items {total_items}, ")
-            print(f"[DEBUG] expecting   {gear_amount + flask_amount + gem_slot_amount + skill_gem_amount} items")
-            print(f"\n\n")
-
-    if _debug:
-#        print(f"[DEBUG] Act {act} reachable: {reachable}")
-        pass
+            logger.debug(f"[DEBUG] total items {total_items}, ")
+            logger.debug(f"[DEBUG] expecting   {gear_amount + flask_amount + gem_slot_amount + skill_gem_amount} items")
+            logger.debug(f"\n\n")
     
     
     return reachable
