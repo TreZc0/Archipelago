@@ -95,17 +95,22 @@ class PathOfExileWorld(World):
         self.goal_act = self.get_goal_act(options)
         max_level = Locations.acts[self.goal_act]["maxMonsterLevel"]
 
-        if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_allow_one_slot_of_normal_rarity
-                or options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
-            gear_upgrades = Items.get_gear_items(table=self.items_to_place)
-            for item in gear_upgrades:
-                if "Magic" in item["category"] or "Rare" in item["category"]:
-                    self.items_to_place.pop(item["id"])
+        if options.gucci_hobo_mode.value != options.gucci_hobo_mode.option_disabled:
+            uniques = [item for item in Items.item_table.values() if "Unique" in item["category"]]
+            for unique in uniques:
+                unique["classification"] = ItemClassification.progression
 
-        if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
-            for item in gear_upgrades:
-                if "Normal" in item["category"]:
-                    self.items_to_place.pop(item["id"])
+            if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_allow_one_slot_of_normal_rarity
+                    or options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
+                gear_upgrades = Items.get_gear_items(table=self.items_to_place)
+                for item in gear_upgrades:
+                    if "Magic" in item["category"] or "Rare" in item["category"]:
+                        self.items_to_place.pop(item["id"])
+
+            if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
+                for item in gear_upgrades:
+                    if "Normal" in item["category"]:
+                        self.items_to_place.pop(item["id"])
 
         # remove passive skill points from item pool
         # we are using the slot_data to tell the client to chill out when it comes to passive skill points

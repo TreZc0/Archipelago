@@ -28,6 +28,22 @@ WPM = 250  # Default words per minute for TTS
 tasks: list[typing.Tuple[str, str, int]] = []  # List to hold async tasks for TTS generation
 
 tts_lock = threading.Lock()  # Lock to ensure thread-safe access to TTS generation
+
+def start_tts_engine():
+    """Initialize the TTS engine."""
+    global _engine
+    if _engine is None:
+        try:
+            if sys.platform == "win32":
+                _engine = pyttsx3.init()
+            else:
+                _engine = pyttsx3.init(driverName='espeak')
+            logger.debug("[DEBUG] TTS engine initialized successfully.")
+        except Exception as e:
+            logger.error(f"[ERROR] Failed to initialize TTS engine: {e}")
+            _engine = None
+    return _engine        
+    
 def get_item_name_tts_text(ctx: "PathOfExileContext", network_item) -> str:
     return ctx.player_names[network_item.player] + " ... " + ctx.item_names.lookup_in_slot(network_item.item,
                                                                                                network_item.player)
@@ -118,7 +134,7 @@ def run_tts_tasks(use_daemon: bool = True):
             return
 
         if _engine is None:
-            _engine = pyttsx3.init()
+            _engine = start_tts_engine()
 
         if len(tasks) > 0:
             for text, filename, rate in tasks:
@@ -147,7 +163,7 @@ async def async_run_tts_tasks():
             return
 
         if _engine is None:
-            _engine = pyttsx3.init()
+            _engine = start_tts_engine()
 
         if len(tasks) > 0:
             for text, filename, rate in tasks:
