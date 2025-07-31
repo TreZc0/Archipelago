@@ -80,24 +80,71 @@ def deprioritize_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, Item
                 item["classification"] = ItemClassification.progression
             else:
                 item["classification"] = ItemClassification.filler
-                
+    return table
+
+GUARANTEED_WEAPON_COUNT = 2  # The number of guaranteed weapons to keep in the world
+def deprioritize_non_logic_gear(world: "PathOfExileWorld", table: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
+    opt: PathOfExileOptions = world.options
+
+    required_weps = list()
+    progression_main_gems = [gem for gem in get_main_skill_gem_items(table) if gem["classification"] == ItemClassification.progression]
+    for gem in progression_main_gems:
+        for wep in gem.get("reqToUse", []):
+            required_weps.append(wep)
+    
+    required_weps = world.random.sample(required_weps, k=min(GUARANTEED_WEAPON_COUNT, len(required_weps)))
+    if "Unarmed" in required_weps: required_weps.remove("Unarmed")
+    required_weps.extend(["Wand", "Bow", "Sword"])
+    required_weps = required_weps[:GUARANTEED_WEAPON_COUNT]  # Ensure we only keep the guaranteed number of weapons
+
+
+    gear_ids = [item["id"] for item in get_gear_items(table)]
+    progression_gear_ids = world.random.sample(gear_ids, opt.gear_upgrades_per_act.value * world.goal_act)
+
+    for item in [ item for item in get_gear_items()]:
+        if item["name"] in required_weps or item["id"] in progression_gear_ids:
+            item["classification"] = ItemClassification.progression
+        else:
+            item["classification"] = ItemClassification.filler
+    
     return table
 
 def cull_items_to_place(world: "PathOfExileWorld", items: Dict[int, ItemDict], locations: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
+    #filler items with counts are going to mess us up.
+    
     total_items_count = sum(item.get("count", 1) for item in items.values())
     total_locations_count = len(locations)
+
+
+
+    items = deprioritize_non_logic_gems(world, items)
+    items = deprioritize_non_logic_gear(world, items)
     amount_to_cull = total_items_count - total_locations_count
 
     remove_items_ids = set()
-    
-    filler_items = [item_id for item_id, item in items.items() if item["classification"] == ItemClassification.filler]
-    if not filler_items:
+
+    filler_items_id = [item_id for item_id, item in items.items() if item.get("classification") == ItemClassification.filler]
+    filler_items = [item for item_id, item in items.items() if item.get("classification") == ItemClassification.filler]
+    filler_items_count = sum(item.get("count", 1) for item in filler_items)
+    if not filler_items_id:
         logger.error("[ERROR] No filler items found to remove. This should not happen.")
     item_to_remove = world.random.sample(filler_items, k=amount_to_cull)
+    
+    
     remove_items_ids.update(item_to_remove)
 
     for item_id in remove_items_ids:
         items.pop(item_id, None)
+    items_left_count = sum(item.get("count", 1) for item in items.values())
+    if items_left_count == total_locations_count:
+        return items
+
+    
+    
+
+
+    return items
+
 
 
 def get_flask_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
@@ -133,6 +180,10 @@ def get_main_skill_gem_items(table: Dict[int, ItemDict] = item_table) -> list[It
         return memoize_cache["MainSkillGem"]
     result = [item for item in table.values() if "MainSkillGem" in item["category"]]
     if table is item_table: memoize_cache["MainSkillGem"] = result
+    return result
+
+def get_main_skill_gem_items_table(table: Dict[int, ItemDict] = item_table) -> dict[int, ItemDict]:
+    result = {item["id"]: item for item in table.values() if "MainSkillGem" in item["category"]}
     return result
 
 def get_support_gem_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
