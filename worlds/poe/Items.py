@@ -7,6 +7,7 @@ from BaseClasses import Item, ItemClassification
 from typing import TypedDict, Dict, Set
 
 from worlds.poe.data import ItemTable
+from worlds.poe import Locations
 
 class ItemDict(TypedDict, total=False): 
     classification: ItemClassification 
@@ -50,9 +51,26 @@ item_table: Dict[int, ItemDict] = ItemTable.item_table
 memoize_cache: Dict[str, list[ItemDict]] = {}
 
 
-def deprioritized_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
+def deprioritize_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
     opt: PathOfExileOptions = world.options
     
+    still_required_gem_ids = set()
+    
+    for act in range(1, world.goal_act + 1):
+        main_gems_for_act = [item for item in get_main_skill_gem_items() if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
+        
+        if main_gems_for_act:  
+            selected_gems = world.random.sample(main_gems_for_act, k=min(opt.skill_gems_per_act.value, len(main_gems_for_act)))
+            still_required_gem_ids.update(item["id"] for item in selected_gems)
+    
+    for item in table.values():
+        if "MainSkillGem" in item["category"]: 
+            if item["id"] in still_required_gem_ids:
+                item["classification"] = ItemClassification.progression
+            else:
+                item["classification"] = ItemClassification.useful
+                
+    return table
 
 def get_flask_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     if table is item_table and "Flask" in memoize_cache:

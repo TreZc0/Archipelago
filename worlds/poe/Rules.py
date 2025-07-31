@@ -44,17 +44,18 @@ req_to_use_weapon_types = ["Axe","Bow","Claw","Dagger","Mace","Sceptre","Staff",
 #}
 
 passives_required_for_act = {
-    1: 16,
-    2: 32,
-    3: 44,
-    4: 54,
-    5: 64,
-    6: 74,
-    7: 84,
-    8: 94,
-    9: 103,
-    10: 112,
-    11: 128,  # max ammount of passives in the game
+    1: 6,
+    2: 16,
+    3: 32,
+    4: 44,
+    5: 54,
+    6: 64,
+    7: 74,
+    8: 84,
+    9: 94,
+    10: 103,
+    11: 112,
+    12: 128,  # max ammount of passives in the game
 }
 
 def get_ascendancy_amount_for_act(act, opt): return opt.ascendancies_available_per_class.value if act == 3 else 0
@@ -116,7 +117,7 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
            gem_slot_count >= gem_slot_amount and \
            usable_skill_gem_count >= skill_gem_amount and \
            passive_count >= passive_amount
-           
+
     if not reachable:
         print (f"[DEBUG] Act {act} not reachable with gear: {gear_count}/{gear_amount}, flask: {flask_count}/{flask_amount}, gem slots: {gem_slot_count}/{gem_slot_amount}, \n" +
                f"skill gems: {usable_skill_gem_count}/{skill_gem_amount}, ascendancies: {ascedancy_count}/{ascedancy_amount} levels:{passive_count}/{passive_amount} for {opt.starting_character.current_option_name}")

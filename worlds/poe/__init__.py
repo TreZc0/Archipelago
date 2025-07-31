@@ -118,7 +118,11 @@ class PathOfExileWorld(World):
             item = Items.get_by_name("Progressive passive point")
             if item:
                 self.items_to_place.pop(item["id"], None)
-        
+        else:
+            item = Items.get_by_name("Progressive passive point")
+            if item:
+                item["count"] = poeRules.passives_required_for_act[self.goal_act + 1]
+
         if options.gear_upgrades != options.gear_upgrades.option_no_gear_unlocked:
             categories = set()
             if options.gear_upgrades in {options.gear_upgrades.option_all_gear_unlocked_at_start,
@@ -223,6 +227,7 @@ class PathOfExileWorld(World):
         for item_id, item_obj in temp_items_to_place.items():
             self.items_to_place[item_id] = item_obj
 
+        self.items_to_place = Items.deprioritize_non_logic_gems(self, self.items_to_place)
         self.total_items_count = sum(item.get("count", 1) for item in self.items_to_place.values())
         self.locations_to_place = poeRules.SelectLocationsToAdd(world=self, target_amount=self.total_items_count)
 

@@ -82,8 +82,6 @@ def validate_char(ctx: "PathOfExileContext" = context):
     last_ran_validate_char = time.time()
 
 async def async_load(ctx: "PathOfExileContext" = None):
-    # TODO: store / load character name, path to client.txt and base item filter from the context to a file
-
 
     await gggAPI.async_get_access_token()
     
