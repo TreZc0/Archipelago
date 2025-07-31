@@ -87,18 +87,9 @@ class PathOfExileWorld(World):
     
     def generate_early(self):
         options: PathOfExileOptions = self.options
-        if   options.goal.value == options.goal.option_complete_act_1: self.goal_act = 1
-        elif options.goal.value == options.goal.option_complete_act_2: self.goal_act = 2
-        elif options.goal.value == options.goal.option_complete_act_3: self.goal_act = 3
-        elif options.goal.value == options.goal.option_complete_act_4: self.goal_act = 4
-        elif options.goal.value == options.goal.option_kauri_fortress_act_6: self.goal_act = 5
-        elif options.goal.value == options.goal.option_complete_act_6: self.goal_act = 6
-        elif options.goal.value == options.goal.option_complete_act_7: self.goal_act = 7
-        elif options.goal.value == options.goal.option_complete_act_8: self.goal_act = 8
-        elif options.goal.value == options.goal.option_complete_act_9: self.goal_act = 9
-        elif options.goal.value == options.goal.option_complete_the_campaign: self.goal_act = 10
-        else: self.goal_act = 11
-        
+        self.goal_act = self.get_goal_act(options)
+        max_level = Locations.acts[self.goal_act]["maxMonsterLevel"]
+
         if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_allow_one_slot_of_normal_rarity
                 or options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
             gear_upgrades = Items.get_gear_items(table=self.items_to_place)
@@ -112,7 +103,6 @@ class PathOfExileWorld(World):
                     self.items_to_place.pop(item["id"])
 
         # remove passive skill points from item pool
-        # we don't just add them to precollected items, because that would clutter the item pool.
         # we are using the slot_data to tell the client to chill out when it comes to passive skill points
         if options.add_passive_skill_points_to_item_pool.value == False:
             item = Items.get_by_name("Progressive passive point")
@@ -122,6 +112,15 @@ class PathOfExileWorld(World):
             item = Items.get_by_name("Progressive passive point")
             if item:
                 item["count"] = poeRules.passives_required_for_act[self.goal_act + 1]
+                
+        items_to_remove = {}
+        # remove gems that are too high level from item pool
+        for item in self.items_to_place.values():
+            if item["category"] in {"MainSkillGem", "SupportGem", "UtilSkillGem"} and item["reqLevel"] > max_level:
+                items_to_remove[item["id"]] = item
+
+        for item_id in items_to_remove:
+            self.items_to_place.pop(item_id)
 
         if options.gear_upgrades != options.gear_upgrades.option_no_gear_unlocked:
             categories = set()
@@ -236,6 +235,19 @@ class PathOfExileWorld(World):
         logger.debug("Here 1")
         logger.debug(f"[DEBUG]: total locs in world.: {len(self.locations_to_place)} / {len(Locations.full_locations)} possible")
         logger.debug("Here 2")
+
+    def get_goal_act(self, options) -> int:
+        if options.goal.value == options.goal.option_complete_act_1: return 1
+        elif options.goal.value == options.goal.option_complete_act_2: return 2
+        elif options.goal.value == options.goal.option_complete_act_3: return 3
+        elif options.goal.value == options.goal.option_complete_act_4: return 4
+        elif options.goal.value == options.goal.option_kauri_fortress_act_6: return 5
+        elif options.goal.value == options.goal.option_complete_act_6: return 6
+        elif options.goal.value == options.goal.option_complete_act_7: return 7
+        elif options.goal.value == options.goal.option_complete_act_8: return 8
+        elif options.goal.value == options.goal.option_complete_act_9: return 9
+        elif options.goal.value == options.goal.option_complete_the_campaign: return 10
+        else: return 11
 
     def create_regions(self):
         """Create the regions for the Path of Exile world.
