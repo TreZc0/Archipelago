@@ -56,6 +56,7 @@ class PathOfExileWorld(World):
     origin_region_name = "Menu"
 
     items_to_place = {}
+    items_procollected = {}
     locations_to_place = {}
     total_items_count = 0
     
@@ -84,6 +85,10 @@ class PathOfExileWorld(World):
         item_to_place = self.items_to_place.pop(item_id)  # Remove from items to place
         item_obj = Items.PathOfExileItem(item_to_place["name"], ItemClassification.progression, item_id, self.player)
         return item_obj
+
+    def precollect(self, item_obj):
+        self.items_procollected[item_obj.code] = item_obj
+        self.multiworld.push_precollected(item_obj)
     
     def generate_early(self):
         options: PathOfExileOptions = self.options
@@ -142,24 +147,24 @@ class PathOfExileWorld(World):
             for item in gear_upgrades:
                 item_objs = self.remove_and_create_item_by_itemdict(item)
                 for item_obj in item_objs:
-                    self.multiworld.push_precollected(item_obj)
+                    self.precollect(item_obj)
 
         if options.add_flask_slots_to_item_pool.value == False:
             flask_slots = Items.get_flask_items(table=self.items_to_place)
             for item in flask_slots:
                 item_objs = self.remove_and_create_item_by_itemdict(item)
                 for item_obj in item_objs:
-                    self.multiworld.push_precollected(item_obj)
+                    self.precollect(item_obj)
 
         if options.add_max_links_to_item_pool.value == False:
             support_gem_slots = Items.get_max_links_items(table=self.items_to_place)
             for item in support_gem_slots:
                 item_obj = self.remove_and_create_item_by_itemdict(item)
-                self.multiworld.push_precollected(item_obj)
+                self.precollect(item_obj)
         
         def handle_starting_character(char):
             item_obj = self.remove_and_create_item_by_name(char)
-            self.multiworld.push_precollected(item_obj)
+            self.precollect(item_obj)
             
             if options.usable_starting_gear.value in \
             (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
@@ -167,31 +172,41 @@ class PathOfExileWorld(World):
             options.usable_starting_gear.option_starting_weapon):
                 weapon_name = ItemTable.starting_items_table[char]["weapon"]
                 if weapon_name in [item["name"] for item in self.items_to_place.values()]:
-                    self.multiworld.push_precollected(self.remove_and_create_item_by_name(weapon_name))
+                    self.precollect(self.remove_and_create_item_by_name(weapon_name))
                 
                 count = self.multiworld.state.count("Progressive max links - Weapon", self.player)
                 if count < 1:
                     wep = self.remove_and_create_item_by_name("Progressive max links - Weapon")
-                    self.multiworld.push_precollected(wep)
+                    self.precollect(wep)
 
             if options.usable_starting_gear.value in \
             (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
              options.usable_starting_gear.option_starting_weapon_and_gems):
-                self.multiworld.push_precollected(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["gem"]))
-                self.multiworld.push_precollected(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["support"]))
+                self.precollect(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["gem"]))
+                self.precollect(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["support"]))
             
             STARTING_FLASK_SLOTS = 3    
             if options.usable_starting_gear.value in \
             (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
             options.usable_starting_gear.option_starting_weapon_and_flask_slots):
-                count = self.multiworld.state.count_from_list([item['name'] for item in Items.get_by_has_every_category({"Flask", "Normal"})], self.player)
-                if (STARTING_FLASK_SLOTS - count) > 0:
-                    flasks = Items.get_by_has_every_category({"Flask", "Normal"}, table=self.items_to_place)
-                    for i in range(3 - count):
-                        if len(flasks) == 0:
-                            break
-                        flask = self.remove_and_create_item_by_name(flasks[0]["name"])
-                        self.multiworld.push_precollected(flask)
+
+                # Get all normal flask items from the main table
+                normal_flasks = Items.get_by_has_every_category({"Flask", "Normal"})
+                normal_flask_ids = {flask["id"] for flask in normal_flasks}
+
+                # Count how many normal flasks are already collected
+                collected_normal_flask_count = sum(
+                    1 for item_obj in self.items_procollected.values()
+                    if item_obj.code in normal_flask_ids
+                )
+
+                # add flasks
+                flasks_needed = STARTING_FLASK_SLOTS - collected_normal_flask_count
+                if flasks_needed > 0:
+                    available_flasks = Items.get_by_has_every_category({"Flask", "Normal"}, table=self.items_to_place)
+                    for i in range(min(flasks_needed, len(available_flasks))):
+                        flask = self.remove_and_create_item_by_name(available_flasks[i]["name"])
+                        self.precollect(flask)
             return char
             
         starting_character = ""
