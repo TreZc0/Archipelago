@@ -222,6 +222,13 @@ class PathOfExileWorld(World):
         for item in Items.get_ascendancy_items(table=self.items_to_place):
             item_id = self.item_name_to_id[item["name"]]
             self.items_to_place.pop(item_id, None)
+
+        # remove other character class items, if not allowed
+        if not options.allow_unlock_of_other_characters.value:
+            character_items = Items.get_character_class_items(self.items_to_place)
+            for character_item in character_items:
+                if character_item['name'] != starting_character:
+                    self.items_to_place.pop(character_item['id'], None)
         
         # add the temp items to place back to the items to place
         for item_id, item_obj in temp_items_to_place.items():
