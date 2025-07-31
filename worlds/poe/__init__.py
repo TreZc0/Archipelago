@@ -114,9 +114,10 @@ class PathOfExileWorld(World):
                 item["count"] = poeRules.passives_required_for_act[self.goal_act + 1]
                 
         items_to_remove = {}
+        gem_categories = {"MainSkillGem", "SupportGem", "UtilSkillGem"}
         # remove gems that are too high level from item pool
         for item in self.items_to_place.values():
-            if item["category"] in {"MainSkillGem", "SupportGem", "UtilSkillGem"} and item["reqLevel"] > max_level:
+            if set(item["category"]).intersection(gem_categories) and item["reqLevel"] > max_level:
                 items_to_remove[item["id"]] = item
 
         for item_id in items_to_remove:
