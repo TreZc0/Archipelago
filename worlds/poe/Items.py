@@ -9,6 +9,9 @@ from typing import TypedDict, Dict, Set
 from worlds.poe.data import ItemTable
 from worlds.poe import Locations
 
+import logging
+logger = logging.getLogger("poe.Items")
+
 class ItemDict(TypedDict, total=False): 
     classification: ItemClassification 
     count: int | None
@@ -50,7 +53,6 @@ class PathOfExileItem(Item):
 item_table: Dict[int, ItemDict] = ItemTable.item_table
 memoize_cache: Dict[str, list[ItemDict]] = {}
 
-
 def deprioritize_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
     opt: PathOfExileOptions = world.options
     
@@ -58,19 +60,45 @@ def deprioritize_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, Item
     
     for act in range(1, world.goal_act + 1):
         main_gems_for_act = [item for item in get_main_skill_gem_items() if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
+        support_gems_for_act = [item for item in get_support_gem_items() if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
+        utility_gems_for_act = [item for item in get_utility_skill_gem_items() if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
         
         if main_gems_for_act:  
             selected_gems = world.random.sample(main_gems_for_act, k=min(opt.skill_gems_per_act.value, len(main_gems_for_act)))
+            selected_gems.extend(world.random.sample(support_gems_for_act, k=min(opt.skill_gems_per_act.value, len(support_gems_for_act))))
+            selected_gems.extend(world.random.sample(utility_gems_for_act, k=min(opt.skill_gems_per_act.value, len(utility_gems_for_act))))
+
+
             still_required_gem_ids.update(item["id"] for item in selected_gems)
     
     for item in table.values():
-        if "MainSkillGem" in item["category"]: 
+        if "MainSkillGem" in item["category"]\
+            or "SupportGem" in item["category"] \
+            or "UtilSkillGem" in item["category"] \
+                :
             if item["id"] in still_required_gem_ids:
                 item["classification"] = ItemClassification.progression
             else:
-                item["classification"] = ItemClassification.useful
+                item["classification"] = ItemClassification.filler
                 
     return table
+
+def cull_items_to_place(world: "PathOfExileWorld", items: Dict[int, ItemDict], locations: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
+    total_items_count = sum(item.get("count", 1) for item in items.values())
+    total_locations_count = len(locations)
+    amount_to_cull = total_items_count - total_locations_count
+
+    remove_items_ids = set()
+    
+    filler_items = [item_id for item_id, item in items.items() if item["classification"] == ItemClassification.filler]
+    if not filler_items:
+        logger.error("[ERROR] No filler items found to remove. This should not happen.")
+    item_to_remove = world.random.sample(filler_items, k=amount_to_cull)
+    remove_items_ids.update(item_to_remove)
+
+    for item_id in remove_items_ids:
+        items.pop(item_id, None)
+
 
 def get_flask_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     if table is item_table and "Flask" in memoize_cache:

@@ -231,6 +231,11 @@ class PathOfExileWorld(World):
         self.total_items_count = sum(item.get("count", 1) for item in self.items_to_place.values())
         self.locations_to_place = poeRules.SelectLocationsToAdd(world=self, target_amount=self.total_items_count)
 
+        if len(self.locations_to_place) <  self.total_items_count:
+            logger.debug(f"[Debug]: Not enough locations to place all items! {len(self.locations_to_place)} < {self.total_items_count}\nCulling...")
+            Items.cull_items_to_place(self, self.items_to_place, self.locations_to_place)
+
+
 
         logger.debug(f"[DEBUG]: total items to place: {len(self.items_to_place)} / {self.total_items_count} possible")
         logger.debug("Here 1")
