@@ -110,10 +110,10 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
 
         #add levels to locations_to_check
         if ctx.game_options.get("add_leveling_up_to_location_pool", True):
-            for level in range(2, ctx.last_character_level):
+            for level in range(2, ctx.last_character_level + 1):
                 if _debug and _verbose_debug:
                     logger.info(f"[DEBUG] Adding level {level} to locations to check.")
-                location_id = Locations.get_lvl_location_name_from_lvl()
+                location_id = Locations.get_lvl_location_name_from_lvl(level)
                 if location_id is not None:
                     locations_to_check.add(location_id)
 

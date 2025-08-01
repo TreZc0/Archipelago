@@ -183,7 +183,7 @@ class TTSSpeed(Range):
     display_name = "TTS Speed"
     range_start = 50
     range_end = 500
-    default = 200
+    default = 250
 
 
 @dataclass

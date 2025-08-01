@@ -937,8 +937,11 @@ for i, item in enumerate(location_array, start=1):
     item["id"] = i
     base_item_location_table[i] = item
 
+base_item_set = set(item["baseItem"] for item in location_array)
+
 level_location_table = {}
-for i, item in enumerate(level_location_array, start=(len(location_array) + 1)):
+for i, item in enumerate(level_location_array,
+                         start=(len(location_array) + 1)):# start counting ids at the end of the base item list
     item["id"] = i
     level_location_table[i] = item
 

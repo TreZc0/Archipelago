@@ -162,6 +162,7 @@ acts = [
 
 def get_lvl_location_name_from_lvl(level: int) -> str: return f"Reach Level {level}"
 # based off of baseItemTypes.json
+base_item_names_set = LocationTable.base_item_set
 base_item_type_locations: Dict[int, LocationDict] = LocationTable.base_item_location_table
 level_locations: Dict[int, LocationDict] = LocationTable.level_location_table
 full_locations = {**base_item_type_locations, **level_locations}

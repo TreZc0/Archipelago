@@ -13,6 +13,7 @@ if typing.TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
 from pathlib import Path
 from worlds.poe.Locations import base_item_types_by_name
+from worlds.poe import Locations
 
 filter_file_dir = Path.home() / "Documents" / "My Games" / "Path of Exile"
 filter_file_path = Path.home() / "Documents" / "My Games" / "Path of Exile" / "__ap.filter"
@@ -76,7 +77,7 @@ def update_item_filter_from_context(ctx : "PathOfExileContext", recently_checked
            (recently_checked_locations and base_item_location_id in recently_checked_locations):
             continue
         base_type_name = ctx.location_names.lookup_in_game(base_item_location_id)
-        if not base_type_name:
+        if not base_type_name or base_type_name not in Locations.base_item_names_set: # other locations that aren't base items
             continue
         relative_wav_path = base_item_id_to_relative_wav_path.get(base_item_location_id, None)
         if relative_wav_path is None:
