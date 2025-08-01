@@ -254,16 +254,20 @@ class PathOfExileWorld(World):
         for item_id, item_obj in temp_items_to_place.items():
             self.items_to_place[item_id] = item_obj
 
+        self.items_to_place = Items.deprioritize_non_logic_gems(self, self.items_to_place)
+        self.items_to_place = Items.deprioritize_non_logic_gear(self, self.items_to_place)
+
         self.total_items_count = sum(item.get("count", 1) for item in self.items_to_place.values())
         self.locations_to_place = poeRules.SelectLocationsToAdd(world=self, target_amount=self.total_items_count)
 
+        table_total_item_count = sum(item.get("count", 1) for item in Items.item_table.values())
         if len(self.locations_to_place) <  self.total_items_count:
-            logger.debug(f"[Debug]: Not enough locations to place all items! {len(self.locations_to_place)} < {self.total_items_count}\nCulling...")
+            logger.debug(f"[Debug]: Not enough locations to place all items! {self.total_items_count} < { table_total_item_count}\nCulling...")
             Items.cull_items_to_place(self, self.items_to_place, self.locations_to_place)
 
 
 
-        logger.debug(f"[DEBUG]: total items to place: {len(self.items_to_place)} / {self.total_items_count} possible")
+        logger.debug(f"[DEBUG]: total items to place: {self.total_items_count} / {table_total_item_count} possible")
         logger.debug("Here 1")
         logger.debug(f"[DEBUG]: total locs in world.: {len(self.locations_to_place)} / {len(Locations.full_locations)} possible")
         logger.debug("Here 2")

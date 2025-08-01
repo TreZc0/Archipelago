@@ -85,11 +85,14 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
     #def _cmd_set_current_character(self) -> bool:
     #    self.ctx.player_verify_code = Random.randint()
 
-    def _cmd_base_item_filter(self, filter_name: str = "FilterBlade") -> bool:
+    def _cmd_base_item_filter(self, filter_name: str = "") -> bool:
         """Set the base item filter. (this needs to be a local file, and remember to add the .filter extension)"""
         if not filter_name:
             self.output("ERROR: Please provide a valid item filter name.")
             return False
+        if not filter_name.endswith(".filter"):
+            filter_name += ".filter"
+            self.output(f"adding .filter extension to the filter name: {filter_name}")
         self.ctx.base_item_filter = filter_name
         self.ctx.update_settings()  # Save the settings
         self.output(f"Base item filter set to: {filter_name}")
@@ -112,16 +115,21 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         poe_main.client_start(self.ctx)
         return True
 
-    def _cmd_t(self):
-        """A test command to check if the command processor is working. -- This is a placeholder for testing purposes."""
-#        self._cmd_connect("Player1:@localhost:38281")
-        # wait 4 seconds to allow the character name to be set
-        #self._cmd_poe_char_name("_ap_test_one")
+    def _cmd_client(self):
+        """Shortcut for setting the client text path."""
+        self._cmd_set_client_text_path(self.ctx.client_text_path)
 
-        self._cmd_received()
+    def _cmd_char(self):
+        """shortcut for setting the character name."""
+        self._cmd_char_name(self.ctx.character_name)
 
+    def _cmd_filter(self, filter_name: str = "") -> bool:
+        """shortcut for setting the base item filter."""
+        self._cmd_base_item_filter(filter_name)
+
+    def _cmd_start(self):
+        """shortcut for starting the Path of Exile client."""
         self._cmd_start_poe()
-
 
 
 

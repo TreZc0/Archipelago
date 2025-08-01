@@ -111,8 +111,6 @@ def deprioritize_non_logic_gear(world: "PathOfExileWorld", table: Dict[int, Item
 
 def cull_items_to_place(world: "PathOfExileWorld", items: Dict[int, ItemDict], locations: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
     total_locations_count = len(locations)
-    items = deprioritize_non_logic_gems(world, items)
-    items = deprioritize_non_logic_gear(world, items)
     
     # Keep culling until we match the location count
     while True:

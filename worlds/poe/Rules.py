@@ -20,6 +20,7 @@ ACT_0_USABLE_GEMS = 4
 ACT_0_FLASK_SLOTS = 2
 ACT_0_NORMAL_WEAPONS = 1
 ACT_0_NORMAL_ARMOUR = 1
+ACT_0_ADDITIONAL_LOCATIONS = 8
 _debug = True
 _very_debug = False
 
@@ -119,8 +120,24 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
            passive_count >= passive_amount
 
     if not reachable:
-        print (f"[DEBUG] Act {act} not reachable with gear: {gear_count}/{gear_amount}, flask: {flask_count}/{flask_amount}, gem slots: {gem_slot_count}/{gem_slot_amount}, \n" +
-               f"skill gems: {usable_skill_gem_count}/{skill_gem_amount}, ascendancies: {ascedancy_count}/{ascedancy_amount} levels:{passive_count}/{passive_amount} for {opt.starting_character.current_option_name}")
+        log = f"[DEBUG] Act {act} not reachable with gear:"
+        if gear_count < gear_amount:
+            log += f"gear: {gear_count}/{gear_amount},"
+        if flask_count < flask_amount:
+            log += f" flask: {flask_count}/{flask_amount},"
+        if gem_slot_count < gem_slot_amount:
+            log += f" gem slots: {gem_slot_count}/{gem_slot_amount},"
+        if usable_skill_gem_count < skill_gem_amount:
+            log += f" skill gems: {usable_skill_gem_count}/{skill_gem_amount},"
+        if ascedancy_count < ascedancy_amount:
+            log += f" ascendancies: {ascedancy_count}/{ascedancy_amount},"
+        if passive_count < passive_amount:
+            log += f" levels:{passive_count}/{passive_amount}"
+        log += f" for {opt.starting_character.current_option_name}"
+
+        print (log)
+
+        logger.debug(log)
         if _very_debug:
             logger.debug(f"[DEBUG] expecting Act {act} - Gear: {gear_amount}, Flask: {flask_amount}, Gem Slots: {gem_slot_amount}, Skill Gems: {skill_gem_amount}, Ascendancies: {ascedancy_amount}")
             logger.debug(f"[DEBUG] we have   Act {act} - Gear: {gear_count}, Flask: {flask_count}, Gem Slots: {gem_slot_count}, Skill Gems: {usable_skill_gem_count}, Ascendancies: {ascedancy_count}")
@@ -165,7 +182,7 @@ def SelectLocationsToAdd (world: "PathOfExileWorld", target_amount):
         if act < 1:
             return 0
         needed_locations_for_act = 0
-        needed_locations_for_act += ACT_0_USABLE_GEMS + ACT_0_NORMAL_WEAPONS + ACT_0_NORMAL_ARMOUR + ACT_0_FLASK_SLOTS
+        needed_locations_for_act += ACT_0_USABLE_GEMS + ACT_0_NORMAL_WEAPONS + ACT_0_NORMAL_ARMOUR + ACT_0_FLASK_SLOTS + ACT_0_ADDITIONAL_LOCATIONS
         needed_locations_for_act += get_ascendancy_amount_for_act(act, opt)
         needed_locations_for_act += get_gear_amount_for_act(act, opt)
         needed_locations_for_act += get_flask_amount_for_act(act, opt)
@@ -181,7 +198,10 @@ def SelectLocationsToAdd (world: "PathOfExileWorld", target_amount):
         if not locations_in_act:
             break
 
-        selected_locations = world.random.sample(locations_in_act, k=needed_locations_for_act)
+        if needed_locations_for_act > len(locations_in_act):
+            logger.error(f"[ERROR] Not enough locations for Act {act}. Needed: {needed_locations_for_act}, Available: {len(locations_in_act)}, going to try to generate anyway...")
+
+        selected_locations = world.random.sample(locations_in_act, k=min(needed_locations_for_act, len(locations_in_act)))
         for loc in selected_locations:
             total_available_locations.remove(loc)
         selected_locations_result.extend(selected_locations)
