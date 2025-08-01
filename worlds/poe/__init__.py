@@ -195,23 +195,29 @@ class PathOfExileWorld(World):
             (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
             options.usable_starting_gear.option_starting_weapon_and_flask_slots):
 
-                # Get all normal flask items from the main table
+                # Get all normal flask items from the main table, this will probably just be 1, with a count
                 normal_flasks = Items.get_by_has_every_category({"Flask", "Normal"})
                 normal_flask_ids = {flask["id"] for flask in normal_flasks}
-
+                total_normal_flask_count = sum(item.get("count", 1) for item in self.items_to_place.values() if item["id"] in normal_flask_ids)
                 # Count how many normal flasks are already collected
-                collected_normal_flask_count = sum(
-                    1 for item_obj in self.items_procollected.values()
-                    if item_obj.code in normal_flask_ids
-                )
+                collected_normal_flask_count = sum(1 for item_obj in self.items_procollected.values() if item_obj.code in normal_flask_ids)
 
                 # add flasks
                 flasks_needed = STARTING_FLASK_SLOTS - collected_normal_flask_count
                 if flasks_needed > 0:
-                    available_flasks = Items.get_by_has_every_category({"Flask", "Normal"}, table=self.items_to_place)
-                    for i in range(min(flasks_needed, len(available_flasks))):
-                        flask = self.remove_and_create_item_by_name(available_flasks[i]["name"])
-                        self.precollect(flask)
+                    normal_progressive_flask = Items.get_by_has_every_category({"Flask", "Normal"}, table=self.items_to_place) # should only be 1 item
+                    total_normal_flask_count = normal_progressive_flask[0].get("count", 1)
+                    for i in range(min(flasks_needed, total_normal_flask_count)):
+                        item_obj = Items.PathOfExileItem(
+                            name=normal_progressive_flask[0]["name"],
+                            classification=ItemClassification.progression,
+                            code=normal_progressive_flask[0]["id"],
+                            player=self.player)
+                        self.precollect(item_obj)
+
+                    normal_progressive_flask[0]["count"] -= flasks_needed
+                    if normal_progressive_flask[0]["count"] <= 0:
+                        self.items_to_place.pop(normal_progressive_flask[0]["id"], None)
             return char
             
         starting_character = ""
@@ -300,7 +306,9 @@ class PathOfExileWorld(World):
 
         self.multiworld.completion_condition[self.player] = lambda state: (poeRules.completion_condition(self, state))
 
-    def create_items(self):
+        self.create_items_but_do_it_earlier()
+
+    def create_items_but_do_it_earlier(self):
         """Create the items for the Path of Exile world.
         This method initializes the items based on the items defined in Items.py.
         """
@@ -313,6 +321,9 @@ class PathOfExileWorld(World):
 
         logger.debug(f"[DEBUG]: items left to place:{len(self.items_to_place)} /{self.total_items_count}.\n Created {len(self.locations_to_place)} locations.")
 
+    def create_items(self):
+        itempool = self.multiworld.itempool
+        logger.debug(f"[DEBUG]: in create_items {len(itempool)} ---- ")
 
 
     def fill_slot_data(self):
