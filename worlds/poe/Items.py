@@ -79,7 +79,10 @@ def deprioritize_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, Item
             if item["id"] in still_required_gem_ids:
                 item["classification"] = ItemClassification.progression
             else:
-                item["classification"] = ItemClassification.filler
+                if item["classification"] == ItemClassification.progression:
+                    item["classification"] = ItemClassification.useful
+                elif item["classification"] == ItemClassification.useful:
+                    item["classification"] = ItemClassification.filler
     return table
 
 GUARANTEED_WEAPON_COUNT = 2  # The number of guaranteed weapons to keep in the world
@@ -106,13 +109,16 @@ def deprioritize_non_logic_gear(world: "PathOfExileWorld", table: Dict[int, Item
         if item["name"] in required_weps or item["id"] in progression_gear_ids:
             item["classification"] = ItemClassification.progression
         else:
-            item["classification"] = ItemClassification.filler
+            if item["classification"] == ItemClassification.progression:
+                item["classification"] = ItemClassification.useful
+            elif item["classification"] == ItemClassification.useful:
+                item["classification"] = ItemClassification.filler
     
     return table
 
 def cull_items_to_place(world: "PathOfExileWorld", items: Dict[int, ItemDict], locations: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
     total_locations_count = len(locations)
-    
+
     # Keep culling until we match the location count
     while True:
         total_items_count = sum(item.get("count", 1) for item in items.values())
@@ -120,47 +126,57 @@ def cull_items_to_place(world: "PathOfExileWorld", items: Dict[int, ItemDict], l
         
         if amount_to_cull <= 0:
             break
-        
-        # Get filler items sorted by count (remove high count items first)
+
         filler_items = [(item_id, item) for item_id, item in items.items() 
                        if item.get("classification") == ItemClassification.filler]
+
+        useful_items = [(item_id, item) for item_id, item in items.items()
+                       if item.get("classification") == ItemClassification.useful]
         
         
-        if not filler_items:
+        if not filler_items and not useful_items:
             logger.error("[ERROR] No items available to remove. Cannot match location count.")
             break
         
         # Sort by count descending (remove high-count items first for efficiency)
         filler_items = world.random.sample(filler_items, k=min(len(filler_items), amount_to_cull))
-        
+        useful_items = world.random.sample(useful_items, k=min(len(useful_items), amount_to_cull))
+
         culled_count = 0
-        items_to_remove = []
-        
-        for item_id, item in filler_items:
-            if culled_count >= amount_to_cull:
-                break
-                
-            item_count = item.get("count", 1)
-            
-            if item_count <= (amount_to_cull - culled_count):
-                # Remove entire item
-                items_to_remove.append(item_id)
-                culled_count += item_count
-            else:
-                # Reduce item count
-                reduction = amount_to_cull - culled_count
-                item["count"] = item_count - reduction
-                culled_count += reduction
-        
-        # Remove items marked for removal
-        for item_id in items_to_remove:
-            items.pop(item_id, None)
-    
+        def cull_item_func(cull_items, culled_count=0, amount_to_cull=amount_to_cull):
+            items_to_remove = []
+
+            for item_id, item in cull_items:
+                if culled_count >= amount_to_cull:
+                    break
+
+                item_count = item.get("count", 1)
+
+                if item_count <= (amount_to_cull - culled_count):
+                    # Remove entire item
+                    items_to_remove.append(item_id)
+                    culled_count += item_count
+                else:
+                    # Reduce item count
+                    reduction = amount_to_cull - culled_count
+                    item["count"] = item_count - reduction
+                    culled_count += reduction
+
+            # Remove items marked for removal
+            for item_id in items_to_remove:
+                items.pop(item_id, None)
+            return culled_count
+
+        culled_count = cull_item_func(filler_items, culled_count, amount_to_cull)
+        culled_count = cull_item_func(useful_items, culled_count, amount_to_cull)
+
+        logger.info(f"[INFO] Culled {culled_count} items.")
+
     # Final verification
     final_count = sum(item.get("count", 1) for item in items.values())
     if final_count != total_locations_count:
         logger.warning(f"Final item count ({final_count}) doesn't match location count ({total_locations_count})")
-    
+
     return items
 
 

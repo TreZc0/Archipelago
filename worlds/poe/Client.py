@@ -32,8 +32,9 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
             self.output("TTS generation disabled.")
         return True
 
-    def _cmd_tts_speed(self, speed: int = 250) -> bool:
+    def _cmd_tts_speed(self, speed: int) -> bool: #its going to actually be a string, but we will convert it to an int
         """Set the speed of TTS generation."""
+        speed = int(speed)
         if not isinstance(speed, int) or speed <= 0:
             self.output("ERROR: Please provide a valid positive integer for TTS speed.")
             return False
@@ -219,8 +220,8 @@ class PathOfExileContext(CommonContext):
                 try:
                     settings = task.result()
                     if settings:
-                        self.tts_options.enable = settings.get("tts_enabled", self.client_options.get('ttsEnabled', True))
-                        self.tts_options.speed = settings.get("tts_speed", self.client_options.get('ttsSpeed', 250))
+                        self.tts_options.enable = settings.get("tts_enabled", self.client_options.get('ttsEnabled', True) == True)
+                        self.tts_options.speed = settings.get("tts_speed", int(self.client_options.get('ttsSpeed', 250)))
                         self.client_text_path = settings.get("client_txt", self.client_text_path)
                         self.character_name = settings.get("last_char", self.character_name)
                         self.base_item_filter = settings.get("base_item_filter", self.base_item_filter)

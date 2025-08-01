@@ -31,7 +31,6 @@ SetBackgroundColor 238 227 147 255
 MinimapIcon 0 Green UpsideDownHouse
 PlayEffect Cyan
 """
-
 default_style_string = f"""SetFontSize 45
 SetFontSize 35
 SetTextColor 201 117 130 255
@@ -40,7 +39,6 @@ SetBackgroundColor 201 117 130 240
 MinimapIcon 1 Green UpsideDownHouse
 PlayEffect Cyan Temp
 """
-
 filler_style_string = f"""SetFontSize 45
 SetFontSize 20
 SetTextColor 201 117 130 255
@@ -48,7 +46,6 @@ SetBorderColor 201 148 194 255
 SetBackgroundColor 201 117 130 220
 MinimapIcon 2 Green UpsideDownHouse
 """
-
 trap_style_string = f"""SetFontSize 45
 SetFontSize 45
 SetTextColor 201 117 130 255
@@ -90,9 +87,9 @@ def update_item_filter_from_context(ctx : "PathOfExileContext", recently_checked
 
         if flags & 0b001:  # advancement
             progression = ItemClassification.progression
-        if flags & 0b010:  # useful
+        elif flags & 0b010:  # useful
             progression = ItemClassification.useful
-        if flags & 0b100:  # trap
+        elif flags & 0b100:  # trap
             progression = ItemClassification.trap
         else:
             progression = ItemClassification.filler
@@ -106,7 +103,7 @@ def update_item_filter_from_context(ctx : "PathOfExileContext", recently_checked
             style_string = default_style_string
         elif progression == ItemClassification.trap:
             style_string = trap_style_string
-        item_filter_str += generate_item_filter_block(base_type_name, relative_wav_path) + "\n\n"
+        item_filter_str += generate_item_filter_block(base_type_name, alert_sound=relative_wav_path, style_string=style_string) + "\n\n"
     write_item_filter(item_filter_str, item_filter_import=ctx.base_item_filter)
 
 def generate_item_filter_block(base_type_name, alert_sound, style_string=default_style_string) -> str:
@@ -115,7 +112,7 @@ def generate_item_filter_block(base_type_name, alert_sound, style_string=default
         return ""
     if not Path.exists(filter_file_dir / alert_sound):
         print(f"[ERROR] Alert sound '{alert_sound}' does not exist in {filter_sounds_path}.")
-        return generate_item_filter_block_without_sound(base_type_name)
+        return generate_item_filter_block_without_sound(base_type_name=base_type_name, style_string=style_string)
     return f"""
 {start_item_filter_block}
 Show 

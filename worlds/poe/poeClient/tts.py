@@ -100,10 +100,11 @@ def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", tts_spe
     if not ctx or not ctx.missing_locations:
         logger.info("[DEBUG] No missing locations to generate TTS for.")
         return
-
+    speed = 250
     if tts_speed is None:
         if not ctx.tts_options: logger.error("[Error] No client options available for TTS.")
-        else: speed = ctx.tts_options.speed
+    else:
+        speed = int(ctx.tts_options.speed)
 
     missing_location_ids = ctx.missing_locations
     for base_item_location_id in missing_location_ids:
