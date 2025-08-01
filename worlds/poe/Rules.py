@@ -59,7 +59,14 @@ passives_required_for_act = {
     12: 128,  # max ammount of passives in the game
 }
 
-def get_ascendancy_amount_for_act(act, opt): return opt.ascendancies_available_per_class.value if act == 3 else 0
+def get_ascendancy_amount_for_act(act, opt):
+    return (
+        max(
+            opt.ascendancies_available_per_class.value,
+            3 if opt.starting_character.value != opt.starting_character.option_scion else 1
+        )
+    ) if act == 3 else 0
+
 def get_gear_amount_for_act(act, opt): return min(opt.gear_upgrades_per_act.value * (act - 1), MAX_GEAR_UPGRADES)
 def get_flask_amount_for_act(act, opt): return 0 if not opt.add_flask_slots_to_item_pool else min(opt.flask_slots_per_act.value * (act - 1), MAX_FLASK_SLOTS)
 def get_gem_amount_for_act(act, opt): return 0 if not opt.add_max_links_to_item_pool else min(opt.max_links_per_act.value * (act - 1), MAX_LINK_UPGRADES)

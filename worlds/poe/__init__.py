@@ -239,9 +239,13 @@ class PathOfExileWorld(World):
         temp_items_to_place = {}
         # add ascendancy items.
         char_classes = ["Marauder", "Ranger", "Witch", "Duelist", "Templar", "Shadow", "Scion"] if options.allow_unlock_of_other_characters.value else [starting_character]
-        for item in range(0, options.ascendancies_available_per_class.value):
-            for char_class in char_classes:
-                item: Items.ItemDict = self.random.choice(Items.get_ascendancy_class_items(char_class, table=self.items_to_place))
+
+        for char_class in char_classes:
+            items: list[Items.ItemDict] = self.random.sample(
+                population=Items.get_ascendancy_class_items(char_class, table=self.items_to_place),
+                k=min(1 if char_class == "Scion" else 3, options.ascendancies_available_per_class.value)
+            )
+            for item in items:
                 temp_items_to_place[item["id"]] = item
         
         # remove all the other ascendancy items
