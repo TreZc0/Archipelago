@@ -161,6 +161,8 @@ async def save_settings(ctx: "PathOfExileContext", path: Path = settings_file_pa
         # Create new world entry
         world_key = build_world_key(ctx)
         new_world_data = {
+            "tts_speed": str(ctx.client_options["ttsSpeed"]),
+            "tts_enabled": str(ctx.client_options["ttsEnabled"]),
             "client_txt": str(ctx.client_text_path),
             "last_char": str(ctx.character_name),
             "base_item_filter": str(ctx.base_item_filter),

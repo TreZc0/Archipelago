@@ -128,7 +128,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         return True
 
     else:
-        await update_filter_to_invalid_char_filter(validate_errors)
+        await update_filter_to_invalid_char_filter(validate_errors, ctx.tts_options.enable, ctx.tts_options.speed)
         full_error_text = f"@{ctx.character_name} you are out of logic: {", and".join(validate_errors)}"
         await inputHelper.send_poe_text(full_error_text)
         return False
@@ -278,20 +278,25 @@ def rarity_check(total_recieved_items, rarity: str, equipmentId: str) -> str | N
 #        logger.info(f"Item filter updated with {len(missing_location_ids)} items.")
 #    return True
 
-async def update_filter_to_invalid_char_filter(errors: list[str]):
-    if len(errors) > 1:
-        error_text = " and ... ".join(errors)
+async def update_filter_to_invalid_char_filter(errors: list[str], enable_tts: bool = True, tts_speed: int = 250) -> None:
+
+    if enable_tts:
+        if len(errors) > 1:
+            error_text = " and ... ".join(errors)
+        else:
+            error_text = errors[0]
+        filename = f"{fileHelper.short_hash(error_text)}_{tts.WPM}.wav" # this could be a long text, so we use a hash
+        full_error_text = f"YOU ARE OUT OF LOGIC: {error_text}"
+        await tts.safe_tts_async(
+            text=full_error_text,
+            filename=itemFilter.filter_sounds_path / f"{filename}",
+            rate=tts_speed
+        )
+        invalid_item_filter_string = itemFilter.generate_invalid_item_filter_block(f"{itemFilter.filter_sounds_dir_name}/{filename}")
+        itemFilter.write_item_filter(invalid_item_filter_string, item_filter_import=None)
     else:
-        error_text = errors[0]
-    filename = f"{fileHelper.short_hash(error_text)}_{tts.WPM}.wav" # this could be a long text, so we use a hash
-    full_error_text = f"YOU ARE OUT OF LOGIC: {error_text}"
-    await tts.safe_tts_async(
-        text=full_error_text,
-        filename=itemFilter.filter_sounds_path / f"{filename}",
-        rate=tts.WPM
-    )
-    invalid_item_filter_string = itemFilter.generate_invalid_item_filter_block(f"{itemFilter.filter_sounds_dir_name}/{filename}")
-    itemFilter.write_item_filter(invalid_item_filter_string, item_filter_import=None)
+        invalid_item_filter_string = itemFilter.generate_invalid_item_filter_block_without_sound()
+        itemFilter.write_item_filter(invalid_item_filter_string, item_filter_import=None)
 
 
 def get_found_items(char: gggAPI.Character) -> set:

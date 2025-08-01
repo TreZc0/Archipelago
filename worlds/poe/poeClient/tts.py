@@ -94,17 +94,25 @@ def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WP
         itemFilter.base_item_id_to_relative_wav_path[base_item_location_id] = relative_path
 
 
-def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WPM) -> None:
+def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", tts_speed: int) -> None:
     """Generate TTS files for missing locations."""
     if not ctx or not ctx.missing_locations:
         logger.info("[DEBUG] No missing locations to generate TTS for.")
         return
 
+    speed = WPM
+    if not ctx.client_options:
+        logger.error("[DEBUG] No client options available for TTS.")
+    if ctx.client_options.tts_speed:
+        speed = ctx.client_options.get(['ttsSpeed'], WPM)
+
+
+
     missing_location_ids = ctx.missing_locations
     for base_item_location_id in missing_location_ids:
         network_item = ctx.locations_info[base_item_location_id]
         item_text = get_item_name_tts_text(ctx, network_item)
-        filename = fileHelper.safe_filename(f"{item_text.lower()}_{WPM}.wav")
+        filename = fileHelper.safe_filename(f"{item_text.lower()}_{speed}.wav")
 
         relative_path = f"{itemFilter.filter_sounds_dir_name}/{filename.lower()}"
         full_path = itemFilter.filter_sounds_path / f"{filename}"
@@ -115,7 +123,7 @@ def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", WPM: in
                 tasks.append((
                     item_text,
                     full_path,
-                    WPM
+                    speed
                 ))
         itemFilter.base_item_id_to_relative_wav_path[base_item_location_id] = relative_path
 

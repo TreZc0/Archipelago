@@ -2,7 +2,7 @@ import asyncio
 from random import Random
 import logging
 from typing import TYPE_CHECKING
-
+from dataclasses import dataclass
     
 
 import colorama
@@ -19,6 +19,29 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         ctx: "PathOfExileContext"
     logger = logging.getLogger("poeClient.PathOfExileCommandProcessor")
 
+    def _cmd_enable_tts(self, enable: bool = True) -> bool:
+        """Enable or disable TTS generation."""
+        if enable not in [True, False]:
+            self.output("ERROR: Please provide a valid boolean value for enabling TTS (True/False).")
+            return False
+        self.ctx.tts_options.enable = enable
+        self.ctx.update_settings()
+        if enable:
+            self.output("TTS generation enabled.")
+        else:
+            self.output("TTS generation disabled.")
+        return True
+
+    def _cmd_tts_speed(self, speed: int = 250) -> bool:
+        """Set the speed of TTS generation."""
+        if not isinstance(speed, int) or speed <= 0:
+            self.output("ERROR: Please provide a valid positive integer for TTS speed.")
+            return False
+        self.ctx.tts_options.speed = speed
+        self.ctx.update_settings()
+        self.output(f"TTS speed set to {speed} words per minute.")
+        return True
+
     def _cmd_generate_tts(self) -> bool:
         """Generate TTS for missing locations."""
         from .poeClient import tts
@@ -26,7 +49,9 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         if not self.ctx.missing_locations:
             self.output("No missing locations to generate TTS for, are you connected to the server?")
             return False
-
+        if not self.ctx.tts_options.enable:
+            self.output("TTS is disabled in the client options, please enable it to generate TTS.")
+            return False
         tts.generate_tts_tasks_from_missing_locations(self.ctx)
         tts.run_tts_tasks()
         return True
@@ -80,6 +105,7 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         self.ctx.character_name = character_name
         self.ctx.update_settings()
         self.output(f"Character name set to: {character_name}")
+        return True
         
 
     #def _cmd_set_current_character(self) -> bool:
@@ -115,24 +141,29 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         poe_main.client_start(self.ctx)
         return True
 
-    def _cmd_client(self):
+    def _cmd_client(self, path: str = "") -> bool:
         """Shortcut for setting the client text path."""
-        self._cmd_set_client_text_path(self.ctx.client_text_path)
+        return self._cmd_set_client_text_path(path)
 
-    def _cmd_char(self):
+    def _cmd_char(self, character_name: str = "") -> bool:
         """shortcut for setting the character name."""
-        self._cmd_char_name(self.ctx.character_name)
+        return self._cmd_char_name(character_name)
+
 
     def _cmd_filter(self, filter_name: str = "") -> bool:
         """shortcut for setting the base item filter."""
-        self._cmd_base_item_filter(filter_name)
+        return self._cmd_base_item_filter(filter_name)
 
-    def _cmd_start(self):
+    def _cmd_start(self) -> bool:
         """shortcut for starting the Path of Exile client."""
-        self._cmd_start_poe()
+        return self._cmd_start_poe()
 
 
-
+@dataclass
+class TTSOptions:
+    """Options for Text-to-Speech (TTS) generation."""
+    speed: int = 250  # Default TTS speed in words per minute
+    enable: bool = True  # Default TTS enabled state
 class PathOfExileContext(CommonContext):
     game = "Path of Exile"
     command_processor = PathOfExileCommandProcessor
@@ -147,6 +178,10 @@ class PathOfExileContext(CommonContext):
     slot_data = {}
     game_options = {}
     client_options = {}
+    
+
+    tts_options = TTSOptions()
+
     _debug = True  # Enable debug mode for poe client
 
     logger = logging.getLogger("poeClient.PathOfExileContext")
@@ -180,6 +215,8 @@ class PathOfExileContext(CommonContext):
                 try:
                     settings = task.result()
                     if settings:
+                        self.tts_options.enable = settings.get("tts_enabled", self.client_options.get('ttsEnabled', True))
+                        self.tts_options.speed = settings.get("tts_speed", self.client_options.get('ttsSpeed', 250))
                         self.client_text_path = settings.get("client_txt", self.client_text_path)
                         self.character_name = settings.get("last_char", self.character_name)
                         self.base_item_filter = settings.get("base_item_filter", self.base_item_filter)
