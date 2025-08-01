@@ -113,7 +113,8 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
             for level in range(2, ctx.last_character_level + 1):
                 if _debug and _verbose_debug:
                     logger.info(f"[DEBUG] Adding level {level} to locations to check.")
-                location_id = Locations.get_lvl_location_name_from_lvl(level)
+                level_location_name = Locations.get_lvl_location_name_from_lvl(level)
+                location_id = Locations.get_location_id_from_level_location_name[level_location_name]
                 if location_id is not None:
                     locations_to_check.add(location_id)
 
