@@ -61,7 +61,7 @@ passives_required_for_act = {
 
 def get_ascendancy_amount_for_act(act, opt):
     return (
-        max(
+        min(
             opt.ascendancies_available_per_class.value,
             3 if opt.starting_character.value != opt.starting_character.option_scion else 1
         )
