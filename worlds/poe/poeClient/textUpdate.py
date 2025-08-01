@@ -165,30 +165,13 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
         # Get all armor items in item_ids
         armor = [item for item in Items.get_armor_items() if item["id"] in item_ids]
         await split_send_message(ctx,', '.join(armor['name'] for armor in armor))
-        
+
+    if "!passive" in message:
+        message = f"You have {ctx.passives_available - ctx.passives_used} passive skill points available. ( {ctx.passives_used} used, {ctx.passives_available} total for character {ctx.character_name} )"
+        await inputHelper.send_poe_text(message)
+
     if "!help" in message or "!commands" in message:
-            help_message = """
-!ap char - Set your character
-
-!main gems
-!support gems
-!utility gems
-!all gems or !gems
-!usable skill gems - Usable by level
-!usable support gems - Usable by level
-!usable utility gems - Usable by level
-!usable gems - Usable by level
-
-!gear
-!weapons
-!armor
-!links
-!flasks
-
-!ascendancy
-!help
-
-Note: use @yourname followed a command."""
+            help_message = """!ap char - Set your character | !passive | !usable skill gems - Usable by level | !usable support gems | !usable utility gems | !usable gems | !main gems | !support gems | !utility gems | !all gems or !gems | !gear | !weapons | !armor | !links | !flasks | !ascendancy | !help | Note: use @yourname followed a command."""
             await split_send_message(ctx, help_message)
 async def split_send_message(ctx, message: str, max_length: int = 500):
     """

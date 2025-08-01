@@ -160,6 +160,8 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     if ctx.game_options.get("passivePointsAsItems", True):
         passive_points = len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive passive point'])
         passives_used = len(character.passives.hashes) # number of passives allocated
+        ctx.passives_available = passive_points
+        ctx.passives_used = passives_used
         if passives_used > passive_points:
             errors.append(f"{passives_used - passive_points} Over-allocated passive points")
 

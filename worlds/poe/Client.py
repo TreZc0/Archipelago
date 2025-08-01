@@ -172,6 +172,10 @@ class PathOfExileContext(CommonContext):
     last_response_from_api = {}
     last_entered_zone = ""
     last_character_level: int = 1
+
+    passives_used: int = 0
+    passives_available: int = 0
+
     character_name: str = ""
     client_text_path: Path = ""
     base_item_filter: str = ""
