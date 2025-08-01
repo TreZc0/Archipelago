@@ -99,7 +99,8 @@ def deprioritize_non_logic_gear(world: "PathOfExileWorld", table: Dict[int, Item
 
 
     gear_ids = [item["id"] for item in get_gear_items(table)]
-    progression_gear_ids = world.random.sample(gear_ids, opt.gear_upgrades_per_act.value * world.goal_act)
+    progression_sample_size = min(opt.gear_upgrades_per_act.value * world.goal_act, len(gear_ids))
+    progression_gear_ids = world.random.sample(gear_ids, progression_sample_size)
 
     for item in [ item for item in get_gear_items()]:
         if item["name"] in required_weps or item["id"] in progression_gear_ids:
