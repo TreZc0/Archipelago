@@ -59,9 +59,9 @@ def deprioritize_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, Item
     still_required_gem_ids = set()
     
     for act in range(1, world.goal_act + 1):
-        main_gems_for_act = [item for item in get_main_skill_gem_items() if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
-        support_gems_for_act = [item for item in get_support_gem_items() if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
-        utility_gems_for_act = [item for item in get_utility_skill_gem_items() if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
+        main_gems_for_act = [item for item in get_main_skill_gem_items(table) if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
+        support_gems_for_act = [item for item in get_support_gem_items(table) if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
+        utility_gems_for_act = [item for item in get_utility_skill_gem_items(table) if item["reqLevel"] <= Locations.acts[act]["maxMonsterLevel"]]
         
         if main_gems_for_act:  
             selected_gems = world.random.sample(main_gems_for_act, k=min(opt.skill_gems_per_act.value, len(main_gems_for_act)))
@@ -102,7 +102,7 @@ def deprioritize_non_logic_gear(world: "PathOfExileWorld", table: Dict[int, Item
     progression_sample_size = min(opt.gear_upgrades_per_act.value * world.goal_act, len(gear_ids))
     progression_gear_ids = world.random.sample(gear_ids, progression_sample_size)
 
-    for item in [ item for item in get_gear_items()]:
+    for item in [ item for item in get_gear_items(table)]:
         if item["name"] in required_weps or item["id"] in progression_gear_ids:
             item["classification"] = ItemClassification.progression
         else:
@@ -249,7 +249,7 @@ def get_utility_skill_gems_by_required_level(level_minimum:int=0, level_maximum:
     key = f"UtilitySkillGems_{level_minimum}_{level_maximum}"
     if table is item_table and key in memoize_cache:
         return memoize_cache[key]
-    result = [item for item in table.values() if "UtilityGem" in item["category"] and (item["reqLevel"] is not None and (level_minimum <= item["reqLevel"] <= level_maximum))]
+    result = [item for item in table.values() if "UtilSkillGem" in item["category"] and (item["reqLevel"] is not None and (level_minimum <= item["reqLevel"] <= level_maximum))]
     if table is item_table: memoize_cache[key] = result
     return result
 

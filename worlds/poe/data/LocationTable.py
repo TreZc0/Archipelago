@@ -725,8 +725,6 @@ location_array = [
 {"dropLevel": 69, "act": 11, "baseItem": "Coronal Maul", "name": "Coronal Maul"},
 {"dropLevel": 70, "act": 11, "baseItem": "Saintly Chainmail", "name": "Saintly Chainmail"},
 {"dropLevel": 70, "act": 11, "baseItem": "Two-Toned Boots", "name": "Two-Toned Boots"},
-{"dropLevel": 70, "act": 11, "baseItem": "Two-Toned Boots", "name": "Two-Toned Boots"},
-{"dropLevel": 70, "act": 11, "baseItem": "Two-Toned Boots", "name": "Two-Toned Boots"},
 {"dropLevel": 70, "act": 11, "baseItem": "Fugitive Boots", "name": "Fugitive Boots"},
 {"dropLevel": 70, "act": 11, "baseItem": "Terror Claw", "name": "Terror Claw"},
 {"dropLevel": 70, "act": 11, "baseItem": "Sai", "name": "Sai"},
@@ -744,7 +742,6 @@ location_array = [
 {"dropLevel": 70, "act": 11, "baseItem": "Supreme Spiked Shield", "name": "Supreme Spiked Shield"},
 {"dropLevel": 70, "act": 11, "baseItem": "Eclipse Staff", "name": "Eclipse Staff"},
 {"dropLevel": 70, "act": 11, "baseItem": "Harpy Rapier", "name": "Harpy Rapier"},
-{"dropLevel": 70, "act": 11, "baseItem": "Fleshripper", "name": "Fleshripper"},
 {"dropLevel": 70, "act": 11, "baseItem": "Fleshripper", "name": "Fleshripper"},
 {"dropLevel": 70, "act": 11, "baseItem": "Exquisite Blade", "name": "Exquisite Blade"},
 {"dropLevel": 70, "act": 11, "baseItem": "Profane Wand", "name": "Profane Wand"},
@@ -827,6 +824,8 @@ location_array = [
 {"dropLevel": 84, "act": 11, "baseItem": "Haunted Bascinet", "name": "Haunted Bascinet"},
 {"dropLevel": 84, "act": 11, "baseItem": "Lich's Circlet", "name": "Lich's Circlet"}
 ]
+
+# two-toned boots and fleshripper were duplicates.
 
 level_location_array = [
     {"name": "Reach Level 2", "level": 2,  "act": 1},

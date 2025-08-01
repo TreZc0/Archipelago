@@ -166,7 +166,7 @@ class PathOfExileContext(CommonContext):
 
         if cmd == 'Connected':
             self.slot_data = args.get('slot_data', {})
-            self.client_options = self.slot_data.get('game_options', {})
+            self.game_options = self.slot_data.get('game_options', {})
             self.client_options = self.slot_data.get('client_options', {})
 
             # Request info for all locations after connecting
