@@ -129,6 +129,8 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
 
     else:
         await update_filter_to_invalid_char_filter(validate_errors)
+        full_error_text = f"@{ctx.character_name} you are out of logic: {", and".join(validate_errors)}"
+        await inputHelper.send_poe_text(full_error_text)
         return False
 
 
@@ -282,8 +284,9 @@ async def update_filter_to_invalid_char_filter(errors: list[str]):
     else:
         error_text = errors[0]
     filename = f"{fileHelper.short_hash(error_text)}_{tts.WPM}.wav" # this could be a long text, so we use a hash
+    full_error_text = f"YOU ARE OUT OF LOGIC: {error_text}"
     await tts.safe_tts_async(
-        text=f"YOU ARE OUT OF LOGIC: {error_text}",
+        text=full_error_text,
         filename=itemFilter.filter_sounds_path / f"{filename}",
         rate=tts.WPM
     )
