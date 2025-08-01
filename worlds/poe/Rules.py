@@ -142,7 +142,7 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
             log += f" levels:{passive_count}/{passive_amount}"
         log += f" for {opt.starting_character.current_option_name}"
 
-        print (log)
+        #print (log)
 
         logger.debug(log)
         if _very_debug:

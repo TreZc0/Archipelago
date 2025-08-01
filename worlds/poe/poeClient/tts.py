@@ -3,6 +3,7 @@ import logging
 import sys
 import threading
 
+from worlds.kh1.Items import category
 from worlds.poe.poeClient import fileHelper
 fileHelper.load_vendor_modules()
 
@@ -94,19 +95,15 @@ def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WP
         itemFilter.base_item_id_to_relative_wav_path[base_item_location_id] = relative_path
 
 
-def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", tts_speed: int) -> None:
+def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", tts_speed: int = None) -> None:
     """Generate TTS files for missing locations."""
     if not ctx or not ctx.missing_locations:
         logger.info("[DEBUG] No missing locations to generate TTS for.")
         return
 
-    speed = WPM
-    if not ctx.client_options:
-        logger.error("[DEBUG] No client options available for TTS.")
-    if ctx.client_options.tts_speed:
-        speed = ctx.client_options.get(['ttsSpeed'], WPM)
-
-
+    if tts_speed is None:
+        if not ctx.tts_options: logger.error("[Error] No client options available for TTS.")
+        else: speed = ctx.tts_options.speed
 
     missing_location_ids = ctx.missing_locations
     for base_item_location_id in missing_location_ids:
