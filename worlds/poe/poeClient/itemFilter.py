@@ -6,6 +6,9 @@ import logging
 # purp = 201 148 194 255
 #orange = 216 160 125 255
 import typing
+
+from BaseClasses import ItemClassification
+
 if typing.TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
 from pathlib import Path
@@ -20,7 +23,7 @@ end_item_filter_block = "# </Base Item Hunt item>"
 
 logger = logging.getLogger("poeClient.itemFilter")
 
-default_style_string = f"""SetFontSize 45
+progressive_style_string = f"""SetFontSize 45
 SetFontSize 45
 SetTextColor 201 117 130 255
 SetBorderColor 117 194 116 255
@@ -28,8 +31,34 @@ SetBackgroundColor 238 227 147 255
 MinimapIcon 0 Green UpsideDownHouse
 PlayEffect Cyan
 """
+
+default_style_string = f"""SetFontSize 45
+SetFontSize 35
+SetTextColor 201 117 130 255
+SetBorderColor 201 148 194 255
+SetBackgroundColor 201 117 130 240
+MinimapIcon 1 Green UpsideDownHouse
+PlayEffect Cyan Temp
+"""
+
+filler_style_string = f"""SetFontSize 45
+SetFontSize 20
+SetTextColor 201 117 130 255
+SetBorderColor 201 148 194 255
+SetBackgroundColor 201 117 130 220
+MinimapIcon 2 Green UpsideDownHouse
+"""
+
+trap_style_string = f"""SetFontSize 45
+SetFontSize 45
+SetTextColor 201 117 130 255
+SetBorderColor 117 194 116 255
+SetBackgroundColor 238 227 147 255
+MinimapIcon 2 Red Cross
+PlayEffect Red Temp
+"""
 invalid_style_string = f"""SetFontSize 45
-SetTextColor 255 0 0 255
+SetTextColor 255 0 0 0
 SetBorderColor 255 0 0 255
 SetBackgroundColor 255 0 0 255
 """
@@ -56,6 +85,27 @@ def update_item_filter_from_context(ctx : "PathOfExileContext", recently_checked
         if relative_wav_path is None:
             print(f"[ERROR] No wav path found for base item location ID {base_item_location_id}.")
             continue
+        flags = ctx.locations_info[base_item_location_id].flags
+        progression = 0
+
+        if flags & 0b001:  # advancement
+            progression = ItemClassification.progression
+        if flags & 0b010:  # useful
+            progression = ItemClassification.useful
+        if flags & 0b100:  # trap
+            progression = ItemClassification.trap
+        else:
+            progression = ItemClassification.filler
+
+        style_string = default_style_string
+        if progression == ItemClassification.progression:
+            style_string = progressive_style_string
+        elif progression == ItemClassification.filler:
+            style_string = filler_style_string
+        elif progression == ItemClassification.useful:
+            style_string = default_style_string
+        elif progression == ItemClassification.trap:
+            style_string = trap_style_string
         item_filter_str += generate_item_filter_block(base_type_name, relative_wav_path) + "\n\n"
     write_item_filter(item_filter_str, item_filter_import=ctx.base_item_filter)
 
