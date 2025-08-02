@@ -58,7 +58,7 @@ class PathOfExileWorld(World):
     items_to_place = {}
     items_procollected = {}
     locations_to_place = {}
-    total_items_count = 0
+    total_items_to_place_count = 0
     
     goal_act = 0
     #generate the location and item tables from Locations.py and Items.py
@@ -99,17 +99,15 @@ class PathOfExileWorld(World):
         self.items_to_place = Items.deprioritize_non_logic_gems(self, self.items_to_place)
         self.items_to_place = Items.deprioritize_non_logic_gear(self, self.items_to_place)
 
-        self.total_items_count = sum(item.get("count", 1) for item in self.items_to_place.values())
-        self.locations_to_place = poeRules.SelectLocationsToAdd(world=self, target_amount=self.total_items_count)
+        self.total_items_to_place_count = sum(item.get("count", 1) for item in self.items_to_place.values())
+        self.locations_to_place = poeRules.SelectLocationsToAdd(world=self, target_amount=self.total_items_to_place_count)
 
         table_total_item_count = sum(item.get("count", 1) for item in Items.item_table.values())
-        if len(self.locations_to_place) <  self.total_items_count:
-            logger.debug(f"[Debug]: Not enough locations to place all items! {self.total_items_count} < { table_total_item_count}\nCulling...")
+        if len(self.locations_to_place) <  self.total_items_to_place_count:
+            logger.debug(f"[Debug]: Not enough locations to place all items! {self.total_items_to_place_count} < { table_total_item_count}\nCulling...")
             Items.cull_items_to_place(self, self.items_to_place, self.locations_to_place)
 
-
-
-        logger.debug(f"[DEBUG]: total items to place: {self.total_items_count} / {table_total_item_count} possible")
+        logger.debug(f"[DEBUG]: total items to place: {self.total_items_to_place_count} / {table_total_item_count} possible")
         logger.debug("Here 1")
         logger.debug(f"[DEBUG]: total locs in world.: {len(self.locations_to_place)} / {len(Locations.full_locations)} possible")
         logger.debug("Here 2")
@@ -143,7 +141,7 @@ class PathOfExileWorld(World):
             for item in list_of_items:
                 self.multiworld.itempool.append(item)
 
-        logger.debug(f"[DEBUG]: items left to place:{len(self.items_to_place)} /{self.total_items_count}.\n Created {len(self.locations_to_place)} locations.")
+        logger.debug(f"[DEBUG]: items left to place:{len(self.items_to_place)} /{self.total_items_to_place_count}.\n Created {len(self.locations_to_place)} locations.")
 
     def create_items(self):
         itempool = self.multiworld.itempool
