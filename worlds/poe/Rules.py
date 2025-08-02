@@ -17,9 +17,9 @@ MAX_LINK_UPGRADES   = 21
 MAX_SKILL_GEMS      = 30 # you will get more, but this is the max required for "logic"
 
 ACT_0_USABLE_GEMS = 4
-ACT_0_FLASK_SLOTS = 2
-ACT_0_NORMAL_WEAPONS = 1
-ACT_0_NORMAL_ARMOUR = 1
+ACT_0_FLASK_SLOTS = 3
+ACT_0_NORMAL_WEAPONS = 2
+ACT_0_NORMAL_ARMOUR = 2
 ACT_0_ADDITIONAL_LOCATIONS = 8
 _debug = True
 _very_debug = False

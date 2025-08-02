@@ -92,177 +92,9 @@ class PathOfExileWorld(World):
     
     def generate_early(self):
         options: PathOfExileOptions = self.options
-        self.goal_act = self.get_goal_act(options)
-        max_level = Locations.acts[self.goal_act]["maxMonsterLevel"]
+        self.goal_act = get_goal_act(options)
 
-        if options.gucci_hobo_mode.value != options.gucci_hobo_mode.option_disabled:
-            uniques = [item for item in Items.item_table.values() if "Unique" in item["category"]]
-            for unique in uniques:
-                unique["classification"] = ItemClassification.progression
-
-            if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_allow_one_slot_of_normal_rarity
-                    or options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
-                gear_upgrades = Items.get_gear_items(table=self.items_to_place)
-                for item in gear_upgrades:
-                    if "Magic" in item["category"] or "Rare" in item["category"]:
-                        self.items_to_place.pop(item["id"])
-
-            if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
-                for item in gear_upgrades:
-                    if "Normal" in item["category"]:
-                        self.items_to_place.pop(item["id"])
-
-        # remove passive skill points from item pool
-        # we are using the slot_data to tell the client to chill out when it comes to passive skill points
-        if options.add_passive_skill_points_to_item_pool.value == False:
-            item = Items.get_by_name("Progressive passive point")
-            if item:
-                self.items_to_place.pop(item["id"], None)
-        else:
-            item = Items.get_by_name("Progressive passive point")
-            if item:
-                item["count"] = poeRules.passives_required_for_act[self.goal_act + 1]
-                
-        items_to_remove = {}
-        gem_categories = {"MainSkillGem", "SupportGem", "UtilSkillGem"}
-        # remove gems that are too high level from item pool
-        for item in self.items_to_place.values():
-            if set(item["category"]).intersection(gem_categories) and item["reqLevel"] > max_level:
-                items_to_remove[item["id"]] = item
-
-        for item_id in items_to_remove:
-            self.items_to_place.pop(item_id)
-
-        if options.gear_upgrades != options.gear_upgrades.option_no_gear_unlocked:
-            categories = set()
-            if options.gear_upgrades in {options.gear_upgrades.option_all_gear_unlocked_at_start,
-                                         options.gear_upgrades.option_all_normal_and_unique_gear_unlocked,
-                                         options.gear_upgrades.option_all_normal_gear_unlocked}:
-                categories.add("Normal")
-            if options.gear_upgrades in {options.gear_upgrades.option_all_gear_unlocked_at_start,
-                                         options.gear_upgrades.option_all_normal_and_unique_gear_unlocked,
-                                         options.gear_upgrades.option_all_uniques_unlocked}:
-                categories.add("Unique")
-            if options.gear_upgrades == options.gear_upgrades.option_all_gear_unlocked_at_start:
-                categories.add("Magic")
-                categories.add("Rare")
-
-            all_gear_items = Items.get_gear_items(table=self.items_to_place)
-            gear_upgrades = [item for item in all_gear_items if set(item["category"]).intersection(categories)]
-            for item in gear_upgrades:
-                item_objs = self.remove_and_create_item_by_itemdict(item)
-                for item_obj in item_objs:
-                    self.precollect(item_obj)
-
-        if options.add_flask_slots_to_item_pool.value == False:
-            flask_slots = Items.get_flask_items(table=self.items_to_place)
-            for item in flask_slots:
-                item_objs = self.remove_and_create_item_by_itemdict(item)
-                for item_obj in item_objs:
-                    self.precollect(item_obj)
-
-        if options.add_max_links_to_item_pool.value == False:
-            support_gem_slots = Items.get_max_links_items(table=self.items_to_place)
-            for item in support_gem_slots:
-                item_obj = self.remove_and_create_item_by_itemdict(item)
-                self.precollect(item_obj)
-        
-        def handle_starting_character(char):
-            item_obj = self.remove_and_create_item_by_name(char)
-            self.precollect(item_obj)
-            
-            if options.usable_starting_gear.value in \
-            (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
-            options.usable_starting_gear.option_starting_weapon_and_gems,
-            options.usable_starting_gear.option_starting_weapon):
-                weapon_name = ItemTable.starting_items_table[char]["weapon"]
-                if weapon_name in [item["name"] for item in self.items_to_place.values()]:
-                    self.precollect(self.remove_and_create_item_by_name(weapon_name))
-                
-                count = self.multiworld.state.count("Progressive max links - Weapon", self.player)
-                if count < 1:
-                    wep = self.remove_and_create_item_by_name("Progressive max links - Weapon")
-                    self.precollect(wep)
-
-            if options.usable_starting_gear.value in \
-            (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
-             options.usable_starting_gear.option_starting_weapon_and_gems):
-                self.precollect(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["gem"]))
-                self.precollect(self.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["support"]))
-            
-            STARTING_FLASK_SLOTS = 3    
-            if options.usable_starting_gear.value in \
-            (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
-            options.usable_starting_gear.option_starting_weapon_and_flask_slots):
-
-                # Get all normal flask items from the main table, this will probably just be 1, with a count
-                normal_flasks = Items.get_by_has_every_category({"Flask", "Normal"})
-                normal_flask_ids = {flask["id"] for flask in normal_flasks}
-                total_normal_flask_count = sum(item.get("count", 1) for item in self.items_to_place.values() if item["id"] in normal_flask_ids)
-                # Count how many normal flasks are already collected
-                collected_normal_flask_count = sum(1 for item_obj in self.items_procollected.values() if item_obj.code in normal_flask_ids)
-
-                # add flasks
-                flasks_needed = STARTING_FLASK_SLOTS - collected_normal_flask_count
-                if flasks_needed > 0:
-                    normal_progressive_flask = Items.get_by_has_every_category({"Flask", "Normal"}, table=self.items_to_place) # should only be 1 item
-                    total_normal_flask_count = normal_progressive_flask[0].get("count", 1)
-                    for i in range(min(flasks_needed, total_normal_flask_count)):
-                        item_obj = Items.PathOfExileItem(
-                            name=normal_progressive_flask[0]["name"],
-                            classification=ItemClassification.progression,
-                            code=normal_progressive_flask[0]["id"],
-                            player=self.player)
-                        self.precollect(item_obj)
-
-                    normal_progressive_flask[0]["count"] -= flasks_needed
-                    if normal_progressive_flask[0]["count"] <= 0:
-                        self.items_to_place.pop(normal_progressive_flask[0]["id"], None)
-            return char
-            
-        starting_character = ""
-        if options.starting_character.value == options.starting_character.option_scion:
-            starting_character = handle_starting_character("Scion")
-        if options.starting_character.value == options.starting_character.option_marauder:
-            starting_character = handle_starting_character("Marauder")
-        if options.starting_character.value == options.starting_character.option_duelist:
-            starting_character = handle_starting_character("Duelist")
-        if options.starting_character.value == options.starting_character.option_ranger:
-            starting_character = handle_starting_character("Ranger")
-        if options.starting_character.value == options.starting_character.option_shadow:
-            starting_character = handle_starting_character("Shadow")
-        if options.starting_character.value == options.starting_character.option_witch:
-            starting_character = handle_starting_character("Witch")
-        if options.starting_character.value == options.starting_character.option_templar:
-            starting_character = handle_starting_character("Templar")
-
-        temp_items_to_place = {}
-        # add ascendancy items.
-        char_classes = ["Marauder", "Ranger", "Witch", "Duelist", "Templar", "Shadow", "Scion"] if options.allow_unlock_of_other_characters.value else [starting_character]
-
-        for char_class in char_classes:
-            items: list[Items.ItemDict] = self.random.sample(
-                population=Items.get_ascendancy_class_items(char_class, table=self.items_to_place),
-                k=min(1 if char_class == "Scion" else 3, options.ascendancies_available_per_class.value)
-            )
-            for item in items:
-                temp_items_to_place[item["id"]] = item
-        
-        # remove all the other ascendancy items
-        for item in Items.get_ascendancy_items(table=self.items_to_place):
-            item_id = self.item_name_to_id[item["name"]]
-            self.items_to_place.pop(item_id, None)
-
-        # remove other character class items, if not allowed
-        if not options.allow_unlock_of_other_characters.value:
-            character_items = Items.get_character_class_items(self.items_to_place)
-            for character_item in character_items:
-                if character_item['name'] != starting_character:
-                    self.items_to_place.pop(character_item['id'], None)
-        
-        # add the temp items to place back to the items to place
-        for item_id, item_obj in temp_items_to_place.items():
-            self.items_to_place[item_id] = item_obj
+        setup_early_items(self, options)
 
         self.items_to_place = Items.deprioritize_non_logic_gems(self, self.items_to_place)
         self.items_to_place = Items.deprioritize_non_logic_gear(self, self.items_to_place)
@@ -282,18 +114,6 @@ class PathOfExileWorld(World):
         logger.debug(f"[DEBUG]: total locs in world.: {len(self.locations_to_place)} / {len(Locations.full_locations)} possible")
         logger.debug("Here 2")
 
-    def get_goal_act(self, options) -> int:
-        if options.goal.value == options.goal.option_complete_act_1: return 1
-        elif options.goal.value == options.goal.option_complete_act_2: return 2
-        elif options.goal.value == options.goal.option_complete_act_3: return 3
-        elif options.goal.value == options.goal.option_complete_act_4: return 4
-        elif options.goal.value == options.goal.option_kauri_fortress_act_6: return 5
-        elif options.goal.value == options.goal.option_complete_act_6: return 6
-        elif options.goal.value == options.goal.option_complete_act_7: return 7
-        elif options.goal.value == options.goal.option_complete_act_8: return 8
-        elif options.goal.value == options.goal.option_complete_act_9: return 9
-        elif options.goal.value == options.goal.option_complete_the_campaign: return 10
-        else: return 11
 
     def create_regions(self):
         """Create the regions for the Path of Exile world.
@@ -358,6 +178,191 @@ class PathOfExileWorld(World):
                                 self.player])
 
 
+# ---------
+def setup_early_items(world, options):
+    setup_character_items(world, options)
+    max_level = Locations.acts[world.goal_act]["maxMonsterLevel"]
+    if options.gucci_hobo_mode.value != options.gucci_hobo_mode.option_disabled:
+        uniques = [item for item in Items.item_table.values() if "Unique" in item["category"]]
+        for unique in uniques:
+            unique["classification"] = ItemClassification.progression
+
+        if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_allow_one_slot_of_normal_rarity
+                or options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
+            gear_upgrades = Items.get_gear_items(table=world.items_to_place)
+            for item in gear_upgrades:
+                if "Magic" in item["category"] or "Rare" in item["category"]:
+                    world.items_to_place.pop(item["id"])
+
+        if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
+            for item in gear_upgrades:
+                if "Normal" in item["category"]:
+                    world.items_to_place.pop(item["id"])
+    # remove passive skill points from item pool
+    # we are using the slot_data to tell the client to chill out when it comes to passive skill points
+    if options.add_passive_skill_points_to_item_pool.value == False:
+        item = Items.get_by_name("Progressive passive point")
+        if item:
+            world.items_to_place.pop(item["id"], None)
+    else:
+        item = Items.get_by_name("Progressive passive point")
+        if item:
+            item["count"] = poeRules.passives_required_for_act[world.goal_act + 1]
+    items_to_remove = {}
+    gem_categories = {"MainSkillGem", "SupportGem", "UtilSkillGem"}
+    # remove gems that are too high level from item pool
+    for item in world.items_to_place.values():
+        if set(item["category"]).intersection(gem_categories) and item["reqLevel"] > max_level:
+            items_to_remove[item["id"]] = item
+    for item_id in items_to_remove:
+        world.items_to_place.pop(item_id)
+    if options.gear_upgrades != options.gear_upgrades.option_no_gear_unlocked:
+        categories = set()
+        if options.gear_upgrades in {options.gear_upgrades.option_all_gear_unlocked_at_start,
+                                     options.gear_upgrades.option_all_normal_and_unique_gear_unlocked,
+                                     options.gear_upgrades.option_all_normal_gear_unlocked}:
+            categories.add("Normal")
+        if options.gear_upgrades in {options.gear_upgrades.option_all_gear_unlocked_at_start,
+                                     options.gear_upgrades.option_all_normal_and_unique_gear_unlocked,
+                                     options.gear_upgrades.option_all_uniques_unlocked}:
+            categories.add("Unique")
+        if options.gear_upgrades == options.gear_upgrades.option_all_gear_unlocked_at_start:
+            categories.add("Magic")
+            categories.add("Rare")
+
+        all_gear_items = Items.get_gear_items(table=world.items_to_place)
+        gear_upgrades = [item for item in all_gear_items if set(item["category"]).intersection(categories)]
+        for item in gear_upgrades:
+            item_objs = world.remove_and_create_item_by_itemdict(item)
+            for item_obj in item_objs:
+                world.precollect(item_obj)
+    if options.add_flask_slots_to_item_pool.value == False:
+        flask_slots = Items.get_flask_items(table=world.items_to_place)
+        for item in flask_slots:
+            item_objs = world.remove_and_create_item_by_itemdict(item)
+            for item_obj in item_objs:
+                world.precollect(item_obj)
+    if options.add_max_links_to_item_pool.value == False:
+        support_gem_slots = Items.get_max_links_items(table=world.items_to_place)
+        for item in support_gem_slots:
+            item_obj = world.remove_and_create_item_by_itemdict(item)
+            world.precollect(item_obj)
+
+def setup_character_items(world, options):
+    def handle_starting_character(char):
+        item_obj = world.remove_and_create_item_by_name(char)
+        world.precollect(item_obj)
+
+        if options.usable_starting_gear.value in \
+                (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
+                 options.usable_starting_gear.option_starting_weapon_and_gems,
+                 options.usable_starting_gear.option_starting_weapon):
+            weapon_name = ItemTable.starting_items_table[char]["weapon"]
+            if weapon_name in [item["name"] for item in world.items_to_place.values()]:
+                world.precollect(world.remove_and_create_item_by_name(weapon_name))
+
+            count = world.multiworld.state.count("Progressive max links - Weapon", world.player)
+            if count < 1:
+                wep = world.remove_and_create_item_by_name("Progressive max links - Weapon")
+                world.precollect(wep)
+
+        if options.usable_starting_gear.value in \
+                (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
+                 options.usable_starting_gear.option_starting_weapon_and_gems):
+            world.precollect(world.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["gem"]))
+            world.precollect(world.remove_and_create_item_by_name(ItemTable.starting_items_table[char]["support"]))
+
+        STARTING_FLASK_SLOTS = 3
+        if options.usable_starting_gear.value in \
+                (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
+                 options.usable_starting_gear.option_starting_weapon_and_flask_slots):
+
+            # Get all normal flask items from the main table, this will probably just be 1, with a count
+            normal_flasks = Items.get_by_has_every_category({"Flask", "Normal"})
+            normal_flask_ids = {flask["id"] for flask in normal_flasks}
+            total_normal_flask_count = sum(
+                item.get("count", 1) for item in world.items_to_place.values() if item["id"] in normal_flask_ids)
+            # Count how many normal flasks are already collected
+            collected_normal_flask_count = sum(
+                1 for item_obj in world.items_procollected.values() if item_obj.code in normal_flask_ids)
+
+            # add flasks
+            flasks_needed = STARTING_FLASK_SLOTS - collected_normal_flask_count
+            if flasks_needed > 0:
+                normal_progressive_flask = Items.get_by_has_every_category({"Flask", "Normal"},
+                                                                           table=world.items_to_place)  # should only be 1 item
+                total_normal_flask_count = normal_progressive_flask[0].get("count", 1)
+                for i in range(min(flasks_needed, total_normal_flask_count)):
+                    item_obj = Items.PathOfExileItem(
+                        name=normal_progressive_flask[0]["name"],
+                        classification=ItemClassification.progression,
+                        code=normal_progressive_flask[0]["id"],
+                        player=world.player)
+                    world.precollect(item_obj)
+
+                normal_progressive_flask[0]["count"] -= flasks_needed
+                if normal_progressive_flask[0]["count"] <= 0:
+                    world.items_to_place.pop(normal_progressive_flask[0]["id"], None)
+        return char
+
+    starting_character = ""
+    if options.starting_character.value == options.starting_character.option_scion:
+        starting_character = handle_starting_character("Scion")
+    if options.starting_character.value == options.starting_character.option_marauder:
+        starting_character = handle_starting_character("Marauder")
+    if options.starting_character.value == options.starting_character.option_duelist:
+        starting_character = handle_starting_character("Duelist")
+    if options.starting_character.value == options.starting_character.option_ranger:
+        starting_character = handle_starting_character("Ranger")
+    if options.starting_character.value == options.starting_character.option_shadow:
+        starting_character = handle_starting_character("Shadow")
+    if options.starting_character.value == options.starting_character.option_witch:
+        starting_character = handle_starting_character("Witch")
+    if options.starting_character.value == options.starting_character.option_templar:
+        starting_character = handle_starting_character("Templar")
+    # remove other character class items, if not allowed
+    if not options.allow_unlock_of_other_characters.value:
+        character_items = Items.get_character_class_items(world.items_to_place)
+        for character_item in character_items:
+            if character_item['name'] != starting_character:
+                world.items_to_place.pop(character_item['id'], None)
+    temp_items_to_place = {}
+    # add ascendancy items.
+    char_classes = ["Marauder", "Ranger", "Witch", "Duelist", "Templar", "Shadow",
+                    "Scion"] if options.allow_unlock_of_other_characters.value else [starting_character]
+    if world.goal_act >= 3:
+        for char_class in char_classes:
+            items: list[Items.ItemDict] = world.random.sample(
+                population=Items.get_ascendancy_class_items(char_class, table=world.items_to_place),
+                k=min(1 if char_class == "Scion" else 3, options.ascendancies_available_per_class.value)
+            )
+            for item in items:
+                temp_items_to_place[item["id"]] = item
+    # remove all the other ascendancy items
+    for item in Items.get_ascendancy_items(table=world.items_to_place):
+        item_id = world.item_name_to_id[item["name"]]
+        world.items_to_place.pop(item_id, None)
+    # add the temp items to place back to the items to place
+    for item_id, item_obj in temp_items_to_place.items():
+        world.items_to_place[item_id] = item_obj
+
+def get_goal_act(options) -> int:
+    if options.goal.value == options.goal.option_complete_act_1: return 1
+    elif options.goal.value == options.goal.option_complete_act_2: return 2
+    elif options.goal.value == options.goal.option_complete_act_3: return 3
+    elif options.goal.value == options.goal.option_complete_act_4: return 4
+    elif options.goal.value == options.goal.option_kauri_fortress_act_6: return 5
+    elif options.goal.value == options.goal.option_complete_act_6: return 6
+    elif options.goal.value == options.goal.option_complete_act_7: return 7
+    elif options.goal.value == options.goal.option_complete_act_8: return 8
+    elif options.goal.value == options.goal.option_complete_act_9: return 9
+    elif options.goal.value == options.goal.option_complete_the_campaign: return 10
+    else: return 11
+
+
+
+
+
+
 
 # TODO handle multiple locations with the same name -- two stone rings and stone axe (IIRC)
-# TODO handle multiple items with the same name -- for flasks and such
