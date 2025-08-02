@@ -17,6 +17,7 @@ from worlds.poe import Locations
 
 filter_file_dir = Path.home() / "Documents" / "My Games" / "Path of Exile"
 filter_file_path = Path.home() / "Documents" / "My Games" / "Path of Exile" / "__ap.filter"
+invalid_filter_file_path = Path.home() / "Documents" / "My Games" / "Path of Exile" / "__invalid.filter"
 filter_sounds_dir_name = "apsound"
 filter_sounds_path = filter_file_dir / filter_sounds_dir_name
 start_item_filter_block = "# <Base Item Hunt item>"
@@ -35,16 +36,16 @@ PlayEffect Cyan
 default_style_string = f"""SetFontSize 45
 SetFontSize 35
 SetTextColor 201 117 130 255
-SetBorderColor 201 148 194 255
-SetBackgroundColor 201 117 130 240
+SetBorderColor 117 194 116 255
+SetBackgroundColor 238 227 147 255
 MinimapIcon 1 Green UpsideDownHouse
 PlayEffect Cyan Temp
 """
 filler_style_string = f"""SetFontSize 45
 SetFontSize 20
 SetTextColor 201 117 130 255
-SetBorderColor 201 148 194 255
-SetBackgroundColor 201 117 130 220
+SetBorderColor 117 194 116 255
+SetBackgroundColor 238 227 147 255
 MinimapIcon 2 Green UpsideDownHouse
 """
 trap_style_string = f"""SetFontSize 45
@@ -161,11 +162,13 @@ def write_item_filter(item_filter:str, item_filter_import:str|None=None, file_pa
         write_filter = True
 
     if _debug and not write_filter:
-            print(f"[DEBUG] Not writing base item filter because import path '{item_filter_import}' is not valid or does not exist.")
+            print(f"[DEBUG] Not writing base item filter because import path '{item_filter_import}' is not valid or does not exist (this is fine, there just isn't a backup item filter).")
+
     if write_filter:
         item_filter = f"""{item_filter}
     Import "{item_filter_import}"
     """
+
     with open(str(file_path), "w", encoding="utf-8") as f:
         f.write(item_filter)
     if _debug:

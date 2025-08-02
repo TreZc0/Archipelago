@@ -4,6 +4,8 @@ import logging
 from typing import TYPE_CHECKING
 
 from NetUtils import ClientStatus
+from .inputHelper import send_multiple_poe_text
+
 if TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
     from worlds.poe import PathOfExileWorld
@@ -29,16 +31,22 @@ _verbose_debug = False
 
 logger = logging.getLogger("poeClient.validationLogic")
 
+last_zone = None
 async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
+    global last_zone, is_char_in_logic
     zone = textUpdate.get_zone_from_line(ctx, line)
+    last_zone = zone
     if not zone:
         return
     victory_task = check_for_victory(ctx, zone)
-    skip_load_filter = True if victory_task else False
-       
-    await validate_and_update(ctx)
+    logic_errors = await validate_and_update(ctx)
     #await asyncio.sleep(0.1)  # Allow some time for the game to load
-    if not skip_load_filter:
+
+    if not is_char_in_logic:
+        await send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {", and".join(logic_errors)}"])
+    elif victory_task:
+        pass # callback handles chat
+    else:
         await inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5)
 
 def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | None:
@@ -126,13 +134,11 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
             if _debug:
                 logger.info("[DEBUG] No locations to check, skipping check_locations.")
         itemFilter.update_item_filter_from_context(ctx, recently_checked_locations=locations_to_check)
-        return True
+        return validate_errors
 
     else:
-        await update_filter_to_invalid_char_filter(validate_errors, ctx.tts_options.enable, ctx.tts_options.speed)
-        full_error_text = f"@{ctx.character_name} you are out of logic: {", and".join(validate_errors)}"
-        await inputHelper.send_poe_text(full_error_text)
-        return False
+        await update_filter_to_invalid_char_filter(errors=validate_errors, enable_tts=ctx.tts_options.enable, tts_speed=ctx.tts_options.speed)
+        return validate_errors
 
 
 
@@ -296,10 +302,10 @@ async def update_filter_to_invalid_char_filter(errors: list[str], enable_tts: bo
             rate=tts_speed
         )
         invalid_item_filter_string = itemFilter.generate_invalid_item_filter_block(f"{itemFilter.filter_sounds_dir_name}/{filename}")
-        itemFilter.write_item_filter(invalid_item_filter_string, item_filter_import=None)
+        itemFilter.write_item_filter(item_filter=invalid_item_filter_string, item_filter_import=None, file_path=itemFilter.invalid_filter_file_path)
     else:
         invalid_item_filter_string = itemFilter.generate_invalid_item_filter_block_without_sound()
-        itemFilter.write_item_filter(invalid_item_filter_string, item_filter_import=None)
+        itemFilter.write_item_filter(item_filter=invalid_item_filter_string, item_filter_import=None, file_path=itemFilter.invalid_filter_file_path)
 
 
 def get_found_items(char: gggAPI.Character) -> set:

@@ -63,34 +63,40 @@ async def send_poe_text_ignore_debounce(command: str):
     return await send_poe_text(command)
 
 async def send_poe_text(command: str, retry_times: int = 1, retry_delay: float = 0):
+    return await send_multiple_poe_text([command], retry_times, retry_delay)
+
+async def send_multiple_poe_text(commands: list[str], retry_times: int = 1, retry_delay: float = 0):
     window = gw.getActiveWindow()
     global _last_called
     # if windows is active
     now = time.monotonic()
     async with _send_lock:  # Acquire lock before any operations
         if window is not None and window.title == "Path of Exile" and not (_last_called is not None and now - _last_called < _debounce_time):
-            if _debug:
-                logger.info("[DEBUG] Found active Path of Exile window")
-                logger.info(f"[DEBUG] Sending command: {command}")
+
+            logger.debug("[DEBUG] Found active Path of Exile window")
+
             _last_called = now
 
-            clipboard_value = get_then_set_clipboard(command)
+            clipboard_value = get_then_set_clipboard(commands[0])
+            for i, command in enumerate(commands):
+                if not i == 0:
+                    set_clipboard(command)
+                logger.debug(f"[DEBUG] Sending command: {command}")
+                # Press Enter
+                keyboard_controller.press(Key.enter)
+                keyboard_controller.release(Key.enter)
 
-            # Press Enter
-            keyboard_controller.press(Key.enter)
-            keyboard_controller.release(Key.enter)
+                await asyncio.sleep(0.05)
+                # Type command
+                keyboard_controller.press(Key.ctrl)
+                keyboard_controller.press('v')
+                keyboard_controller.release('v')
+                keyboard_controller.release(Key.ctrl)
 
-            await asyncio.sleep(0.05)
-            # Type command
-            keyboard_controller.press(Key.ctrl)
-            keyboard_controller.press('v')
-            keyboard_controller.release('v')
-            keyboard_controller.release(Key.ctrl)
-
-            await asyncio.sleep(0.05)
-            # Press Enter again
-            keyboard_controller.press(Key.enter)
-            keyboard_controller.release(Key.enter)
+                await asyncio.sleep(0.05)
+                # Press Enter again
+                keyboard_controller.press(Key.enter)
+                keyboard_controller.release(Key.enter)
 
             set_clipboard(clipboard_value)
             if _debug:
@@ -107,7 +113,7 @@ async def send_poe_text(command: str, retry_times: int = 1, retry_delay: float =
             if _debug:
                 logger.info(f"[DEBUG] Debounced: Waiting {delay} seconds before retrying")
         await asyncio.sleep(delay)
-        return await send_poe_text(command, retry_times - 1, retry_delay)
+        return await send_multiple_poe_text(commands, retry_times - 1, retry_delay)
     else:
         if _debug:
             logger.info("[DEBUG] Path of Exile window not active, no retries left")

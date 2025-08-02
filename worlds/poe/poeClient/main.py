@@ -25,7 +25,7 @@ _generate_wav = True  # Set to True if you want to generate the wav files
 _debug = True  # Set to True for debug output, False for production
 validate_char_debounce_time = 2  # seconds
 loop_timer = 0.1  # Time in seconds to wait before reloading the item filter
-context = {}
+context = None  # This will be set in the client_start function
 _run_update_item_filter = False
 possible_paths_to_client_txt = [
     Path("C:/Program Files (x86)/Grinding Gear Games/Path of Exile/logs/client.txt"),
@@ -66,7 +66,7 @@ def on_press(key):
 
 last_ran_validate_char = 0
 def validate_char(ctx: "PathOfExileContext" = context):
-    
+
     # add a debounce timer to the validate_char function. I want this function to run at most every 5 seconds
     global last_ran_validate_char, _run_update_item_filter
     current_time = time.time()
@@ -75,9 +75,9 @@ def validate_char(ctx: "PathOfExileContext" = context):
             logger.info(f"[DEBUG] Debounced: validate_char called too soon. Last ran at {last_ran_validate_char}, current time is {current_time}.")
         return
 
-    if _debug:
-        logger.info(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
-    sync_run_async(validationLogic.validate_and_update(ctx))
+
+    logger.debug(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
+    asyncio.create_task(validationLogic.when_enter_new_zone(context, "2025/08/01 19:40:29 39555609 cff945b9 [INFO Client 30324] : You have entered")) # hacky I know lol
     _run_update_item_filter = True
     last_ran_validate_char = time.time()
 
