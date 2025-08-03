@@ -1,11 +1,5 @@
 import json
 import pkgutil
-
-
-
-
-
-
 # two-toned boots and fleshripper were duplicates.
 
 base_item_location_array = json.loads(pkgutil.get_data("worlds.poe.data", "BaseItems.json").decode("utf-8"))

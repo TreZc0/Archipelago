@@ -40,7 +40,7 @@ class LocationDict(TypedDict, total=False):
     id: int
 
 #load the json from ./data/bosses.json
-data = pkgutil.get_data("worlds.poe.data", "bosses.json")
+data = pkgutil.get_data("worlds.poe.data", "Bosses.json")
 goal_items = json.loads(data.decode("utf-8"))
 
 acts = [

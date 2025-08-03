@@ -17,8 +17,11 @@ from . import Locations
 from . import Regions as poeRegions
 from . import Rules as poeRules
 
-# ----- Configure the POE client ----- #
 logger = logging.getLogger("poe")
+logger.setLevel(logging.DEBUG)
+
+# ----- Configure the POE client ----- #
+
 
 def launch_client():
     from . import Client
@@ -337,17 +340,23 @@ def setup_character_items(world, options):
             if character_item['name'] != starting_character:
                 world.items_to_place.pop(character_item['id'], None)
     temp_items_to_place = {}
+    
     # add ascendancy items.
     char_classes = ["Marauder", "Ranger", "Witch", "Duelist", "Templar", "Shadow",
                     "Scion"] if options.allow_unlock_of_other_characters.value else [starting_character]
     if world.goal_act >= 3:
         for char_class in char_classes:
+            sample_size = max(min(1 if char_class == "Scion" else 3, options.ascendancies_available_per_class.value), 0)
+            logger.debug(
+                f"{sample_size} Adding ascendancy items for {char_class}. "
+                f"There are {len(Items.get_ascendancy_class_items(char_class, table=world.items_to_place))} items available.")
             items: list[Items.ItemDict] = world.random.sample(
                 population=Items.get_ascendancy_class_items(char_class, table=world.items_to_place),
-                k=min(1 if char_class == "Scion" else 3, options.ascendancies_available_per_class.value)
+                k=sample_size
             )
             for item in items:
                 temp_items_to_place[item["id"]] = item
+                
     # remove all the other ascendancy items
     for item in Items.get_ascendancy_items(table=world.items_to_place):
         item_id = world.item_name_to_id[item["name"]]
