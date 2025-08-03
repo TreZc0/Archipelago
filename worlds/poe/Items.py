@@ -188,6 +188,13 @@ def get_character_class_items(table: Dict[int, ItemDict] = item_table) -> list[I
     if table is item_table: memoize_cache["Character Class"] = result
     return result
 
+def get_base_class_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
+    if table is item_table and "Base Class" in memoize_cache:
+        return memoize_cache["Base Class"]
+    result = [item for item in table.values() if "Base Class" in item["category"]]
+    if table is item_table: memoize_cache["Base Class"] = result
+    return result
+
 def get_ascendancy_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     if table is item_table and "Ascendancy" in memoize_cache:
         return memoize_cache["Ascendancy"]

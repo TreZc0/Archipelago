@@ -335,7 +335,7 @@ def setup_character_items(world, options):
         starting_character = handle_starting_character("Templar")
     # remove other character class items, if not allowed
     if not options.allow_unlock_of_other_characters.value:
-        character_items = Items.get_character_class_items(world.items_to_place)
+        character_items = Items.get_base_class_items(world.items_to_place)
         for character_item in character_items:
             if character_item['name'] != starting_character:
                 world.items_to_place.pop(character_item['id'], None)
