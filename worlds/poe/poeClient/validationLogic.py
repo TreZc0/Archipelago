@@ -210,8 +210,9 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
                 if socketed_item.baseType not in [i["name"] for i in total_recieved_items]:
                     errors.append(f"Socketed {socketed_item.baseType} in {equipped_item.inventoryId}")
 
-        links = [i["name"] for i in total_recieved_items if i["name"] == f"Progressive max links - {equipped_item.inventoryId if equipped_item.inventoryId != 'BodyArmour' else 'Body'}"] # this if statement is temporary to support version < 0.2.2
-        if len(links) < equipped_sockets - 1: # -1 for the skill gem
+        links = [i["name"] for i in total_recieved_items if i["name"] == f"Progressive max links - {equipped_item.inventoryId if equipped_item.inventoryId != 'BodyArmour' else 'Body'}"]
+        # this if statement is temporary to support version < 0.2.2 ( Item name change to : "Progressive max links - BodyArmour" )
+        if len(links) < equipped_sockets:
             errors.append(f"Too many links for {equipped_item.baseType}")
 
         if equipped_item.inventoryId == "Flask":
