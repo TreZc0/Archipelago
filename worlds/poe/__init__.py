@@ -143,6 +143,15 @@ class PathOfExileWorld(World):
 
         logger.debug(f"[DEBUG]: items left to place:{len(self.items_to_place)} /{self.total_items_to_place_count}.\n Created {len(self.locations_to_place)} locations.")
 
+    def create_item(self, item: str) -> Items.PathOfExileItem:
+        # this is called when AP wants to create an item by name (for plando, start inventory, item links) or when you call it from your own code
+
+        # get the item from the item table, by name
+        id = self.item_name_to_id.get(item)
+        item = ItemTable.item_table.get(id)
+        classification = item.get("classification", ItemClassification.progression)  # progression I guess?
+        return Items.PathOfExileItem(item['name'], classification, item['id'], self.player)
+
     def create_items(self):
         itempool = self.multiworld.itempool
         logger.debug(f"[DEBUG]: in create_items {len(itempool)} ---- ")
