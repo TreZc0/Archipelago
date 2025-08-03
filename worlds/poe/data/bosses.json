@@ -1,0 +1,226 @@
+{
+  "hydra": {
+    "difficulty": "Guardian",
+    "drops": [
+      {"name": "Fragment of the Hydra"}
+    ]
+  },
+  "phoenix": {
+    "difficulty": "Guardian",
+    "drops": [
+      {"name": "Fragment of the Phoenix"}
+    ]
+  },
+  "chimera": {
+    "difficulty": "Guardian",
+    "drops": [
+      {"name": "Fragment of the Chimera"}
+    ]
+  },
+  "minotaur": {
+    "difficulty": "Guardian",
+    "drops": [
+      {"name": "Fragment of the Minotaur"}
+    ]
+  },
+  "shaper": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Shaper's Touch"},
+      {"name": "Voidwalker"},
+      {"name": "Solstice Vigil"},
+      {"name": "Dying Sun"}
+    ]
+  },
+  "uber_shaper": {
+    "difficulty": "Uber",
+    "drops": [
+      {"name": "Echoes of Creation"},
+      {"name": "Entropic Devastation"},
+      {"name": "The Tides of Time"},
+      {"name": "Starforge"}
+    ]
+  },
+  "elder": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Cyclopean Coil"},
+      {"name": "Blasphemer's Grasp"},
+      {"name": "Nebuloch"},
+      {"name": "Hopeshredder"},
+      {"name": "Shimmeron"},
+      {"name": "Impresence"}
+    ]
+  },
+  "uber_elder": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Mark of the Shaper"},
+      {"name": "Mark of the Elder"},
+      {"name": "Voidfletcher"},
+      {"name": "Indigon"},
+      {"name": "Disintegrator"}
+    ]
+  },
+  "uber_uber_elder": {
+    "difficulty": "Uber",
+    "drops": [
+      {"name": "Call of the Void"},
+      {"name": "The Devourer of Minds"},
+      {"name": "Soul Ascension"},
+      {"name": "Impresence", "ilvl": 87},
+      {"name": "The Eternity Shroud"},
+      {"name": "Voidforge"}
+    ]
+  },
+  "atziri": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "The Vertex"},
+      {"name": "Atziri's Splendour"},
+      {"name": "Atziri's Rule"},
+      {"name": "Triumvirate Authority"},
+      {"name": "Atziri's Acuity"},
+      {"name": "Atziri's Reflection"},
+      {"name": "Atziri's Disfavour"}
+    ]
+  },
+  "al-hezmin": {
+    "difficulty": "Guardian",
+    "drops": [
+      {"name": "Al-Hezmin's Crest"}
+    ]
+  },
+  "baran": {
+    "difficulty": "Guardian",
+    "drops": [
+      {"name": "Baran's Crest"}
+    ]
+  },
+  "drox": {
+    "difficulty": "Guardian",
+    "drops": [
+      {"name": "Drox's Crest"}
+    ]
+  },
+  "veritania": {
+    "difficulty": "Guardian",
+    "drops": [
+      {"name": "Veritania's Crest"}
+    ]
+  },
+  "sirus": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Crown of the Inward Eye"},
+      {"name": "Hands of the High Templar"},
+      {"name": "The Burden of Truth"},
+      {"name": "Thread of Hope"}
+    ]
+  },
+  "uber_sirus": {
+    "difficulty": "Uber",
+    "drops": [
+      {"name": "Thread of Hope", "ilvl": 87},
+      {"name": "The Tempest Rising"},
+      {"name": "Oriath's End"},
+      {"name": "The Saviour"}
+    ]
+  },
+  "maven": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Legacy of Fury"},
+      {"name": "Graven's Secret"},
+      {"name": "Arn's Anguish"},
+      {"name": "Olesya's Delight"},
+      {"name": "Doppelgänger Guise"},
+      {"name": "Echoforge"}
+    ]
+  },
+  "uber_maven": {
+    "difficulty": "Uber",
+    "drops": [
+      {"name": "Viridi's Veil"},
+      {"name": "Impossible Escape"},
+      {"name": "Grace of the Goddess"},
+      {"name": "Progenesis"}
+    ]
+  },
+  "exarch": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Dawnbreaker"},
+      {"name": "Dawnstrider"},
+      {"name": "Dissolution of the Flesh"}
+    ]
+  },
+  "uber_exarch": {
+    "difficulty": "Uber",
+    "drops": [
+      {"name": "The Annihilating Light"},
+      {"name": "Annihilation's Approach"},
+      {"name": "Crystallised Omniscience"},
+      {"name": "The Celestial Brace"}
+    ]
+  },
+  "eater": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Inextricable Fate"},
+      {"name": "The Gluttonous Tide"},
+      {"name": "Melding of the Flesh"}
+    ]
+  },
+  "uber_eater": {
+    "difficulty": "Uber",
+    "drops": [
+      {"name": "Ravenous Passion"},
+      {"name": "Ashes of the Stars"},
+      {"name": "Nimis"}
+    ]
+  },
+  "incarnation_of_neglect": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "The Arkhon's Tools"},
+      {"name": "Venarius' Astrolabe"},
+      {"name": "Legacy of the Rose"}
+    ]
+  },
+  "incarnation_of_fear": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Servant of Decay"},
+      {"name": "Coiling Whisper"},
+      {"name": "Enmity's Embrace"}
+    ]
+  },
+  "incarnation_of_dread": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "The Dark Monarch"},
+      {"name": "Seven Teachings"},
+      {"name": "Wine of the Prophet"}
+    ]
+  },
+  "cortex": {
+    "difficulty": "Pinnacle",
+    "drops": [
+      {"name": "Offering to the Serpent"},
+      {"name": "Perepiteia"},
+      {"name": "Garb of the Ephemeral"},
+      {"name": "Bottled Faith"}
+    ]
+  },
+  "uber_cortex": {
+    "difficulty": "Uber",
+    "drops": [
+      {"name": "Mask of the Tribunal"},
+      {"name": "Nebulis"},
+      {"name": "Circle of Ambition"},
+      {"name": "The Apostate"},
+      {"name": "Rational Doctrine"}
+    ]
+  }
+}

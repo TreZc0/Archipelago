@@ -1,3 +1,5 @@
+import json
+import pkgutil
 from typing import Dict, TypedDict
 from BaseClasses import Location
 from worlds.poe.data import LocationTable
@@ -37,114 +39,10 @@ class LocationDict(TypedDict, total=False):
     act: int
     id: int
 
-goal_items = {
-    "shaper": [
-        "Shaper's Touch",
-        "Voidwalker",
-        "Solstice Vigil",
-        "Dying Sun",
-    ],
-    "uber_shaper": [
-        "Echoes of Creation",
-        "Entropic Devastation",
-        "The Tides of Time",
-        "Starforge",
-    ],
-    "elder":[
-        "Cyclopean Coil",
-        "Blasphemer's Grasp"
-        "Nebuloch",
-        "Hopeshredder",
-        "Shimmeron",
-        "Impresence",
-    ],
-    "uber_elder": [
-        "Mark of the Shaper",
-        "Mark of the Elder",
-        "Voidfletcher",
-        "Indigon",
-        "Disintegrator",
-    ],
-    "uber_uber_elder": [
-        "Call of the Void",
-        "The Devourer of Minds",
-        "Soul Ascension",
-        "The Eternity Shroud",
-        "Voidforge",
-    ],
-    "atziri":[
-        "The Vertex",
-        "Atziri's Splendour",
-        "Atziri's Rule",
-        "Triumvirate Authority",
-        "Atziri's Acuity",
-        "Atziri's Reflection",
-        "Atziri's Disfavour",
-    ],
-    "sirus":[
-        "Crown of the Inward Eye"
-        "Hands of the High Templar"
-        "The Burden of Truth"
-        "Thread of Hope"
-    ],
-    "uber_sirus":[
-        "Thread of Hope",
-        "The Tempest Rising",
-        "Oriath's End",
-        "The Saviour",
-    ],
-    "maven":[
-        "Legacy of Fury",
-        "Graven's Secret",
-        "Arn's Anguish",
-        "Olesya's Delight",
-        "Doppelgänger Guise",
-        "Echoforge",
-    ],
-    "uber_maven":[
-        "Viridi's Veil",
-        "Impossible Escape",
-        "Grace of the Goddess",
-        "Progenesis",
-    ],
-    "exarch":[
-        "Dawnbreaker",
-        "Dawnstrider",
-        "Dissolution of the Flesh",
-    ],
-    "uber_exarch":[
-        "The Annihilating Light",
-        "Annihilation's Approach",
-        "Crystallised Omniscience",
-        "The Celestial Brace",
-    ],
-    "eater":[
-        "Inextricable Fate",
-        "The Gluttonous Tide",
-        "Melding of the Flesh",
-    ],
-    "uber_eater":[
-        "Ravenous Passion",
-        "Ashes of the Stars",
-        "Nimis",
-    ],
-    "incarnation_of_neglect":[
-        "The Arkhon's Tools",
-        "Venarius' Astrolabe",
-        "Legacy of the Rose",
-    ],
-    "incarnation_of_fear":[
-        "Servant of Decay",
-        "Coiling Whisper",
-        "Enmity's Embrace",
-    ],
-    "incarnation_of_dread":[
-        "The Dark Monarch",
-        "Seven Teachings",
-        "Wine of the Prophet",
-    ]
-}
-
+#load the json from ./data/bosses.json
+data = pkgutil.get_data("worlds.poe.data", "bosses.json")
+goal_items = json.loads(data.decode("utf-8"))
+a = 1+1
 acts = [
     {"act": 0.2, "maxMonsterLevel": 2}, # man these roas are tough lol.
     {"act": 1, "maxMonsterLevel": 13},

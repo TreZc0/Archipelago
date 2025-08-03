@@ -34,18 +34,18 @@ MinimapIcon 0 Green UpsideDownHouse
 PlayEffect Cyan
 """
 default_style_string = f"""SetFontSize 45
-SetFontSize 35
+SetFontSize 38
 SetTextColor 201 117 130 255
 SetBorderColor 117 194 116 255
-SetBackgroundColor 238 227 147 255
+SetBackgroundColor 238 227 147 225
 MinimapIcon 1 Green UpsideDownHouse
 PlayEffect Cyan Temp
 """
 filler_style_string = f"""SetFontSize 45
-SetFontSize 20
+SetFontSize 31
 SetTextColor 201 117 130 255
 SetBorderColor 117 194 116 255
-SetBackgroundColor 238 227 147 255
+SetBackgroundColor 238 227 147 200
 MinimapIcon 2 Green UpsideDownHouse
 """
 trap_style_string = f"""SetFontSize 45
@@ -120,7 +120,7 @@ def generate_item_filter_block(base_type_name, alert_sound, style_string=default
 Show 
 BaseType == "{base_type_name}"
 {style_string}
-CustomAlertSound "{alert_sound}" 300
+CustomAlertSoundOptional "{alert_sound}" 300
 {end_item_filter_block}"""
 
 def generate_item_filter_block_without_sound(base_type_name, style_string=default_style_string) -> str:
@@ -139,7 +139,7 @@ def generate_invalid_item_filter_block(alert_sound) -> str:
     return f"""
 Show 
 {invalid_style_string}
-CustomAlertSound "{alert_sound}" 300
+CustomAlertSoundOptional "{alert_sound}" 300
 """
 
 def generate_invalid_item_filter_block_without_sound() -> str:
