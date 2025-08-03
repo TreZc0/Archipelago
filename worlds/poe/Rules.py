@@ -74,7 +74,11 @@ def get_skill_gem_amount_for_act(act, opt): return min(opt.skill_gems_per_act.va
 def get_passives_amount_for_act(act, opt): return passives_required_for_act.get(act, 0) if opt.add_passive_skill_points_to_item_pool.value else 0
 
 def completion_condition(world: "PathOfExileWorld",  state: CollectionState) -> bool:
-    return can_reach(world.goal_act, world, state)
+    if world.options.goal.value < 10 :
+        return can_reach(world.goal_act, world, state)
+    else :
+        # CHANGE THIS TO THE BOSS RUSH LOCAION? I DON"T KNOW IF THATS EVEN NEEDED
+        return can_reach(world.goal_act, world, state)
 
 def can_reach(act: int, world , state: CollectionState) -> bool:
     opt : PathOfExileOptions = world.options

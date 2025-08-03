@@ -14,7 +14,13 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
     regions = []
     last_region = menu
     for act in act_regions:
-        region_name = f"Act {act['act']}"
+        region_name = ""
+        if act["act"] == 0.2:
+            region_name = "The Twilight Strand"
+        elif act["act"] == 11:
+            region_name = "Maps"
+        else:
+            region_name = f"Act {act['act']}"
         
         region = Region(region_name, player, multiworld)
         entrance_logic = lambda state, act=act["act"]: can_reach(act, world, state)
@@ -28,11 +34,8 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
             loc.get("dropLevel", 9001) <= act["maxMonsterLevel"] or #9001 is just a big number
             loc.get("level", 9001) <= act["maxMonsterLevel"]):
                 is_level = loc.get("baseItem") is None
-                location_name = ""
-                if is_level:
-                    location_name = loc["name"]
-                else:
-                    location_name = f"{loc['baseItem']} - Act {act['act']}"
+                location_name = location_name = loc["name"]
+
                 #location_name = loc["baseItem"]
                 locationObj = PathOfExileLocation(player, location_name, parent=region, address=loc["id"])
                 try:
