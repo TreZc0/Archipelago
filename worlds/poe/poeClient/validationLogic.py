@@ -212,6 +212,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
 
         links = [i["name"] for i in total_recieved_items if i["name"] == f"Progressive max links - {equipped_item.inventoryId if equipped_item.inventoryId != 'BodyArmour' else 'Body'}"]
         # this if statement is temporary to support version < 0.2.2 ( Item name change to : "Progressive max links - BodyArmour" )
+        # TODO: CHANGE THIS TO THE NEW NAME IN THE FUTURE
         if len(links) < equipped_sockets:
             errors.append(f"Too many links for {equipped_item.baseType}")
 

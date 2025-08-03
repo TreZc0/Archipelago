@@ -9,7 +9,7 @@ if typing.TYPE_CHECKING:
     from . import PathOfExileWorld
 
 logger = logging.getLogger("poe.Rules")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 MAX_GEAR_UPGRADES   = 50
 MAX_FLASK_SLOTS     = 10
@@ -197,6 +197,7 @@ def SelectLocationsToAdd (world: "PathOfExileWorld", target_amount):
         needed_locations_for_act += get_skill_gem_amount_for_act(act, opt)
         needed_locations_for_act += get_passives_amount_for_act(act, opt)
         return needed_locations_for_act
+
 
     for act in range(1, goal_act + 1):
         needed_locations_for_act = total_needed_by_act(act, opt) - total_needed_by_act(act - 1, opt)

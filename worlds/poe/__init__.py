@@ -270,8 +270,11 @@ def setup_character_items(world, options):
 
             count = world.multiworld.state.count("Progressive max links - Weapon", world.player)
             if count < 1:
-                wep = world.remove_and_create_item_by_name("Progressive max links - Weapon")
-                world.precollect(wep)
+                link = [i for i in Items.get_max_links_items(table=world.items_to_place) if i["name"] == "Progressive max links - Weapon"]
+                if link and link[0] and link[0]["count"] :
+                    if link[0]["count"] > 0:
+                        world.items_to_place[link[0]["id"]]["count"] -= 1
+                        world.precollect(world.create_item("Progressive max links - Weapon"))
 
         if options.usable_starting_gear.value in \
                 (options.usable_starting_gear.option_starting_weapon_flask_and_gems,
