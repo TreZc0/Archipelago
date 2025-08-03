@@ -82,7 +82,7 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
             if _debug:
                 logger.info(f"[DEBUG] self_whisper_callback: {parts}")
             ctx.character_name = char_name
-            await inputHelper.send_poe_text_ignore_debounce(f"@{ctx.character_name} Welcome to Archipelago!")
+            await inputHelper.send_poe_text_ignore_debounce(f"@{ctx.character_name} Welcome to Archipelago, {ctx.character_name}!")
             await fileHelper.save_settings(ctx)
             return
 
