@@ -42,7 +42,7 @@ class LocationDict(TypedDict, total=False):
 #load the json from ./data/bosses.json
 data = pkgutil.get_data("worlds.poe.data", "bosses.json")
 goal_items = json.loads(data.decode("utf-8"))
-a = 1+1
+
 acts = [
     {"act": 0.2, "maxMonsterLevel": 2}, # man these roas are tough lol.
     {"act": 1, "maxMonsterLevel": 13},
