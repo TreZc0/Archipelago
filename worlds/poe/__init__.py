@@ -1,6 +1,5 @@
-from ast import Set
 import os
-from typing import Dict
+from typing import Dict, Set
 from worlds.LauncherComponents import components, Component, launch_subprocess, Type, icon_paths
 from BaseClasses import Region, MultiWorld, Item, Location, LocationProgressType, ItemClassification
 from worlds.AutoWorld import World, WebWorld
@@ -68,6 +67,8 @@ class PathOfExileWorld(World):
     # location_name_to_id = { loc.name: loc.id for loc in Locations.base_item_types }
     location_name_to_id = { loc["name"]: id for id, loc in Locations.full_locations.items() }
     item_name_to_id = { item["name"]: item["id"] for item in Items.item_table.values() }
+
+    item_name_groups: Dict[str, Set[str]] = Items.get_item_name_groups()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -196,10 +197,10 @@ def setup_early_items(world, options):
         uniques = [item for item in Items.item_table.values() if "Unique" in item["category"]]
         for unique in uniques:
             unique["classification"] = ItemClassification.progression
-
+            
+        gear_upgrades = Items.get_gear_items(table=world.items_to_place)
         if (options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_allow_one_slot_of_normal_rarity
                 or options.gucci_hobo_mode.value == options.gucci_hobo_mode.option_no_non_unique_items):
-            gear_upgrades = Items.get_gear_items(table=world.items_to_place)
             for item in gear_upgrades:
                 if "Magic" in item["category"] or "Rare" in item["category"]:
                     world.items_to_place.pop(item["id"])

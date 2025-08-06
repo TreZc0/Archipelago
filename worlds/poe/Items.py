@@ -173,6 +173,17 @@ def cull_items_to_place(world: "PathOfExileWorld", items: Dict[int, ItemDict], l
     return items
 
 
+def get_item_name_groups() -> Dict[str, Set[str]]:
+        categories: Dict[str, Set[str]] = {}
+        for item in item_table.values():
+            category = item.get("category", [])
+            main_category = category[0]
+            if main_category:
+                if main_category not in categories:
+                    categories[main_category] = set()
+                categories[main_category].add(item["name"])
+
+        return categories
 
 def get_flask_items(table: Dict[int, ItemDict] = item_table) -> list[ItemDict]:
     if table is item_table and "Flask" in memoize_cache:
