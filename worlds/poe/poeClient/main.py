@@ -41,7 +41,7 @@ key_functions = {
     #keyboard.KeyCode: lambda: validate_char(),
     # numpad 1
     keyboard.Key.f12: lambda: asyncio.create_task(validate_char(context)),
-    keyboard.Key.f11: lambda: (_ for _ in ()).throw(Exception("F11 pressed, raising exception for testing purposes")),
+    keyboard.Key.f11: lambda: asyncio.create_task( lambda :(_ for _ in ()).throw(Exception("F11 pressed, raising exception for testing purposes"))),
 }
 
 def on_press(key):
@@ -101,6 +101,7 @@ async def timer_loop():
                 await key_functions[_last_pressed_key]()
             except Exception as e:
                 logger.error(f"[ERROR] Error executing function for key {_last_pressed_key}: {e}")
+                raise e
             _last_pressed_key = None
 
         # Adjust the sleep time as needed
