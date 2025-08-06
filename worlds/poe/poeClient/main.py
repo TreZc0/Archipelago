@@ -27,6 +27,8 @@ validate_char_debounce_time = 2  # seconds
 loop_timer = 0.1  # Time in seconds to wait before reloading the item filter
 context = None  # This will be set in the client_start function
 _run_update_item_filter = False
+_last_pressed_key: keyboard.Key | None = None
+
 possible_paths_to_client_txt = [
     Path("C:/Program Files (x86)/Grinding Gear Games/Path of Exile/logs/client.txt"),
     Path("C:/Program Files (x86)/Steam/steamapps/common/Path of Exile/logs/client.txt"),
@@ -38,34 +40,17 @@ path_to_client_txt = Path("D:/games/poe/logs/Client.txt")
 key_functions = {
     #keyboard.KeyCode: lambda: validate_char(),
     # numpad 1
-    keyboard.Key.f12: lambda : validate_char(context),
-    #keyboard.Key.f11: lambda : ,
+    keyboard.Key.f12: lambda: asyncio.create_task(validate_char(context)),
+    keyboard.Key.f11: lambda: (_ for _ in ()).throw(Exception("F11 pressed, raising exception for testing purposes")),
 }
-
-def sync_run_async(coroutine):
-    """Run an async coroutine in a synchronous context.
-    If an event loop is already running, it creates a task and returns a Future.
-    If no event loop is running, it uses asyncio.run to execute the coroutine.
-    """
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        # No event loop running, safe to use asyncio.run
-        return asyncio.run(coroutine)
-    else:
-        # Already in an event loop, create a task and return a Future
-        return asyncio.create_task(coroutine)
 
 def on_press(key):
     # key is a keycode, key or none.
-    if key in key_functions:
-        try:
-            key_functions[key]()
-        except Exception as e:
-            logger.info(f"Error executing function for key {key}: {e}")
+    global _last_pressed_key
+    _last_pressed_key = key
 
 last_ran_validate_char = 0
-def validate_char(ctx: "PathOfExileContext" = context):
+async def validate_char(ctx: "PathOfExileContext" = context):
 
     # add a debounce timer to the validate_char function. I want this function to run at most every 5 seconds
     global last_ran_validate_char, _run_update_item_filter
@@ -74,12 +59,13 @@ def validate_char(ctx: "PathOfExileContext" = context):
         if _debug:
             logger.info(f"[DEBUG] Debounced: validate_char called too soon. Last ran at {last_ran_validate_char}, current time is {current_time}.")
         return
-
-
     logger.debug(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
-    asyncio.create_task(validationLogic.when_enter_new_zone(context, "2025/08/01 19:40:29 39555609 cff945b9 [INFO Client 30324] : You have entered")) # hacky I know lol
     _run_update_item_filter = True
     last_ran_validate_char = time.time()
+
+    return await validationLogic.when_enter_new_zone(context,
+                                        "2025/08/01 19:40:29 39555609 cff945b9 [INFO Client 30324] : You have entered f12refresh.")  # hacky I know lol
+
 
 async def async_load(ctx: "PathOfExileContext" = None):
 
@@ -103,38 +89,42 @@ async def async_load(ctx: "PathOfExileContext" = None):
 
 async def timer_loop():
     ticks = 0.1
-    global _run_update_item_filter
+    global _run_update_item_filter, _last_pressed_key
     while True:
-        await asyncio.sleep(loop_timer)  # Adjust the sleep time as needed
+        await asyncio.sleep(loop_timer)
         ticks += 0.1
-        if _run_update_item_filter: # every hour
-            await inputHelper.send_poe_text("/itemfilter __ap")
-            _run_update_item_filter = False
 
+        if _last_pressed_key is not None and _last_pressed_key in key_functions:
+            try:
+                if _debug:
+                    logger.info(f"[DEBUG] Key pressed: {_last_pressed_key}, executing function.")
+                await key_functions[_last_pressed_key]()
+            except Exception as e:
+                logger.error(f"[ERROR] Error executing function for key {_last_pressed_key}: {e}")
+            _last_pressed_key = None
 
-        if ticks % 1 < 0.1:
-            pass
+        # Adjust the sleep time as needed
+#        ticks += 0.1
+#        if _run_update_item_filter: # every hour
+#            await inputHelper.send_poe_text("/itemfilter __ap")
+#            _run_update_item_filter = False
+#
+#
+#        if ticks % 1 < 0.1:
+#            pass
             
             
 
-def run():
-    try:
-        if asyncio.get_event_loop().is_running():
-            # If already in an event loop, schedule as a task
-            asyncio.create_task(main_async())
-        else:
-            asyncio.run(main_async())
-    except KeyboardInterrupt:
-        logger.info("Main Loop stopped by user.")
 
-def client_start(ctx: "PathOfExileContext"):
+
+async def client_start(ctx: "PathOfExileContext") -> asyncio.Task:
     global context, path_to_client_txt
     context = ctx
     validationLogic.defaultContext = ctx
     path_to_client_txt = ctx.client_text_path if ctx.client_text_path else path_to_client_txt
     path_to_client_txt = Path(path_to_client_txt)
 
-    run()
+    return await main_async()
     
 async def main_async():
     import time
@@ -159,11 +149,23 @@ async def main_async():
     except KeyboardInterrupt:
         logger.info("Main Loop stopped by user.")
 
+
+
+def run_async_or_not():
+    try:
+        if asyncio.get_event_loop().is_running():
+            # If already in an event loop, schedule as a task
+            asyncio.create_task(main_async())
+        else:
+            asyncio.run(main_async())
+    except KeyboardInterrupt:
+        logger.info("Main Loop stopped by user.")
+
 if __name__ == '__main__':
     # Set the character name here or pass it as an argument
 #    context.character_name = "merc_MY_FIREEE"  # Replace with your character name
 
-    run()
+    run_async_or_not()
 
 
 

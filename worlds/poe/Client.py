@@ -139,8 +139,28 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
             self.output("If you would like to use a custom item filter, please set the base item filter using the 'poe_base_item_filter <filter_name>' command.")
 
         self.output(f"Starting Path of Exile client for character: {self.ctx.character_name}")
-        poe_main.client_start(self.ctx)
+        if self.ctx.running_task and not self.ctx.running_task.done():
+            self.output("Path of Exile client is already running... Killing it and starting a new one.")
+            self.ctx.running_task.cancel()
+            return False
+        self.ctx.running_task = asyncio.create_task(poe_main.client_start(self.ctx), name="main_async_task")
+        self.ctx.running_task.add_done_callback(lambda task: handle_task_errors(task, self.ctx, self))
+
         return True
+
+    def _cmd_stop(self) -> bool:
+        """Stop the Path of Exile client."""
+        if self.ctx.running_task and not self.ctx.running_task.done():
+            if not self.ctx.running_task.done():
+                self.output("Stopping Path of Exile client...")
+            else :
+                self.output("Path of Exile client was already stopped.")
+            self.ctx.running_task.cancel()
+            self.output("Path of Exile client stopped.")
+            return True
+        else:
+            self.output("Path of Exile client is not running.")
+            return False
 
     def _cmd_client(self, path: str = "") -> bool:
         """Shortcut for setting the client text path."""
@@ -159,6 +179,16 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         """shortcut for starting the Path of Exile client."""
         return self._cmd_start_poe()
 
+def handle_task_errors(task: asyncio.Task, ctx: "PathOfExileContext", cmdprocessor: PathOfExileCommandProcessor):
+    """Handle errors in the task."""
+    try:
+        task.result()  # Will raise if the task failed
+    except Exception as e:
+        cmdprocessor.output(f"ERROR, the client borked: {e}")
+        logging.getLogger("poeClient.PathOfExileContext").error(f"Task failed with error: {e}")
+        ctx.running_task = None
+        cmdprocessor.output(f"Trying to restart the client...")
+        cmdprocessor._cmd_start_poe()
 
 @dataclass
 class TTSOptions:
@@ -183,7 +213,8 @@ class PathOfExileContext(CommonContext):
     slot_data = {}
     game_options = {}
     client_options = {}
-    
+
+    running_task : asyncio.Task | None = None
 
     tts_options = TTSOptions()
 
