@@ -454,7 +454,7 @@ async def read_access_token() -> dict | None:
                 print(f"Error: Access token file {access_token_file} is malformed or missing required fields.")
                 return None
         except Exception as e:
-            print(f"Error reading access token from file: {e}")
+            logger.error(f"Error reading access token from file: {e}")
     else:
         if _debug:
             print(f"[DEBUG] Access token file does not exist: {access_token_file}")

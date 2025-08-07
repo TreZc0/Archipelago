@@ -115,25 +115,73 @@ def safe_filename(filename: str) -> str:
     return re.sub(r"[^\w\-_\. ]", "", filename)
 
 async def callback_on_file_change(filepath: Path, async_callbacks: list[callable]):
+    """Monitor file for changes and call callbacks. Can be cancelled."""
     async def zone_change_callback(line: str):
         for callback in async_callbacks:
             if callable(callback):
-                await callback(line)
-    await callback_on_file_line_change(filepath, zone_change_callback)
+                try:
+                    await callback(line)
+                except asyncio.CancelledError:
+                    logger.info("Callback cancelled during execution")
+                    raise
+                except Exception as e:
+                    logger.error(f"Error in callback: {e}")
+                    raise
+    
+    try:
+        await callback_on_file_line_change(filepath, zone_change_callback)
+    except asyncio.CancelledError:
+        logger.info(f"File monitoring cancelled for {filepath}")
+        raise
 
 
 async def callback_on_file_line_change(filepath: Path, async_callback: callable):
-    with open(filepath, 'r') as f:
-        f.seek(0, 2)  # Move the cursor to the end of the file
-        while True:
-            line = f.readline()
-            if not line:
-                await asyncio.sleep(0.3)
-                continue
+    """Monitor file line changes. Cancelable version."""
+    logger.info(f"Starting file monitoring for {filepath}")
+    
+    try:
+        if not filepath.exists():
+            logger.warning(f"File does not exist: {filepath}")
+            return
+            
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            f.seek(0, 2)  # Move to end of file
+            
+            while True:
+                if asyncio.current_task().cancelled():
+                    logger.info("File monitoring task cancelled")
+                    break
+                
+                try:
+                    line = f.readline()
+                    if not line:
+                        await asyncio.sleep(0.3)
+                        continue
 
-            line = line.strip()
-            await async_callback(line)
-
+                    line = line.strip()
+                    await async_callback(line)
+                        
+                except asyncio.CancelledError:
+                    logger.info("File monitoring cancelled during callback")
+                    raise
+                except Exception as e:
+                    logger.error(f"Error reading file {filepath}: {e}")
+                    raise
+                    
+    except asyncio.CancelledError:
+        logger.info(f"File monitoring for {filepath} was cancelled")
+        raise
+    except FileNotFoundError:
+        logger.error(f"File not found: {filepath}")
+        raise
+    except PermissionError:
+        logger.error(f"Permission denied reading file: {filepath}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error monitoring {filepath}: {e}")
+        raise
+    finally:
+        logger.info(f"File monitoring stopped for {filepath}")
 
 def get_last_n_lines_of_file(filepath, n=1):
     with open(filepath, 'r') as f:

@@ -90,20 +90,30 @@ async def async_load(ctx: "PathOfExileContext" = None):
 async def timer_loop():
     ticks = 0.1
     global _run_update_item_filter, _last_pressed_key
-    while True:
-        await asyncio.sleep(loop_timer)
-        ticks += 0.1
+    try:
+        while True:
+            await asyncio.sleep(loop_timer)
+            ticks += 0.1
 
-        if _last_pressed_key is not None and _last_pressed_key in key_functions:
-            try:
-                if _debug:
-                    logger.info(f"[DEBUG] Key pressed: {_last_pressed_key}, executing function.")
-                await key_functions[_last_pressed_key]()
-            except Exception as e:
-                logger.error(f"[ERROR] Error executing function for key {_last_pressed_key}: {e}")
-                raise e
-            _last_pressed_key = None
+            if _last_pressed_key is not None and _last_pressed_key in key_functions:
+                try:
+                    if _debug:
+                        logger.info(f"[DEBUG] Key pressed: {_last_pressed_key}, executing function.")
+                    await key_functions[_last_pressed_key]()
+                except Exception as e:
+                    logger.error(f"[ERROR] Error executing function for key {_last_pressed_key}: {e}")
+                    raise e
+                _last_pressed_key = None
 
+
+    except asyncio.CancelledError:
+        logger.info("Timer loop cancelled.")
+        raise
+    except Exception as e:
+        logger.error(f"Error in timer loop: {e}")
+        raise
+    finally:
+        logger.info("Timer loop stopped.")
         # Adjust the sleep time as needed
 #        ticks += 0.1
 #        if _run_update_item_filter: # every hour
@@ -125,32 +135,61 @@ async def client_start(ctx: "PathOfExileContext") -> asyncio.Task:
     path_to_client_txt = ctx.client_text_path if ctx.client_text_path else path_to_client_txt
     path_to_client_txt = Path(path_to_client_txt)
 
-    return await main_async()
+    return await main_async(ctx)
     
-async def main_async():
+async def main_async(context: "PathOfExileContext"):
     import time
-
+    tasks = []
+    
     try:
         await async_load(context)
+        
         async def enter_new_zone_callback(line: str):
-            await validationLogic.when_enter_new_zone(context, line) # add the context to the callback
-
+            await validationLogic.when_enter_new_zone(context, line)
 
         async def chat_commands(line: str):
             from worlds.poe.poeClient.textUpdate import chat_commands_callback
             await chat_commands_callback(context, line)
-            
-
 
         logger.info("Starting Main Loop...")
+        
         tasks = [
-            fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, chat_commands]),
-            timer_loop()]
+            asyncio.create_task(fileHelper.callback_on_file_change(path_to_client_txt, [enter_new_zone_callback, chat_commands]), name="file_watcher"),
+            asyncio.create_task(timer_loop(), name="timer_loop")
+        ]
+        
         await asyncio.gather(*tasks)
-    except KeyboardInterrupt:
-        logger.info("Main Loop stopped by user.")
+        
+    except (KeyboardInterrupt, asyncio.CancelledError) as e:
+        logger.info(f"Main Loop interrupted: {type(e).__name__}")
+        raise
+    except Exception as e:
+        logger.error(f"Main Loop error: {e}")
+        raise
+    finally:
+        await cancel_tasks(tasks)
 
+async def cancel_tasks(tasks: list[asyncio.Task]):
+    """Cancel a list of tasks gracefully."""
+    if not tasks:
+        return
+            
+    logger.info(f"Cancelling {len(tasks)} tasks...")
 
+    # Cancel all tasks
+    for task in tasks:
+        if not task.done():
+            task.cancel()
+    
+    # Wait for cancellation to complete
+    if tasks:
+        try:
+            await asyncio.gather(*tasks, return_exceptions=True)
+        except Exception as e:
+            logger.error(f"Error during task cancellation: {e}")
+            raise
+    
+    logger.info("All tasks cancelled.")
 
 def run_async_or_not():
     try:
