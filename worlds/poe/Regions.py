@@ -33,10 +33,9 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
             if loc != "used" and (\
             loc.get("dropLevel", 9001) <= act["maxMonsterLevel"] or #9001 is just a big number
             loc.get("level", 9001) <= act["maxMonsterLevel"]):
-                is_level = loc.get("baseItem") is None
-                location_name = location_name = loc["name"]
+                #is_level = loc.get("baseItem") is None
+                location_name = loc["name"]
 
-                #location_name = loc["baseItem"]
                 locationObj = PathOfExileLocation(player, location_name, parent=region, address=loc["id"])
                 try:
                     region.locations.append(locationObj)

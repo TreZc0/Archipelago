@@ -22,8 +22,7 @@ import worlds.poe.Locations as Locations
 import worlds.poe.Options as Options
 
 found_items_dict = {}
-found_items_set = set()
-save_path = "found_items.txt"
+found_items_id_set = set()
 is_char_in_logic = True
 
 _debug = True
@@ -107,11 +106,10 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
     if is_char_in_logic:
         locations_to_check = set()
         #add items to locations_to_check
-        found_items_set = get_found_items(char)
-        for item in found_items_set:
-            if _debug and _verbose_debug:
-                logger.info(f"[DEBUG] Found item: {item}")
-            location_id = Locations.get_location_id_from_item_name(item)
+        found_items_list: list[Locations.LocationDict] = get_found_items(char)
+        for location_dict in found_items_list:
+            logger.info(f"[INFO] Found item: {location_dict["name"]}")
+            location_id = location_dict["id"]
             if location_id is not None:
                 locations_to_check.add(location_id)
         itemFilter.update_item_filter_from_context(ctx)
@@ -119,20 +117,17 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         #add levels to locations_to_check
         if ctx.game_options.get("add_leveling_up_to_location_pool", True):
             for level in range(2, ctx.last_character_level + 1):
-                if _debug and _verbose_debug:
-                    logger.info(f"[DEBUG] Adding level {level} to locations to check.")
+                logger.debug(f"[DEBUG] Adding level {level} to locations to check.")
                 level_location_name = Locations.get_lvl_location_name_from_lvl(level)
                 location_id = Locations.get_location_id_from_level_location_name[level_location_name]
                 if location_id is not None:
                     locations_to_check.add(location_id)
 
         if len(locations_to_check) > 0:
-            if _debug:
-                logger.info(f"[DEBUG] Locations to check: {locations_to_check}")
+            logger.debug(f"[DEBUG] Locations to check: {locations_to_check}")
             locations_to_check = await ctx.check_locations(locations_to_check)
         else:
-            if _debug:
-                logger.info("[DEBUG] No locations to check, skipping check_locations.")
+            logger.debug("[DEBUG] No locations to check, skipping check_locations.")
         itemFilter.update_item_filter_from_context(ctx, recently_checked_locations=locations_to_check)
         return validate_errors
 
@@ -150,11 +145,11 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
 
     errors = list()
 
-    total_recieved_items = list()
+    total_received_items = list()
     for network_item in ctx.items_received:
-        total_recieved_items.append(Items.item_table.get(network_item.item))
+        total_received_items.append(Items.item_table.get(network_item.item))
 
-    if not total_recieved_items:
+    if not total_received_items:
         return ["No items received from the server... are you sure you are connected?"]
 
     simple_equipment_slots = ["BodyArmour","Amulet","Belt","Boots","Gloves","Helmet"]
@@ -165,7 +160,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
 
     # --------- VALIDATION LOGIC STARTS HERE ---------
     if ctx.game_options.get("passivePointsAsItems", True):
-        passive_points = len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive passive point'])
+        passive_points = len([i["name"] for i in total_received_items if i["name"] == 'Progressive passive point'])
         passives_used = len(character.passives.hashes) # number of passives allocated
         ctx.passives_available = passive_points
         ctx.passives_used = passives_used
@@ -173,7 +168,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
             errors.append(f"{passives_used - passive_points} Over-allocated passive points")
 
 
-    if character.class_ not in [i["name"] for i in total_recieved_items]:
+    if character.class_ not in [i["name"] for i in total_received_items]:
         errors.append(f"Class {character.class_}")
 
     gucci_rarity_check = {}
@@ -184,33 +179,33 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
         # simple checks.
         for slot in simple_equipment_slots:
             if equipped_item.inventoryId == slot:
-                errors.append(rarity_check(total_recieved_items, rarity, slot))
+                errors.append(rarity_check(total_received_items, rarity, slot))
                 
         if equipped_item.inventoryId == "Ring":
-            errors.append(rarity_check(total_recieved_items, rarity, "Ring (left)"))
+            errors.append(rarity_check(total_received_items, rarity, "Ring (left)"))
         if equipped_item.inventoryId == "Ring2":
-            errors.append(rarity_check(total_recieved_items, rarity, "Ring (right)"))
+            errors.append(rarity_check(total_received_items, rarity, "Ring (right)"))
         if equipped_item.inventoryId == "Offhand":
             if equipped_item.baseType in Items.quiver_base_types:
-                errors.append(rarity_check(total_recieved_items, rarity, "Quiver"))
+                errors.append(rarity_check(total_received_items, rarity, "Quiver"))
             else:
-                errors.append(rarity_check(total_recieved_items, rarity, "Shield"))
+                errors.append(rarity_check(total_received_items, rarity, "Shield"))
         if equipped_item.inventoryId == "Weapon":
             for prop in equipped_item.properties:
                 prop_name = prop.name
                 for weapon_base_type in Items.weapon_base_types:
                     if prop_name.lower().endswith(weapon_base_type.lower()):
-                        errors.append(rarity_check(total_recieved_items, rarity, weapon_base_type))
+                        errors.append(rarity_check(total_received_items, rarity, weapon_base_type))
 
         equipped_sockets = 0
         if equipped_item.socketedItems is not None:
             for socketed_item in equipped_item.socketedItems:
                 if socketed_item.support:
                     equipped_sockets += 1
-                if socketed_item.baseType not in [i["name"] for i in total_recieved_items]:
+                if socketed_item.baseType not in [i["name"] for i in total_received_items]:
                     errors.append(f"Socketed {socketed_item.baseType} in {equipped_item.inventoryId}")
 
-        links = [i["name"] for i in total_recieved_items if i["name"] == f"Progressive max links - {equipped_item.inventoryId if equipped_item.inventoryId != 'BodyArmour' else 'Body'}"]
+        links = [i["name"] for i in total_received_items if i["name"] == f"Progressive max links - {equipped_item.inventoryId if equipped_item.inventoryId != 'BodyArmour' else 'Body'}"]
         # this if statement is temporary to support version < 0.2.2 ( Item name change to : "Progressive max links - BodyArmour" )
         # TODO: CHANGE THIS TO THE NEW NAME IN THE FUTURE
         if len(links) < equipped_sockets:
@@ -226,11 +221,11 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
                 unique_flask_count += 1
                 
     # get count of items.name that match the progressive unlocks
-    if normal_flask_count > len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive Flask Unlock Slot']):
+    if normal_flask_count > len([i["name"] for i in total_received_items if i["name"] == 'Progressive Flask Unlock Slot']):
         errors.append("Normal Flasks")
-    if magic_flask_count > len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive Magic Flask Unlock']):
+    if magic_flask_count > len([i["name"] for i in total_received_items if i["name"] == 'Progressive Magic Flask Unlock']):
         errors.append("Magic Flasks")
-    if unique_flask_count > len([i["name"] for i in total_recieved_items if i["name"] == 'Progressive Unique Flask Unlock']):
+    if unique_flask_count > len([i["name"] for i in total_received_items if i["name"] == 'Progressive Unique Flask Unlock']):
         errors.append("Unique Flasks")
 
     gucci_hobo_mode = ctx.game_options.get("gucciHobo", False)
@@ -310,14 +305,14 @@ async def update_filter_to_invalid_char_filter(errors: list[str], enable_tts: bo
         itemFilter.write_item_filter(item_filter=invalid_item_filter_string, item_filter_import=None, file_path=itemFilter.invalid_filter_file_path)
 
 
-def get_found_items(char: gggAPI.Character) -> set:
+def get_found_items(char: gggAPI.Character) -> list[Locations.LocationDict]:
     try:
-        full_list = char.inventory + char.equipment
-        for item in full_list:
-            found_items_set.add(item.baseType)
+        full_found_list = char.inventory + char.equipment
+        for item in full_found_list:
+            found_items_id_set.add(Locations.base_item_locations_by_base_item_name[item.baseType])
             if _debug and _verbose_debug:
                 logger.info(f"[DEBUG] Item in inventory: {item.baseType}")
     except Exception as e:
         logger.info(f"Error fetching found items: {e}")
         raise e
-    return found_items_set
+    return found_items_id_set

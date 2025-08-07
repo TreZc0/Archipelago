@@ -12,7 +12,7 @@ from BaseClasses import ItemClassification
 if typing.TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
 from pathlib import Path
-from worlds.poe.Locations import base_item_types_by_name
+from worlds.poe.Locations import base_item_locations_by_base_item_name
 from worlds.poe import Locations
 
 filter_file_dir = Path.home() / "Documents" / "My Games" / "Path of Exile"
@@ -77,7 +77,8 @@ def update_item_filter_from_context(ctx : "PathOfExileContext", recently_checked
         if base_item_location_id in ctx.checked_locations or \
            (recently_checked_locations and base_item_location_id in recently_checked_locations):
             continue
-        base_type_name = ctx.location_names.lookup_in_game(base_item_location_id)
+        base_type = Locations.base_item_type_locations.get(base_item_location_id, {})
+        base_type_name = base_type.get("baseItem", None)
         if not base_type_name or base_type_name not in Locations.base_item_names_set: # other locations that aren't base items
             continue
         relative_wav_path = base_item_id_to_relative_wav_path.get(base_item_location_id, None)
@@ -109,7 +110,7 @@ def update_item_filter_from_context(ctx : "PathOfExileContext", recently_checked
     write_item_filter(item_filter_str, item_filter_import=ctx.base_item_filter)
 
 def generate_item_filter_block(base_type_name, alert_sound, style_string=default_style_string) -> str:
-    if base_type_name not in base_item_types_by_name:
+    if base_type_name not in base_item_locations_by_base_item_name:
         print(f"[ERROR] Base type '{base_type_name}' not found in item table.")
         return ""
     if not Path.exists(filter_file_dir / alert_sound):

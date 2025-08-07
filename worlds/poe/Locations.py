@@ -65,4 +65,4 @@ base_item_names_set = LocationTable.base_item_set
 base_item_type_locations: Dict[int, LocationDict] = LocationTable.base_item_location_table
 level_locations: Dict[int, LocationDict] = LocationTable.level_location_table
 full_locations = {**base_item_type_locations, **level_locations}
-base_item_types_by_name: Dict[str, LocationDict] = {loc['baseItem']: loc for loc in base_item_type_locations.values()}
+base_item_locations_by_base_item_name: Dict[str, LocationDict] = {loc['baseItem']: loc for loc in base_item_type_locations.values()}
