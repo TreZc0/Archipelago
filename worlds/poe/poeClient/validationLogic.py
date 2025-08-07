@@ -22,7 +22,7 @@ import worlds.poe.Locations as Locations
 import worlds.poe.Options as Options
 
 found_items_dict = {}
-found_items_id_set = set()
+found_items_id_list: list[Locations.LocationDict] = []
 is_char_in_logic = True
 
 _debug = True
@@ -309,10 +309,10 @@ def get_found_items(char: gggAPI.Character) -> list[Locations.LocationDict]:
     try:
         full_found_list = char.inventory + char.equipment
         for item in full_found_list:
-            found_items_id_set.add(Locations.base_item_locations_by_base_item_name[item.baseType])
-            if _debug and _verbose_debug:
-                logger.info(f"[DEBUG] Item in inventory: {item.baseType}")
+            if item.baseType in Locations.base_item_locations_by_base_item_name:
+                found_items_id_list.append(Locations.base_item_locations_by_base_item_name[item.baseType])
+                logger.debug(f"[DEBUG] Item in inventory: {item.baseType}")
     except Exception as e:
-        logger.info(f"Error fetching found items: {e}")
+        logger.error(f"Error fetching found items: {e}")
         raise e
-    return found_items_id_set
+    return found_items_id_list
