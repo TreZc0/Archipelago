@@ -110,7 +110,10 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> list[str]:
         return validate_errors
     # defenseive programming end.
 
-    validate_errors = validate_char_equipment(char, ctx)
+    total_received_items = list()
+    for network_item in ctx.items_received:
+        total_received_items.append(Items.item_table.get(network_item.item))
+    validate_errors = validate_char_equipment(char, ctx, total_received_items)
 
     location_ids_to_check = set()
     #add items to locations_to_check
@@ -138,7 +141,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> list[str]:
             passives += 1
 
 
-    validate_errors.extend(validate_passive_points(char, ctx, passives))
+    validate_errors.extend(validate_passive_points(char, ctx, total_received_items, passives))
     is_char_in_logic = True if len(validate_errors) == 0 else False
 
     if len(location_ids_to_check) > 0:
@@ -154,7 +157,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> list[str]:
     return validate_errors
 
 
-def validate_passive_points(character: gggAPI.Character,  ctx: "PathOfExileContext", points_from_this_zone: int = 0) -> list[str]:
+def validate_passive_points(character: gggAPI.Character,  ctx: "PathOfExileContext", total_received_items: list[Items.ItemDict], points_from_this_zone: int = 0) -> list[str]:
     """
     Validate the passive points of the character.
     This function checks if the character has the correct number of passive points based on their level.
@@ -170,17 +173,13 @@ def validate_passive_points(character: gggAPI.Character,  ctx: "PathOfExileConte
             errors.append(f"{passives_used - passive_points} Over-allocated passive points")
     return errors
 
-def validate_char_equipment(character: gggAPI.Character, ctx: "PathOfExileContext") -> list[str]:
+def validate_char_equipment(character: gggAPI.Character, ctx: "PathOfExileContext", total_received_items: list[Items.ItemDict]) -> list[str]:
     # Perform validation logic here
 
     if character is None:
         return ["Character name is not set, cannot validate."]
 
     errors = list()
-
-    total_received_items = list()
-    for network_item in ctx.items_received:
-        total_received_items.append(Items.item_table.get(network_item.item))
 
     if not total_received_items:
         return ["No items received from the server... are you sure you are connected?"]

@@ -185,8 +185,15 @@ def handle_task_errors(task: asyncio.Task, ctx: "PathOfExileContext", cmdprocess
         task.result()  # Will raise if the task failed
     except Exception as e:
         cmdprocessor.output(f"ERROR, the client borked: {e}")
-        logging.getLogger("poeClient.PathOfExileContext").error(f"Task failed with error: {e}")
+
+        logger = logging.getLogger("poeClient.PathOfExileContext")
+        logger.setLevel(logging.DEBUG)
+        tb_str = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+        logger.error(f"Error in callback {callback.__name__}: {e}\nTraceback:\n{tb_str}")
+        logger.error(f"Task failed with error: {e}")
+
         ctx.running_task = None
+
         cmdprocessor.output(f"Trying to restart the client...")
         cmdprocessor._cmd_start_poe()
 
