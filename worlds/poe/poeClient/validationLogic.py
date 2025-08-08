@@ -21,8 +21,6 @@ import worlds.poe.Locations as Locations
 
 import worlds.poe.Options as Options
 
-found_items_dict = {}
-found_items_id_list: list[Locations.LocationDict] = []
 is_char_in_logic = True
 
 _debug = True
@@ -89,16 +87,20 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         validate_errors.append("Character name is not set, cannot validate.")
         
     
-    else: # we have a character name, and ctx is not None -- because we get the character name from ctx
-        char = {}
+    else:  # we have a character name, and ctx is not None -- because we get the character name from ctx
+        char = None
         try:
             char = (await gggAPI.get_character(character_name)).character
-            ctx.last_response_from_api.setdefault("character",{})[ctx.character_name] = char
+            ctx.last_response_from_api.setdefault("character", {})[ctx.character_name] = char
             ctx.last_character_level = char.level
         except Exception as e:
+            # If we cannot fetch the character, treat this as a validation error instead of
+            # letting the exception bubble up.
             logger.info(f"Error fetching character {character_name}: {e}")
-            raise e
-        validate_errors = await validate_char(char, ctx)
+            validate_errors.append(f"Error fetching character: {e}")
+
+        if char is not None:
+            validate_errors = await validate_char(char, ctx)
 
     is_char_in_logic = True if len(validate_errors) == 0 else False
 
@@ -306,13 +308,16 @@ async def update_filter_to_invalid_char_filter(errors: list[str], enable_tts: bo
 
 
 def get_found_items(char: gggAPI.Character) -> list[Locations.LocationDict]:
+    found_items: list[Locations.LocationDict] = []
     try:
         full_found_list = char.inventory + char.equipment
         for item in full_found_list:
             if item.baseType in Locations.base_item_locations_by_base_item_name:
-                found_items_id_list.append(Locations.base_item_locations_by_base_item_name[item.baseType])
+                found_items.append(
+                    Locations.base_item_locations_by_base_item_name[item.baseType]
+                )
                 logger.debug(f"[DEBUG] Item in inventory: {item.baseType}")
     except Exception as e:
         logger.error(f"Error fetching found items: {e}")
         raise e
-    return found_items_id_list
+    return found_items
