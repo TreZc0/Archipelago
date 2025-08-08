@@ -212,9 +212,10 @@ def debug_request(headers, url):
 async def get_character(character_name: str, token: str = access_token,  retry_count: int = 0, max_retry_count: int = 3) -> Optional[CharacterResponse]:
     """
     Fetch character data from the Path of Exile API.
+    Raises on any error.
     :param character_name: The name of the character.
     :param token: OAuth access token.
-    :return: CharacterResponse dataclass, or None if error.
+    :return: CharacterResponse dataclass.
     """
     if token is None:
         token = await async_get_access_token()
@@ -227,14 +228,20 @@ async def get_character(character_name: str, token: str = access_token,  retry_c
     }
     if _debug:
         debug_request(headers, url)
-    response = await _rate_limited_request("GET", url, headers=headers)
-    if _debug:
-        print(f"[DEBUG] Response: {response.status_code} {response.text}")
+
+    try:
+        response = await _rate_limited_request("GET", url, headers=headers)
+    except httpx.RequestError as e:
+        logger.error(f"Network error fetching character '{character_name}': {e}")
+        raise Exception(f"Network error fetching character: {e}") from e
+
+    logger.debug(f"[DEBUG] Response: {response.status_code} {response.text}")
+
     if response.status_code == 200:
         return parse_character_response(response.json())
     else:
-        print(f"Error fetching character data: {response.status_code} {response.text}")
-        return None
+        logger.error(f"Error fetching character data: {response.status_code} {response.text}")
+        raise Exception(f"Error fetching character data: {response.status_code} {response.text}") from None
 
 def parse_character_response(data: dict) -> CharacterResponse:
     # Helper to parse the API response into dataclasses

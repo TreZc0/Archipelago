@@ -28,6 +28,9 @@ _verbose_debug = False
 
 logger = logging.getLogger("poeClient.validationLogic")
 
+
+PASSIVE_POINT_ITEM_ID = Items.get_by_name("Progressive passive point")["id"]
+
 last_zone = None
 async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     global last_zone, is_char_in_logic
@@ -40,11 +43,11 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     #await asyncio.sleep(0.1)  # Allow some time for the game to load
 
     if not is_char_in_logic:
-        await send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {", and".join(logic_errors)}"])
+        await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {", and".join(logic_errors)}"]), 5)
     elif victory_task:
         pass # callback handles chat
     else:
-        await inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5)
+        await asyncio.wait_for(inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5), 5)
 
 def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | None:
     goal = ctx.game_options.get("goal", -1)
@@ -80,66 +83,92 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         # something is wrong, are we not connected?
         logger.info("Context is None, cannot validate character.")
         validate_errors.append("Context is None, cannot validate character.")
-        
+        return False
     character_name = ctx.character_name
     if character_name is None or character_name == "":
         logger.info("Character name is not set, cannot validate.")
         validate_errors.append("Character name is not set, cannot validate.")
-        
+        return False
+    # we have a character name, and ctx is not None
+    char = None
+    try:
+        char = (await asyncio.wait_for(gggAPI.get_character(character_name),5)).character
+        ctx.last_response_from_api.setdefault("character", {})[ctx.character_name] = char
+        ctx.last_character_level = char.level
+    except Exception as e:
+        # If we cannot fetch the character, treat this as a validation error instead of
+        # letting the exception bubble up.
+        logger.info(f"Error fetching character {character_name}: {e}")
+        validate_errors.append(f"Error fetching character: {e}")
+        # DON'T BUBBLE UP -- at least not right now.
+        return False
+    if char is None:
+        logger.error("Character is None, cannot validate.")
+        validate_errors.append("Character is None, cannot validate.")
+        return False
+    # defenseive programming end.
+
+    validate_errors = validate_char_equipment(char, ctx)
+
+    location_ids_to_check = set()
+    #add items to locations_to_check
+    found_items_list: list[Locations.LocationDict] = get_found_items(char)
+    for location_dict in found_items_list:
+        logger.info(f"[INFO] Found item: {location_dict["name"]}")
+        location_id = location_dict["id"]
+        if location_id is not None:
+            location_ids_to_check.add(location_id)
     
-    else:  # we have a character name, and ctx is not None -- because we get the character name from ctx
-        char = None
-        try:
-            char = (await gggAPI.get_character(character_name)).character
-            ctx.last_response_from_api.setdefault("character", {})[ctx.character_name] = char
-            ctx.last_character_level = char.level
-        except Exception as e:
-            # If we cannot fetch the character, treat this as a validation error instead of
-            # letting the exception bubble up.
-            logger.info(f"Error fetching character {character_name}: {e}")
-            validate_errors.append(f"Error fetching character: {e}")
+    #add levels to locations_to_check
+    if ctx.game_options.get("add_leveling_up_to_location_pool", True):
+        for level in range(2, ctx.last_character_level + 1):
+            logger.debug(f"[DEBUG] Adding level {level} to locations to check.")
+            level_location_name = Locations.get_lvl_location_name_from_lvl(level)
+            location_id = Locations.get_location_id_from_level_location_name[level_location_name]
+            if location_id is not None:
+                location_ids_to_check.add(location_id)
 
-        if char is not None:
-            validate_errors = await validate_char(char, ctx)
+    location_ids_to_check = location_ids_to_check & ctx.missing_locations
+    passives = 0
+    for id in location_ids_to_check:
+        network_item = ctx.locations_info[id]
+        if network_item.item == PASSIVE_POINT_ITEM_ID and network_item.player == ctx.slot:
+            passives += 1
 
+
+    validate_errors.extend(validate_passive_points(char, ctx, passives))
     is_char_in_logic = True if len(validate_errors) == 0 else False
 
-
-    if is_char_in_logic:
-        locations_to_check = set()
-        #add items to locations_to_check
-        found_items_list: list[Locations.LocationDict] = get_found_items(char)
-        for location_dict in found_items_list:
-            logger.info(f"[INFO] Found item: {location_dict["name"]}")
-            location_id = location_dict["id"]
-            if location_id is not None:
-                locations_to_check.add(location_id)
-        itemFilter.update_item_filter_from_context(ctx)
-
-        #add levels to locations_to_check
-        if ctx.game_options.get("add_leveling_up_to_location_pool", True):
-            for level in range(2, ctx.last_character_level + 1):
-                logger.debug(f"[DEBUG] Adding level {level} to locations to check.")
-                level_location_name = Locations.get_lvl_location_name_from_lvl(level)
-                location_id = Locations.get_location_id_from_level_location_name[level_location_name]
-                if location_id is not None:
-                    locations_to_check.add(location_id)
-
-        if len(locations_to_check) > 0:
-            logger.debug(f"[DEBUG] Locations to check: {locations_to_check}")
-            locations_to_check = await ctx.check_locations(locations_to_check)
-        else:
-            logger.debug("[DEBUG] No locations to check, skipping check_locations.")
-        itemFilter.update_item_filter_from_context(ctx, recently_checked_locations=locations_to_check)
-        return validate_errors
-
+    if len(location_ids_to_check) > 0:
+        logger.debug(f"[DEBUG] Locations to check: {location_ids_to_check}")
+        location_ids_to_check = await ctx.check_locations(location_ids_to_check)
     else:
+        logger.debug("[DEBUG] No locations to check, skipping check_locations.")
+
+    if not is_char_in_logic:
         await update_filter_to_invalid_char_filter(errors=validate_errors, enable_tts=ctx.tts_options.enable, tts_speed=ctx.tts_options.speed)
-        return validate_errors
+    else:
+        itemFilter.update_item_filter_from_context(ctx, recently_checked_locations=location_ids_to_check)
+    return validate_errors
 
 
+def validate_passive_points(character: gggAPI.Character,  ctx: "PathOfExileContext", points_from_this_zone: int = 0) -> list[str]:
+    """
+    Validate the passive points of the character.
+    This function checks if the character has the correct number of passive points based on their level.
+    """
+    errors = []
+    if ctx.game_options.get("passivePointsAsItems", True):
+        passive_points = len([i["name"] for i in total_received_items if i["name"] == 'Progressive passive point'])
+        passive_points += points_from_this_zone
+        passives_used = len(character.passives.hashes)  # number of passives allocated -- this includes the ascendency points
+        ctx.passives_available = passive_points
+        ctx.passives_used = passives_used
+        if passives_used > passive_points:
+            errors.append(f"{passives_used - passive_points} Over-allocated passive points")
+    return errors
 
-async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") -> list[str]:
+def validate_char_equipment(character: gggAPI.Character, ctx: "PathOfExileContext") -> list[str]:
     # Perform validation logic here
 
     if character is None:
@@ -161,14 +190,6 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
     unique_flask_count = 0
 
     # --------- VALIDATION LOGIC STARTS HERE ---------
-    if ctx.game_options.get("passivePointsAsItems", True):
-        passive_points = len([i["name"] for i in total_received_items if i["name"] == 'Progressive passive point'])
-        passives_used = len(character.passives.hashes) # number of passives allocated
-        ctx.passives_available = passive_points
-        ctx.passives_used = passives_used
-        if passives_used > passive_points:
-            errors.append(f"{passives_used - passive_points} Over-allocated passive points")
-
 
     if character.class_ not in [i["name"] for i in total_received_items]:
         errors.append(f"Class {character.class_}")
@@ -207,9 +228,7 @@ async def validate_char(character: gggAPI.Character, ctx: "PathOfExileContext") 
                 if socketed_item.baseType not in [i["name"] for i in total_received_items]:
                     errors.append(f"Socketed {socketed_item.baseType} in {equipped_item.inventoryId}")
 
-        links = [i["name"] for i in total_received_items if i["name"] == f"Progressive max links - {equipped_item.inventoryId if equipped_item.inventoryId != 'BodyArmour' else 'Body'}"]
-        # this if statement is temporary to support version < 0.2.2 ( Item name change to : "Progressive max links - BodyArmour" )
-        # TODO: CHANGE THIS TO THE NEW NAME IN THE FUTURE
+        links = [i["name"] for i in total_received_items if i["name"] == f"Progressive max links - {equipped_item.inventoryId}"]
         if len(links) < equipped_sockets:
             errors.append(f"Too many links for {equipped_item.baseType}")
 

@@ -1,5 +1,4 @@
-[
-{"category":["Level"],"classification":1,"name":"Progressive passive point","count":128},    
+[{"category":["Level"],"classification":1,"name":"Progressive passive point","count":136},    
 {"category":["Flask","Normal"],"classification":1,"name":"Progressive Flask Unlock Slot","count":5},
 {"category":["Flask","Magic"],"classification":1,"name":"Progressive Magic Flask Unlock","count":5},
 {"category":["Flask","Unique"],"classification":0,"name":"Progressive Unique Flask Unlock","count":5},
@@ -108,7 +107,7 @@
 {"category":["max links"],"classification":1,"name":"Progressive max links - Helm","count":3},
 {"category":["max links"],"classification":1,"name":"Progressive max links - Glove","count":3},
 {"category":["max links"],"classification":1,"name":"Progressive max links - Boot","count":3},
-{"category":["max links"],"classification":1,"name":"Progressive max links - Body","count":5},
+{"category":["max links"],"classification":1,"name":"Progressive max links - BodyArmour","count":5},
 {"category":["max links"],"classification":1,"name":"Progressive max links - Weapon","count":5},
 {"category":["max links"],"classification":1,"name":"Progressive max links - Offhand","count":3},
 {"category":["Gear","Normal"],"classification":0,"name":"Normal Fishing Rod"},
@@ -430,7 +429,6 @@
 {"category":["SupportGem"],"reqLevel":31,"classification":0,"name":"Burning Damage Support"},
 {"category":["SupportGem"],"reqLevel":31,"classification":0,"name":"Controlled Blaze Support"},
 {"category":["SupportGem"],"reqLevel":31,"classification":0,"name":"Corrupting Cry Support"},
-{"category":["SupportGem"],"reqLevel":31,"classification":0,"name":"Divine Blessing Support"},
 {"category":["SupportGem"],"reqLevel":31,"classification":0,"name":"Fire Penetration Support"},
 {"category":["SupportGem"],"reqLevel":31,"classification":0,"name":"Fortify Support"},
 {"category":["SupportGem"],"reqLevel":31,"classification":0,"name":"Generosity Support"},
