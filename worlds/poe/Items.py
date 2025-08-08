@@ -346,7 +346,7 @@ quiver_base_types = ItemTable.quiver_base_type_array.copy()  # Copy the list to 
 shield_base_types = ItemTable.shield_base_type_array.copy() 
 
 # used to check weapon base types
-weapon_base_types = [
+held_equipment_types = [
 "Axe",
 "Bow",
 "Claw",
@@ -356,5 +356,7 @@ weapon_base_types = [
 "Staff",
 "Sword",
 "Wand",
+"Shield",
+"Quiver",
 "Fishing Rod",
 ]
