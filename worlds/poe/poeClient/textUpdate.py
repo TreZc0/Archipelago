@@ -144,12 +144,21 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
     if "!links" in message:
         # Get all linked items in item_ids
         links = [item for item in Items.get_max_links_items() if item["id"] in item_ids]
-        await split_send_message(ctx,', '.join(link['name'] for link in links))
+        link_counts: dict[str, int] = {}
+        for link in links:
+            link_counts[link["name"]] = link_counts.get(link["name"], 0) + 1
+        link_message = ', '.join(f"{name}: {count}" for name, count in link_counts.items())
+        await split_send_message(ctx, link_message)
 
-    if "!flasks" in message:
+    if "!flasks" in message or "!flask" in message:
         # Get all flask items in item_ids
         flasks = [item for item in Items.get_flask_items() if item["id"] in item_ids]
-        await split_send_message(ctx,', '.join(flask['name'] for flask in flasks))
+        flask_counts: dict[str, int] = {}
+        for flask in flasks:
+            flask_counts[flask["name"]] = flask_counts.get(flask["name"], 0) + 1
+        # Create a message with flask names and counts
+        flask_message = ', '.join(f"{name}: {count}" for name, count in flask_counts.items())
+        await split_send_message(ctx, flask_message)
 
     if "!ascendancy" in message:
         # Get all ascendancy items in item_ids
@@ -166,8 +175,8 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
         armor = [item for item in Items.get_armor_items() if item["id"] in item_ids]
         await split_send_message(ctx,', '.join(armor['name'] for armor in armor))
 
-    if "!passive" in message:
-        message = f"You have {ctx.passives_available - ctx.passives_used} passive skill points available. ( {ctx.passives_used} used, {ctx.passives_available} total for character {ctx.character_name} )"
+    if "!passive" in message or "!p" in message:
+        message = f"You have {ctx.passives_available - ctx.passives_used} passive skill points available. ( {ctx.passives_used} / {ctx.passives_available} total for character {ctx.character_name} )"
         await inputHelper.send_poe_text(message)
 
     if "!help" in message or "!commands" in message:
