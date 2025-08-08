@@ -190,7 +190,7 @@ def handle_task_errors(task: asyncio.Task, ctx: "PathOfExileContext", cmdprocess
         logger = logging.getLogger("poeClient.PathOfExileContext")
         logger.setLevel(logging.DEBUG)
         tb_str = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
-        logger.error(f"Error in callback {callback.__name__}: {e}\nTraceback:\n{tb_str}")
+        logger.error(f"Error: {e}\nTraceback:\n{tb_str}")
         logger.error(f"Task failed with error: {e}")
 
         ctx.running_task = None
