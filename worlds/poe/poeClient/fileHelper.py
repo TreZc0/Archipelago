@@ -4,6 +4,9 @@ import logging
 import re
 import pickle
 import asyncio
+import importlib.util
+import sys
+import types
 
 import typing
 if typing.TYPE_CHECKING:
@@ -20,6 +23,16 @@ settings_file_path = Path("poe_settings")
 client_txt_last_modified_time = None
 callbacks_on_file_change: list[callable] = []
 logger = logging.getLogger("poeClient")
+
+def _ensure_stdlib_shims():
+    """Provide minimal shims for stdlib modules missing in the frozen runtime."""
+    if 'doctest' not in sys.modules:
+        shim = types.ModuleType('doctest')
+        # minimal API; pyrect only imports doctest, doesn't use at import time
+        def testmod(*args, **kwargs):
+            return None
+        shim.testmod = testmod
+        sys.modules['doctest'] = shim
 
 def load_vendor_modules():
     import os
@@ -68,6 +81,8 @@ def load_vendor_modules():
 
         if not os.path.isdir(base_vendor_dir):
             raise FileNotFoundError(f"Vendor directory could not be found or extracted: {base_vendor_dir}")
+
+    _ensure_stdlib_shims()  # ensure shims before importing vendor modules
 
     for entry in os.listdir(base_vendor_dir):
         entry_path = os.path.join(base_vendor_dir, entry)

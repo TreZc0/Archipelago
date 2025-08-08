@@ -32,6 +32,8 @@ logger = logging.getLogger("poeClient.validationLogic")
 PASSIVE_POINT_ITEM_ID = Items.get_by_name("Progressive passive point")["id"]
 
 last_zone = None
+# Timeouts (seconds)
+TIMEOUT = 5.0
 async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     global last_zone, is_char_in_logic
     zone = textUpdate.get_zone_from_line(ctx, line)
@@ -43,11 +45,11 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     #await asyncio.sleep(0.1)  # Allow some time for the game to load
 
     if not is_char_in_logic:
-        await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {", and".join(logic_errors)}"]), 5)
+        await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {", and".join(logic_errors)}"]), TIMEOUT)
     elif victory_task:
         pass # callback handles chat
     else:
-        await asyncio.wait_for(inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5), 5)
+        await asyncio.wait_for(inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5), TIMEOUT)
 
 def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | None:
     goal = ctx.game_options.get("goal", -1)
@@ -76,23 +78,23 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | No
     return None
 
 
-async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
+async def validate_and_update(ctx: "PathOfExileContext" = None) -> list[str]:
     global is_char_in_logic
     validate_errors = []
     if ctx is None:
         # something is wrong, are we not connected?
         logger.info("Context is None, cannot validate character.")
         validate_errors.append("Context is None, cannot validate character.")
-        return False
+        return validate_errors
     character_name = ctx.character_name
     if character_name is None or character_name == "":
         logger.info("Character name is not set, cannot validate.")
         validate_errors.append("Character name is not set, cannot validate.")
-        return False
+        return validate_errors
     # we have a character name, and ctx is not None
     char = None
     try:
-        char = (await asyncio.wait_for(gggAPI.get_character(character_name),5)).character
+        char = (await asyncio.wait_for(gggAPI.get_character(character_name),TIMEOUT)).character
         ctx.last_response_from_api.setdefault("character", {})[ctx.character_name] = char
         ctx.last_character_level = char.level
     except Exception as e:
@@ -101,11 +103,11 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         logger.info(f"Error fetching character {character_name}: {e}")
         validate_errors.append(f"Error fetching character: {e}")
         # DON'T BUBBLE UP -- at least not right now.
-        return False
+        return validate_errors
     if char is None:
         logger.error("Character is None, cannot validate.")
         validate_errors.append("Character is None, cannot validate.")
-        return False
+        return validate_errors
     # defenseive programming end.
 
     validate_errors = validate_char_equipment(char, ctx)
@@ -124,7 +126,7 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> bool:
         for level in range(2, ctx.last_character_level + 1):
             logger.debug(f"[DEBUG] Adding level {level} to locations to check.")
             level_location_name = Locations.get_lvl_location_name_from_lvl(level)
-            location_id = Locations.get_location_id_from_level_location_name[level_location_name]
+            location_id = Locations.id_by_level_location_name.get(level_location_name)
             if location_id is not None:
                 location_ids_to_check.add(location_id)
 

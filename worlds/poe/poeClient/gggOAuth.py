@@ -164,10 +164,10 @@ async def async_oauth_login() -> dict:
 
 
 if __name__ == '__main__':
-    # Run the async OAuth login
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(async_oauth_login())
-    logger.info(f"OAuth login result:{result}")
+    # Run the async OAuth login (fixes DeprecationWarning)
+    logger.setLevel(logging.DEBUG)
+    result = asyncio.run(async_oauth_login())
+    logger.info(f"OAuth login result:  -------->       {result['access_token']}      <-------- expires at {result['expires_at']} seconds since epoch")
 
 
 ## === Step 5: Launch browser and serve ===
