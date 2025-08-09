@@ -11,10 +11,11 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger("poe.Rules")
 logger.setLevel(logging.DEBUG)
 
-MAX_GEAR_UPGRADES   = 50
-MAX_FLASK_SLOTS     = 10
-MAX_LINK_UPGRADES   = 21
-MAX_SKILL_GEMS      = 30 # you will get more, but this is the max required for "logic"
+MAX_GUCCI_GEAR_UPGRADES = 20
+MAX_GEAR_UPGRADES       = 50
+MAX_FLASK_SLOTS         = 10
+MAX_LINK_UPGRADES       = 21
+MAX_SKILL_GEMS          = 30 # you will get more, but this is the max required for "logic"
 
 ACT_0_USABLE_GEMS = 4
 ACT_0_FLASK_SLOTS = 3
@@ -67,7 +68,7 @@ def get_ascendancy_amount_for_act(act, opt):
         )
     ) if act == 3 else 0
 
-def get_gear_amount_for_act(act, opt): return min(opt.gear_upgrades_per_act.value * (act - 1), MAX_GEAR_UPGRADES)
+def get_gear_amount_for_act(act, opt): return min(opt.gear_upgrades_per_act.value * (act - 1), MAX_GEAR_UPGRADES if opt.gucci_hobo_mode.value == opt.gucci_hobo_mode.option_disabled else MAX_GUCCI_GEAR_UPGRADES)
 def get_flask_amount_for_act(act, opt): return 0 if not opt.add_flask_slots_to_item_pool else min(opt.flask_slots_per_act.value * (act - 1), MAX_FLASK_SLOTS)
 def get_gem_amount_for_act(act, opt): return 0 if not opt.add_max_links_to_item_pool else min(opt.max_links_per_act.value * (act - 1), MAX_LINK_UPGRADES)
 def get_skill_gem_amount_for_act(act, opt): return min(opt.skill_gems_per_act.value * (act - 1), MAX_SKILL_GEMS)
