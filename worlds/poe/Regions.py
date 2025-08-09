@@ -1,13 +1,21 @@
-from typing import Dict
-from BaseClasses import Region, MultiWorld
+import random
+
+from BaseClasses import Region, MultiWorld, ItemClassification
 from .Locations import LocationDict, PathOfExileLocation, base_item_type_locations, acts, get_lvl_location_name_from_lvl
 from .Rules import can_reach
+from . import Items
+from . import Locations
 
+import typing
+if typing.TYPE_CHECKING:
+    from worlds.poe import PathOfExileWorld
+    from . import PathOfExileOptions
 
 import logging
 logger = logging.getLogger("poe.Regions")
 
-def create_and_populate_regions(world, multiworld: MultiWorld, player: int, locations: list[LocationDict] = base_item_type_locations, act_regions=acts) -> list[Region]:
+def create_and_populate_regions(world: "PathOfExileWorld", multiworld: MultiWorld, player: int, locations: list[LocationDict] = base_item_type_locations, act_regions=acts) -> list[Region]:
+    opt: PathOfExileOptions = world.options
     locations: list[LocationDict] = locations.copy()
     menu = Region("Menu", player, multiworld)
     multiworld.regions.append(menu)
@@ -15,10 +23,12 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
     last_region = menu
     for act in act_regions:
         region_name = ""
+        maps_region = False
         if act["act"] == 0.2:
             region_name = "The Twilight Strand"
         elif act["act"] == 11:
             region_name = "Maps"
+            maps_region = True
         else:
             region_name = f"Act {act['act']}"
         
@@ -29,9 +39,24 @@ def create_and_populate_regions(world, multiworld: MultiWorld, player: int, loca
         multiworld.regions.append(region)
         last_region = region
 
+        if maps_region and len(world.bosses_for_goal) > 0:
+            for boss in world.bosses_for_goal:
+                location_name = f"Defeat {boss}"
+                # Fix: Use 'id' as a string key
+                locationObj = PathOfExileLocation(player, location_name, parent=region, address=Locations.bosses[boss].get('id'))
+                region.locations.append(locationObj)
+                # 0 classification means progressive
+                item_id = Items.bosses_completion_item_table.get(boss, {}).get('id', None)
+                if item_id is None:
+                    logger.error(f"Boss {boss} does not have a completion item defined.")
+                    raise ValueError(f"Boss {boss} does not have a completion item defined.")
+                item = Items.PathOfExileItem(f"complete {boss}", ItemClassification.skip_balancing, item_id, player)
+                locationObj.place_locked_item(item)
+
+
         for i, loc in enumerate(locations):
             if loc != "used" and (\
-            loc.get("dropLevel", 9001) <= act["maxMonsterLevel"] or #9001 is just a big number
+            loc.get("dropLevel", 9001) <= act["maxMonsterLevel"] or #9001 is just a big number to default to
             loc.get("level", 9001) <= act["maxMonsterLevel"]):
                 #is_level = loc.get("baseItem") is None
                 location_name = loc["name"]

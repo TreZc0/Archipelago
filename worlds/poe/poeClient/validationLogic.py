@@ -94,12 +94,18 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str, found_items: list[Lo
         return asyncio.create_task(textUpdate.callback_if_valid_char(ctx, send_goal))
 
     # we should probably create a location and fill it with a goal item for each boss.
-    if goal == Options.Goal.option_defeat_maven:
-        drops:[] = Locations.bosses.get("maven").get("drops")
-        for item in found_items:
-            if item["name"] in [i["name"] for i in drops]:
-                logger.info(f"Found goal item {item['name']} in {zone}.")
-                send_goal()
+    if goal == Options.Goal.option_defeat_bosses:
+        for boss in ctx.game_options.get("bosses_for_goal", []):
+            boss_data = Locations.bosses.get(boss)
+            if not boss_data:
+                logger.error(f"Boss {boss} not found in Locations.bosses.")
+                raise ValueError(f"Boss {boss} not found in Locations.bosses.")
+            drops = boss_data.get("drops", [])
+            for item in found_items:
+                if item["name"] in [i["name"] for i in drops]:
+                    # check ilevel
+                    logger.info(f"Found goal item {item['name']} in {zone}.")
+                    ctx.check_locations({boss_data['id']})
 
         
     

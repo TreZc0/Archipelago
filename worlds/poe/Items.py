@@ -1,4 +1,7 @@
 import typing
+
+from worlds.poe.data.ItemTable import bosses_completion_item_table
+
 if typing.TYPE_CHECKING:
     from worlds.poe import PathOfExileWorld
     from worlds.poe.Options import PathOfExileOptions
@@ -345,6 +348,8 @@ def get_by_name(name: str, table: Dict[int, ItemDict] = item_table) -> ItemDict 
 quiver_base_types = ItemTable.quiver_base_type_array.copy()  # Copy the list to avoid modifying the original data
 shield_base_types = ItemTable.shield_base_type_array.copy() 
 
+
+bosses_completion_item_table = ItemTable.bosses_completion_item_table.copy()
 # used to check weapon base types
 held_equipment_types = [
 "Axe",

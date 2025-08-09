@@ -68,6 +68,8 @@ class PathOfExileWorld(World):
     location_name_to_id = { loc["name"]: id for id, loc in Locations.full_locations.items() }
     item_name_to_id = { item["name"]: item["id"] for item in Items.item_table.values() }
 
+    bosses_for_goal: list[str] = []
+
     item_name_groups: Dict[str, Set[str]] = Items.get_item_name_groups()
 
     def __init__(self, *args, **kwargs):
@@ -95,10 +97,18 @@ class PathOfExileWorld(World):
         self.multiworld.push_precollected(item_obj)
     
     def generate_early(self):
-        options: PathOfExileOptions = self.options
-        self.goal_act = get_goal_act(options)
+        opt: PathOfExileOptions = self.options
+        self.goal_act = get_goal_act(self, opt)
 
-        setup_early_items(self, options)
+        if opt.goal.value == opt.goal.option_defeat_bosses:
+            if opt.bosses_available.value is None or len(opt.bosses_available.value) == 0:
+                opt.bosses_available.value = list(Locations.bosses.keys())
+
+            bosses_to_kill = min(opt.number_of_bosses, len(Locations.bosses), len(opt.bosses_available.value))
+
+            self.bosses_for_goal = self.random.sample(sorted(opt.bosses_available.value), bosses_to_kill)
+
+        setup_early_items(self, opt)
 
         self.items_to_place = Items.deprioritize_non_logic_gems(self, self.items_to_place)
         self.items_to_place = Items.deprioritize_non_logic_gear(self, self.items_to_place)
@@ -168,6 +178,7 @@ class PathOfExileWorld(World):
             "passivePointsAsItems": options.add_passive_skill_points_to_item_pool.value,
             "LevelingUpAsLocations": options.add_leveling_up_to_location_pool.value,
             "goal": options.goal.value,
+            "bosses_for_goal": self.bosses_for_goal
         }
         client_options = {
             "ttsSpeed" : options.tts_speed.value,
@@ -366,17 +377,17 @@ def setup_character_items(world, options):
     for item_id, item_obj in temp_items_to_place.items():
         world.items_to_place[item_id] = item_obj
 
-def get_goal_act(options) -> int:
-    if options.goal.value == options.goal.option_complete_act_1: return 1
-    elif options.goal.value == options.goal.option_complete_act_2: return 2
-    elif options.goal.value == options.goal.option_complete_act_3: return 3
-    elif options.goal.value == options.goal.option_complete_act_4: return 4
-    elif options.goal.value == options.goal.option_kauri_fortress_act_6: return 5
-    elif options.goal.value == options.goal.option_complete_act_6: return 6
-    elif options.goal.value == options.goal.option_complete_act_7: return 7
-    elif options.goal.value == options.goal.option_complete_act_8: return 8
-    elif options.goal.value == options.goal.option_complete_act_9: return 9
-    elif options.goal.value == options.goal.option_complete_the_campaign: return 10
+def get_goal_act(world, opt) -> int:
+    if opt.goal.value == opt.goal.option_complete_act_1: return 1
+    elif opt.goal.value == opt.goal.option_complete_act_2: return 2
+    elif opt.goal.value == opt.goal.option_complete_act_3: return 3
+    elif opt.goal.value == opt.goal.option_complete_act_4: return 4
+    elif opt.goal.value == opt.goal.option_kauri_fortress_act_6: return 5
+    elif opt.goal.value == opt.goal.option_complete_act_6: return 6
+    elif opt.goal.value == opt.goal.option_complete_act_7: return 7
+    elif opt.goal.value == opt.goal.option_complete_act_8: return 8
+    elif opt.goal.value == opt.goal.option_complete_act_9: return 9
+    elif opt.goal.value == opt.goal.option_complete_the_campaign: return 10
     else: return 11
 
 

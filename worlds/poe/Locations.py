@@ -40,8 +40,7 @@ class LocationDict(TypedDict, total=False):
     id: int
 
 #load the json from ./data/bosses.json
-data = pkgutil.get_data("worlds.poe.data", "Bosses.json")
-bosses = json.loads(data.decode("utf-8"))
+
 
 acts = [
     {"act": 0.2, "maxMonsterLevel": 2}, # man these roas are tough lol.
@@ -66,3 +65,5 @@ base_item_type_locations: Dict[int, LocationDict] = LocationTable.base_item_loca
 level_locations: Dict[int, LocationDict] = LocationTable.level_location_table
 full_locations = {**base_item_type_locations, **level_locations}
 base_item_locations_by_base_item_name: Dict[str, LocationDict] = {loc['baseItem']: loc for loc in base_item_type_locations.values()}
+
+bosses = LocationTable.bosses

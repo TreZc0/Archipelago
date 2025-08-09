@@ -3,6 +3,7 @@ from typing import FrozenSet, Union, Set
 
 from Options import Choice, Toggle, DefaultOnToggle, ItemSet, OptionSet, Range, PerGameCommonOptions, DeathLinkMixin
 from worlds.AutoWorld import World
+from worlds.poe import Locations
 
 
 class Goal(Choice):
@@ -22,11 +23,36 @@ class Goal(Choice):
     option_complete_act_8 = 8
     option_complete_act_9 = 9
     alias_complete_act_10 = 0
-    option_defeat_shaper = 10
-    option_defeat_maven = 11
-    option_defeat_all_uber_bosses = 20
-    
+    option_defeat_bosses = 10
     default = 0
+
+class NumberOfBosses(Range):
+    """
+    This is ignored if Goal isn't set to defeat_bosses. This specifies the number of bosses that need to be defeated
+    (and for you to pick up their drops) in order for you to goal. This will max out at the number of bosses available in the world.
+    """
+    display_name = "Bosses to kill (ignored if Goal is not set to defeat_bosses)"
+    range_start = 0
+    range_end = len(Locations.bosses.values())
+    default = 1
+
+class BossesAvailable(OptionSet):
+    """
+    This is also ignored if Goal isn't set to defeat_bosses. Specifies the availability of the bosses in the world.
+    This will NOT determine how many bosses are available in the world, but rather which bosses can be randomized.
+    This will choose any (including _very_ difficult bosses if none are selected.)
+
+    valid choices: [ "hydra", "phoenix", "chimera", "minotaur", "shaper", "uber_shaper", "elder", "uber_elder",
+     "uber_uber_elder", "atziri", "al-hezmin", "baran", "drox", "veritania", "sirus", "uber_sirus", "maven",
+     "uber_maven", "exarch", "uber_exarch", "eater", "uber_eater", "incarnation_of_neglect", "incarnation_of_fear",
+     "incarnation_of_dread", "cortex", "uber_cortex"]
+    """
+    display_name = "Bosses Available"
+    valid_keys = Locations.bosses.keys()
+    default = [
+        key for key in valid_keys
+        if Locations.bosses[key].get('difficulty', 'Guardian') not in {'Uber', 'Pinnacle'}
+    ]
 
 
 class GearUpgrades(Choice):
@@ -39,7 +65,7 @@ class GearUpgrades(Choice):
     option_all_normal_gear_unlocked = 2
     option_all_uniques_unlocked = 3
     option_no_gear_unlocked = 4
-    default = 1
+    default = 2
 
 class UsableStartingGear(Choice):
     """
@@ -192,6 +218,8 @@ class PathOfExileOptions(DeathLinkMixin, PerGameCommonOptions):
     Common options for Path of Exile.
     """
     goal: Goal
+    number_of_bosses: NumberOfBosses
+    bosses_available: BossesAvailable
     gear_upgrades: GearUpgrades
     usable_starting_gear: UsableStartingGear
     add_passive_skill_points_to_item_pool: AddPassiveSkillPointsToItemPool

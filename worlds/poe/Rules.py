@@ -75,10 +75,16 @@ def get_skill_gem_amount_for_act(act, opt): return min(opt.skill_gems_per_act.va
 def get_passives_amount_for_act(act, opt): return passives_required_for_act.get(act, 0) if opt.add_passive_skill_points_to_item_pool.value else 0
 
 def completion_condition(world: "PathOfExileWorld",  state: CollectionState) -> bool:
-    if world.options.goal.value < 10 :
-        return can_reach(world.goal_act, world, state)
-    else :
-        # CHANGE THIS TO THE BOSS RUSH LOCAION? I DON"T KNOW IF THATS EVEN NEEDED
+    if len(world.bosses_for_goal) > 0:
+        # if we can reach act 11, we can assume we have completed the goal
+        return can_reach(11, world, state)
+    #    # if there are bosses for the goal, we need to check if they are all completed
+    #    for boss in world.bosses_for_goal:
+    #        if not state.has(f"complete {boss}", world.player):
+    #            return False
+    #    return True
+
+    else: # reach act for goal
         return can_reach(world.goal_act, world, state)
 
 def can_reach(act: int, world , state: CollectionState) -> bool:
