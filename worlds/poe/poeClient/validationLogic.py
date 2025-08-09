@@ -41,8 +41,21 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     if not zone:
         return
     victory_task = check_for_victory(ctx, zone)
-    logic_errors = await validate_and_update(ctx)
-    #await asyncio.sleep(0.1)  # Allow some time for the game to load
+    char = None
+    if ctx.character_name is None or ctx.character_name == "":
+        logger.info("Character name is not set, cannot validate.")
+        await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", "Character name is not set, cannot validate."]), TIMEOUT)
+        return
+    try:
+        char = (await asyncio.wait_for(gggAPI.get_character(ctx.character_name),TIMEOUT)).character
+        ctx.last_response_from_api.setdefault("character", {})[ctx.character_name] = char
+        ctx.last_character_level = char.level
+    except Exception as e:
+        logger.info(f"Error fetching character {ctx.character_name}: {e}")
+        raise
+
+
+    logic_errors = await validate_and_update(ctx, char)
 
     if not is_char_in_logic:
         await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {", and".join(logic_errors)}"]), TIMEOUT)
@@ -78,7 +91,7 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | No
     return None
 
 
-async def validate_and_update(ctx: "PathOfExileContext" = None) -> list[str]:
+async def validate_and_update(ctx: "PathOfExileContext", char) -> list[str]:
     global is_char_in_logic
     validate_errors = []
     if ctx is None:
@@ -90,23 +103,6 @@ async def validate_and_update(ctx: "PathOfExileContext" = None) -> list[str]:
     if character_name is None or character_name == "":
         logger.info("Character name is not set, cannot validate.")
         validate_errors.append("Character name is not set, cannot validate.")
-        return validate_errors
-    # we have a character name, and ctx is not None
-    char = None
-    try:
-        char = (await asyncio.wait_for(gggAPI.get_character(character_name),TIMEOUT)).character
-        ctx.last_response_from_api.setdefault("character", {})[ctx.character_name] = char
-        ctx.last_character_level = char.level
-    except Exception as e:
-        # If we cannot fetch the character, treat this as a validation error instead of
-        # letting the exception bubble up.
-        logger.info(f"Error fetching character {character_name}: {e}")
-        validate_errors.append(f"Error fetching character: {e}")
-        # DON'T BUBBLE UP -- at least not right now.
-        return validate_errors
-    if char is None:
-        logger.error("Character is None, cannot validate.")
-        validate_errors.append("Character is None, cannot validate.")
         return validate_errors
     # defenseive programming end.
 
