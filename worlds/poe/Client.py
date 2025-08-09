@@ -20,23 +20,39 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         ctx: "PathOfExileContext"
     logger = logging.getLogger("poeClient.PathOfExileCommandProcessor")
 
-    def _cmd_enable_tts(self, enable: bool = True) -> bool:
+    def _cmd_enable_tts(self, enable: bool | str = True) -> bool:
         """Enable or disable TTS generation."""
-        if enable not in [True, False]:
+        if isinstance(enable, str):
+            lowered = enable.lower()
+            if lowered in {"true", "1", "yes", "y", "on"}:
+                enable_bool = True
+            elif lowered in {"false", "0", "no", "n", "off"}:
+                enable_bool = False
+            else:
+                self.output("ERROR: Please provide a valid boolean value for enabling TTS (True/False).")
+                return False
+        elif isinstance(enable, bool):
+            enable_bool = enable
+        else:
             self.output("ERROR: Please provide a valid boolean value for enabling TTS (True/False).")
             return False
-        self.ctx.tts_options.enable = enable
+
+        self.ctx.tts_options.enable = enable_bool
         self.ctx.update_settings()
-        if enable:
+        if enable_bool:
             self.output("TTS generation enabled.")
         else:
             self.output("TTS generation disabled.")
         return True
 
-    def _cmd_tts_speed(self, speed: int) -> bool: #its going to actually be a string, but we will convert it to an int
+    def _cmd_tts_speed(self, speed: int) -> bool:  # actually receives a string from the CLI
         """Set the speed of TTS generation."""
-        speed = int(speed)
-        if not isinstance(speed, int) or speed <= 0:
+        try:
+            speed = int(speed)
+        except (TypeError, ValueError):
+            self.output("ERROR: Please provide a valid positive integer for TTS speed.")
+            return False
+        if speed <= 0:
             self.output("ERROR: Please provide a valid positive integer for TTS speed.")
             return False
         self.ctx.tts_options.speed = speed
@@ -67,7 +83,7 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
             except Exception as e:
                 self.output(f"Authentication failed: {e}")
         
-        task = asyncio.create_task(gggAPI.request_new_access_token()) # request_new_access_token is an async function, and will return a Task object.
+        task = asyncio.create_task(gggAPI.request_new_access_token()) # request_new_access_token is async, and will return a Task.
         task.add_done_callback(on_complete)
         self.output("Authentication started...")
         return True
@@ -151,14 +167,14 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
 
     def _cmd_stop(self) -> bool:
         """Stop the Path of Exile client."""
-        if self.ctx.running_task and not self.ctx.running_task.done():
+        if self.ctx.running_task:
             if not self.ctx.running_task.done():
                 self.output("Stopping Path of Exile client...")
-            else :
+                self.ctx.running_task.cancel()
+                self.output("Path of Exile client stopped.")
+                return True
+            else:
                 self.output("Path of Exile client was already stopped.")
-            self.ctx.running_task.cancel()
-            self.output("Path of Exile client stopped.")
-            return True
         else:
             self.output("Path of Exile client is not running.")
             return False

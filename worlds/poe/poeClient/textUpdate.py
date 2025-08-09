@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 _debug = True
 _random_string = ""
 logger = logging.getLogger("poeClient.textUpdate")
-
+SEND_MESSAGE_TIMEOUT = 4
 def get_zone_from_line(ctx: "PathOfExileContext", line: str) -> str:
     # Implement the logic for handling self goals here
     match = re.search(r'] : You have entered (.+)\.$', line)
@@ -191,7 +191,7 @@ async def split_send_message(ctx, message: str, max_length: int = 500):
     prefix = f"@{ctx.character_name} "
     max_length = max_length - len(prefix)  # Adjust for character name prefix
     if len(message) <= max_length:
-        await inputHelper.send_poe_text(message)
+        await asyncio.wait_for(inputHelper.send_poe_text(prefix + message), SEND_MESSAGE_TIMEOUT)
         return
 
     # Split the message into chunks, only at a comma
@@ -199,4 +199,4 @@ async def split_send_message(ctx, message: str, max_length: int = 500):
     
     # Send each chunk
     for chunk in chunks:
-        await inputHelper.send_poe_text(prefix + chunk, retry_times=len(chunks) + 1, retry_delay=0.5)
+        await asyncio.wait_for(inputHelper.send_poe_text(prefix + chunk, retry_times=len(chunks) + 1, retry_delay=0.5), SEND_MESSAGE_TIMEOUT * len(chunks))

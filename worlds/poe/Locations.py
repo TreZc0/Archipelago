@@ -27,7 +27,7 @@ def get_location_id_from_item_name(item_name: str) -> int | None:
         int | None: The location ID if found, otherwise None.
     """
     for loc_id, loc in base_item_type_locations.items():
-        if loc['baseItem'] == item_name:
+        if loc.get('baseItem') == item_name:
             return loc_id
     return None
 
@@ -60,7 +60,7 @@ acts = [
 
 def get_lvl_location_name_from_lvl(level: int) -> str: return f"Reach Level {level}"
 # based off of baseItemTypes.json
-id_by_level_location_name = {i ['name']: i['id'] for i in LocationTable.level_location_table.values() if 'name' in i}
+id_by_level_location_name = {i['name']: i['id'] for i in LocationTable.level_location_table.values() if 'name' in i}
 base_item_names_set = LocationTable.base_item_set
 base_item_type_locations: Dict[int, LocationDict] = LocationTable.base_item_location_table
 level_locations: Dict[int, LocationDict] = LocationTable.level_location_table

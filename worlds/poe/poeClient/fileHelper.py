@@ -7,14 +7,12 @@ import asyncio
 import importlib.util
 import sys
 import types
+from collections import deque
+from pathlib import Path
 
 import typing
 if typing.TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
-
-
-from collections import deque
-from pathlib import Path
 
 
 _debug = True
