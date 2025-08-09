@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import traceback
 
 from typing import TYPE_CHECKING
 
@@ -27,7 +28,7 @@ _debug = True
 _verbose_debug = False
 
 logger = logging.getLogger("poeClient.validationLogic")
-
+logger.setLevel(logging.DEBUG)
 
 PASSIVE_POINT_ITEM_ID = Items.get_by_name("Progressive passive point")["id"]
 
@@ -40,8 +41,10 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     last_zone = zone
     if not zone:
         return
-    victory_task = check_for_victory(ctx, zone)
+    
+    
     char = None
+    found_items_list: list[Locations.LocationDict] = []
     if ctx.character_name is None or ctx.character_name == "":
         logger.info("Character name is not set, cannot validate.")
         await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", "Character name is not set, cannot validate."]), TIMEOUT)
@@ -50,21 +53,23 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
         char = (await asyncio.wait_for(gggAPI.get_character(ctx.character_name),TIMEOUT)).character
         ctx.last_response_from_api.setdefault("character", {})[ctx.character_name] = char
         ctx.last_character_level = char.level
+        found_items_list = get_found_items(char)
     except Exception as e:
-        logger.info(f"Error fetching character {ctx.character_name}: {e}")
+        tb_str = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+        logger.error(f"Error fetching character {ctx.character_name}: {e}\nTraceback:\n{tb_str}")
         raise
 
-
-    logic_errors = await validate_and_update(ctx, char)
-
+    logic_errors = await validate_and_update(ctx, char, found_items_list)
+    victory_task = check_for_victory(ctx, zone, found_items_list)
     if not is_char_in_logic:
-        await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {", and".join(logic_errors)}"]), TIMEOUT)
+        error_msg = ", and ".join(logic_errors) if logic_errors else "unknown errors"
+        await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {error_msg}"]), TIMEOUT)
     elif victory_task:
         pass # callback handles chat
     else:
         await asyncio.wait_for(inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5), TIMEOUT)
 
-def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | None:
+def check_for_victory(ctx: "PathOfExileContext", zone: str, found_items: list[Locations.LocationDict]) -> asyncio.Task | None:
     goal = ctx.game_options.get("goal", -1)
     if goal == -1:
         logger.info("ERROR: No goal set in client options.")
@@ -87,11 +92,21 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str) -> asyncio.Task | No
     (goal == Options.Goal.option_complete_act_9 and zone == "Oriath Docks") or \
     (goal == Options.Goal.option_complete_the_campaign and zone == "Karui Shores"):
         return asyncio.create_task(textUpdate.callback_if_valid_char(ctx, send_goal))
+
+    # we should probably create a location and fill it with a goal item for each boss.
+    if goal == Options.Goal.option_defeat_maven:
+        drops:[] = Locations.bosses.get("maven").get("drops")
+        for item in found_items:
+            if item["name"] in [i["name"] for i in drops]:
+                logger.info(f"Found goal item {item['name']} in {zone}.")
+                send_goal()
+
+        
     
     return None
 
 
-async def validate_and_update(ctx: "PathOfExileContext", char) -> list[str]:
+async def validate_and_update(ctx: "PathOfExileContext", char, found_items_list: list[Locations.LocationDict]) -> list[str]:
     global is_char_in_logic
     validate_errors = []
     if ctx is None:
@@ -113,9 +128,8 @@ async def validate_and_update(ctx: "PathOfExileContext", char) -> list[str]:
 
     location_ids_to_check = set()
     #add items to locations_to_check
-    found_items_list: list[Locations.LocationDict] = get_found_items(char)
     for location_dict in found_items_list:
-        logger.info(f"[INFO] Found item: {location_dict["name"]}")
+        logger.debug(f"[DEBUG] Found item: {location_dict["name"]}")
         location_id = location_dict["id"]
         if location_id is not None:
             location_ids_to_check.add(location_id)
@@ -123,7 +137,7 @@ async def validate_and_update(ctx: "PathOfExileContext", char) -> list[str]:
     #add levels to locations_to_check
     if ctx.game_options.get("add_leveling_up_to_location_pool", True):
         for level in range(2, ctx.last_character_level + 1):
-            logger.debug(f"[DEBUG] Adding level {level} to locations to check.")
+            if _verbose_debug: logger.debug(f"[DEBUG] Adding level {level} to locations to check.")
             level_location_name = Locations.get_lvl_location_name_from_lvl(level)
             location_id = Locations.id_by_level_location_name.get(level_location_name)
             if location_id is not None:

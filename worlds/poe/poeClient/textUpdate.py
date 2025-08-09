@@ -139,9 +139,19 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
         # Get all linked items in item_ids
         links = [item for item in Items.get_max_links_items() if item["id"] in item_ids]
         link_counts: dict[str, int] = {}
-        for link in links:
-            link_counts[link["name"]] = link_counts.get(link["name"], 0) + 1
-        link_message = ', '.join(f"{name}: {count}" for name, count in link_counts.items())
+        
+        # Count each occurrence of each link item
+        for item_id in item_ids:
+            # Find the link item with this ID
+            link_item = next((item for item in Items.get_max_links_items() if item["id"] == item_id), None)
+            if link_item:
+                link_counts[link_item["name"]] = link_counts.get(link_item["name"], 0) + 1
+        
+        if link_counts:
+            link_message = ', '.join(f"{name}: {count}" for name, count in link_counts.items())
+        else:
+            link_message = "No link items found"
+        
         await split_send_message(ctx, link_message)
 
     if "!flasks" in message or "!flask" in message:
