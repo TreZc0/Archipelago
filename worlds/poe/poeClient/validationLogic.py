@@ -214,7 +214,7 @@ def validate_char_equipment(character: gggAPI.Character, ctx: "PathOfExileContex
  #               errors.append(rarity_check(total_received_items, rarity, "Quiver"))
  #           else:
  #               errors.append(rarity_check(total_received_items, rarity, "Shield"))
-        if equipped_item.inventoryId == "Weapon":
+        if equipped_item.inventoryId == "Weapon" or equipped_item.inventoryId == "Offhand":
             for prop in equipped_item.properties:
                 prop_name = prop.name
                 for weapon_base_type in Items.held_equipment_types:
