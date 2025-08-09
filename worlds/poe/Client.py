@@ -196,6 +196,10 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         """shortcut for starting the Path of Exile client."""
         return self._cmd_start_poe()
 
+    def _cmd_deathlink(self):
+        """Toggles deathlink"""
+        self.ctx.update_death_link(not self.ctx.get_is_death_linked())
+
 def handle_task_errors(task: asyncio.Task, ctx: "PathOfExileContext", cmdprocessor: PathOfExileCommandProcessor):
     """Handle errors in the task."""
     try:
@@ -249,6 +253,9 @@ class PathOfExileContext(CommonContext):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def get_is_death_linked(self) -> bool:
+        """Check if the client is in death link mode."""
+        return "DeathLink" in self.tags
 
     async def server_auth(self, password_requested: bool = False):
         if password_requested and not self.password:

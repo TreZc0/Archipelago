@@ -145,11 +145,15 @@ async def main_async(context: "PathOfExileContext"):
         await async_load(context)
         
         async def enter_new_zone_callback(line: str):
-            await validationLogic.when_enter_new_zone(context, line)
+            await asyncio.wait_for(validationLogic.when_enter_new_zone(context, line), timeout=7.0)
 
         async def chat_commands(line: str):
             from worlds.poe.poeClient.textUpdate import chat_commands_callback
-            await chat_commands_callback(context, line)
+            await asyncio.wait_for(chat_commands_callback(context, line), timeout=7.0)
+
+            from worlds.poe.poeClient.textUpdate import deathlink_callback
+            if context.get_is_death_linked():
+                await asyncio.wait_for(deathlink_callback(context, line), timeout=7.0)
 
         logger.info("Starting Main Loop...")
         

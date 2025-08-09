@@ -1,7 +1,7 @@
 from dataclasses import dataclass, fields, Field
 from typing import FrozenSet, Union, Set
 
-from Options import Choice, Toggle, DefaultOnToggle, ItemSet, OptionSet, Range, PerGameCommonOptions
+from Options import Choice, Toggle, DefaultOnToggle, ItemSet, OptionSet, Range, PerGameCommonOptions, DeathLinkMixin
 from worlds.AutoWorld import World
 
 
@@ -187,7 +187,7 @@ class TTSSpeed(Range):
 
 
 @dataclass
-class PathOfExileOptions(PerGameCommonOptions):
+class PathOfExileOptions(DeathLinkMixin, PerGameCommonOptions):
     """
     Common options for Path of Exile.
     """
