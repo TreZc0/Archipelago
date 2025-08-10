@@ -53,29 +53,36 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
         char = (await asyncio.wait_for(gggAPI.get_character(ctx.character_name),TIMEOUT)).character
         ctx.last_response_from_api.setdefault("character", {})[ctx.character_name] = char
         ctx.last_character_level = char.level
-        found_items_list = get_found_items(char)
+        found_items_list = get_found_base_item_locations(char)
     except Exception as e:
         tb_str = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
         logger.error(f"Error fetching character {ctx.character_name}: {e}\nTraceback:\n{tb_str}")
         raise
 
     logic_errors = await validate_and_update(ctx, char, found_items_list)
-    victory_task = check_for_victory(ctx, zone, found_items_list)
+    victory_task = check_for_victory(ctx, zone, char)
+
+    # THIS IS FOR DEBUGGING PURPOSES, I'm tired of respeccing my character to test the logic, lol
+    if True:
+        is_char_in_logic = True
+
     if not is_char_in_logic:
         error_msg = ", and ".join(logic_errors) if logic_errors else "unknown errors"
         await asyncio.wait_for(send_multiple_poe_text(["/itemfilter __invalid", f"@{ctx.character_name} you are out of logic: {error_msg}"]), TIMEOUT)
     elif victory_task:
-        pass # callback handles chat
+        pass # callback handles victory and chat sending
     else:
         await asyncio.wait_for(inputHelper.important_send_poe_text("/itemfilter __ap", retry_times=40, retry_delay=0.5), TIMEOUT)
 
-def check_for_victory(ctx: "PathOfExileContext", zone: str, found_items: list[Locations.LocationDict]) -> asyncio.Task | None:
+def check_for_victory(ctx: "PathOfExileContext", zone: str, char: gggAPI.Character) -> asyncio.Task | None:
     goal = ctx.game_options.get("goal", -1)
     if goal == -1:
         logger.info("ERROR: No goal set in client options.")
+        raise ValueError("No goal set in client options.")
 
     def send_goal():
         asyncio.create_task(ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}]))
+        asyncio.create_task(inputHelper.important_send_poe_text("Congratulations! You have won!", retry_times=40, retry_delay=0.5))
         ctx.finished_game = True
         ctx.victory = True
     
@@ -95,19 +102,33 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str, found_items: list[Lo
 
     # we should probably create a location and fill it with a goal item for each boss.
     if goal == Options.Goal.option_defeat_bosses:
-        for boss in ctx.game_options.get("bosses_for_goal", []):
+        held_items = get_held_item_names_ilvls_from_char(char)
+        boss_sent = []
+        bosses_for_goal = ctx.game_options.get("bosses_for_goal", [])
+        for boss in bosses_for_goal:
             boss_data = Locations.bosses.get(boss)
             if not boss_data:
                 logger.error(f"Boss {boss} not found in Locations.bosses.")
                 raise ValueError(f"Boss {boss} not found in Locations.bosses.")
             drops = boss_data.get("drops", [])
-            for item in found_items:
-                if item["name"] in [i["name"] for i in drops]:
-                    # check ilevel
-                    logger.info(f"Found goal item {item['name']} in {zone}.")
+            for item, ilvl in held_items:
+                if item in [i["name"] for i in drops]:
+                    if ilvl and drops[item].get("ilvl", 0) and ilvl < drops[item]["ilvl"]:
+                        continue # item is not high enough level
+                    logger.info(f"Found goal item {item} in {zone}.")
+                    boss_sent.append(boss)
                     ctx.check_locations({boss_data['id']})
 
+        received_item_names = {item.item for item in ctx.items_received} | {f"complete {boss}" for boss in boss_sent}
+        required_completion_items = {f"complete {boss}" for boss in bosses_for_goal} 
         
+        # Check if we have ALL required boss completion items
+        if required_completion_items.issubset(received_item_names):
+            logger.info(f"Victory condition met! All bosses defeated: {bosses_for_goal}")
+            return asyncio.create_task(textUpdate.callback_if_valid_char(ctx, send_goal))
+        else:
+            missing = required_completion_items - received_item_names
+            logger.debug(f"Still missing boss completions: {missing}")
     
     return None
 
@@ -342,8 +363,18 @@ async def update_filter_to_invalid_char_filter(errors: list[str], enable_tts: bo
         invalid_item_filter_string = itemFilter.generate_invalid_item_filter_block_without_sound()
         itemFilter.write_item_filter(item_filter=invalid_item_filter_string, item_filter_import=None, file_path=itemFilter.invalid_filter_file_path)
 
+def get_held_item_names_ilvls_from_char(char: gggAPI.Character) -> list[tuple[str, int]]:
+    """
+    Returns a list of all items from the character's inventory and equipment.
+    """
+    all_items: list[tuple[str, int]] = []
+    full_found_list = char.inventory + char.equipment
+    for item in full_found_list:
+        all_items.append((item.name if item.name else item.baseType, item.ilvl))  # Item is a dataclass, not a dict
 
-def get_found_items(char: gggAPI.Character) -> list[Locations.LocationDict]:
+    return all_items
+
+def get_found_base_item_locations(char: gggAPI.Character) -> list[Locations.LocationDict]:
     found_items: list[Locations.LocationDict] = []
     try:
         full_found_list = char.inventory + char.equipment

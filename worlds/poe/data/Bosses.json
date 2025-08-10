@@ -1,29 +1,39 @@
 {
   "hydra": {
+    "name": "defeat hydra",
+    "id": 41301,
     "difficulty": "Guardian",
     "drops": [
       {"name": "Fragment of the Hydra"}
     ]
   },
   "phoenix": {
+    "name": "defeat phoenix",
+    "id": 41302,
     "difficulty": "Guardian",
     "drops": [
       {"name": "Fragment of the Phoenix"}
     ]
   },
   "chimera": {
+    "name": "defeat chimera",
+    "id": 41303,
     "difficulty": "Guardian",
     "drops": [
       {"name": "Fragment of the Chimera"}
     ]
   },
   "minotaur": {
+    "name": "defeat minotaur",
+    "id": 41304,
     "difficulty": "Guardian",
     "drops": [
       {"name": "Fragment of the Minotaur"}
     ]
   },
   "shaper": {
+    "name": "defeat shaper",
+    "id": 41305,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Shaper's Touch"},
@@ -33,6 +43,8 @@
     ]
   },
   "uber_shaper": {
+    "name": "defeat uber_shaper",
+    "id": 41306,
     "difficulty": "Uber",
     "drops": [
       {"name": "Echoes of Creation"},
@@ -42,6 +54,8 @@
     ]
   },
   "elder": {
+    "name": "defeat elder",
+    "id": 41307,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Cyclopean Coil"},
@@ -53,6 +67,8 @@
     ]
   },
   "uber_elder": {
+    "name": "defeat uber_elder",
+    "id": 41308,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Mark of the Shaper"},
@@ -63,6 +79,8 @@
     ]
   },
   "uber_uber_elder": {
+    "name": "defeat uber_uber_elder",
+    "id": 41309,
     "difficulty": "Uber",
     "drops": [
       {"name": "Call of the Void"},
@@ -74,6 +92,8 @@
     ]
   },
   "atziri": {
+    "name": "defeat atziri",
+    "id": 41310,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "The Vertex"},
@@ -86,30 +106,40 @@
     ]
   },
   "al-hezmin": {
+    "name": "defeat al-hezmin",
+    "id": 41311,
     "difficulty": "Guardian",
     "drops": [
       {"name": "Al-Hezmin's Crest"}
     ]
   },
   "baran": {
+    "name": "defeat baran",
+    "id": 41312,
     "difficulty": "Guardian",
     "drops": [
       {"name": "Baran's Crest"}
     ]
   },
   "drox": {
+    "name": "defeat drox",
+    "id": 41313,
     "difficulty": "Guardian",
     "drops": [
       {"name": "Drox's Crest"}
     ]
   },
   "veritania": {
+    "name": "defeat veritania",
+    "id": 41314,
     "difficulty": "Guardian",
     "drops": [
       {"name": "Veritania's Crest"}
     ]
   },
   "sirus": {
+    "name": "defeat sirus",
+    "id": 41315,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Crown of the Inward Eye"},
@@ -119,6 +149,8 @@
     ]
   },
   "uber_sirus": {
+    "name": "defeat uber_sirus",
+    "id": 41316,
     "difficulty": "Uber",
     "drops": [
       {"name": "Thread of Hope", "ilvl": 87},
@@ -128,6 +160,8 @@
     ]
   },
   "maven": {
+    "name": "defeat maven",
+    "id": 41317,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Legacy of Fury"},
@@ -139,6 +173,8 @@
     ]
   },
   "uber_maven": {
+    "name": "defeat uber_maven",
+    "id": 41318,
     "difficulty": "Uber",
     "drops": [
       {"name": "Viridi's Veil"},
@@ -148,6 +184,8 @@
     ]
   },
   "exarch": {
+    "name": "defeat exarch",
+    "id": 41319,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Dawnbreaker"},
@@ -156,6 +194,8 @@
     ]
   },
   "uber_exarch": {
+    "name": "defeat uber_exarch",
+    "id": 41320,
     "difficulty": "Uber",
     "drops": [
       {"name": "The Annihilating Light"},
@@ -165,6 +205,8 @@
     ]
   },
   "eater": {
+    "name": "defeat eater",
+    "id": 41321,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Inextricable Fate"},
@@ -173,6 +215,8 @@
     ]
   },
   "uber_eater": {
+    "name": "defeat uber_eater",
+    "id": 41322,
     "difficulty": "Uber",
     "drops": [
       {"name": "Ravenous Passion"},
@@ -181,6 +225,8 @@
     ]
   },
   "incarnation_of_neglect": {
+    "name": "defeat incarnation_of_neglect",
+    "id": 41323,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "The Arkhon's Tools"},
@@ -189,6 +235,8 @@
     ]
   },
   "incarnation_of_fear": {
+    "name": "defeat incarnation_of_fear",
+    "id": 41324,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Servant of Decay"},
@@ -197,6 +245,8 @@
     ]
   },
   "incarnation_of_dread": {
+    "name": "defeat incarnation_of_dread",
+    "id": 41325,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "The Dark Monarch"},
@@ -205,6 +255,8 @@
     ]
   },
   "cortex": {
+    "name": "defeat cortex",
+    "id": 41326,
     "difficulty": "Pinnacle",
     "drops": [
       {"name": "Offering to the Serpent"},
@@ -214,6 +266,8 @@
     ]
   },
   "uber_cortex": {
+    "name": "defeat uber_cortex",
+    "id": 41327,
     "difficulty": "Uber",
     "drops": [
       {"name": "Mask of the Tribunal"},

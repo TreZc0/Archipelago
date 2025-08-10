@@ -65,8 +65,9 @@ class PathOfExileWorld(World):
     goal_act = 0
     #generate the location and item tables from Locations.py and Items.py
     # location_name_to_id = { loc.name: loc.id for loc in Locations.base_item_types }
-    location_name_to_id = { loc["name"]: id for id, loc in Locations.full_locations.items() }
-    item_name_to_id = { item["name"]: item["id"] for item in Items.item_table.values() }
+    location_name_to_id = ({ loc["name"]: id for id, loc in Locations.full_locations.items() } 
+    | { loc["name"]: loc["id"] for loc in Locations.bosses.values() })
+    item_name_to_id = { item["name"]: item["id"] for item in Items.item_table.values() } | { item["name"]: item["id"] for item in Locations.bosses.values() }
 
     bosses_for_goal: list[str] = []
 

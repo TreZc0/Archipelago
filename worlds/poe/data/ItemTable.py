@@ -171,12 +171,7 @@ for i, item in enumerate(item_array, start=1):
     item_table[i] = item
 
 data = pkgutil.get_data("worlds.poe.data", "Bosses.json")
-_bosses = json.loads(data.decode("utf-8"))
-bosses_completion_item_table = {}
-for i, (key,value) in enumerate(_bosses.items(), start=(len(item_array) + 1)):
-    value["id"] = i
-    bosses_completion_item_table[key] = value
-    
+
 if __name__ == "__main__":
     import json
     print(json.dumps(item_table, indent=4))

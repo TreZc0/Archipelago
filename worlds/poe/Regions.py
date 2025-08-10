@@ -43,14 +43,10 @@ def create_and_populate_regions(world: "PathOfExileWorld", multiworld: MultiWorl
             for boss in world.bosses_for_goal:
                 location_name = f"Defeat {boss}"
                 # Fix: Use 'id' as a string key
-                locationObj = PathOfExileLocation(player, location_name, parent=region, address=Locations.bosses[boss].get('id'))
+                boss_id = Locations.bosses.get(boss, {}).get('id', None)
+                locationObj = PathOfExileLocation(player, location_name, parent=region, address=boss_id)
                 region.locations.append(locationObj)
-                # 0 classification means progressive
-                item_id = Items.bosses_completion_item_table.get(boss, {}).get('id', None)
-                if item_id is None:
-                    logger.error(f"Boss {boss} does not have a completion item defined.")
-                    raise ValueError(f"Boss {boss} does not have a completion item defined.")
-                item = Items.PathOfExileItem(f"complete {boss}", ItemClassification.skip_balancing, item_id, player)
+                item = Items.PathOfExileItem(f"complete {boss}", ItemClassification.skip_balancing, boss_id, player)
                 locationObj.place_locked_item(item)
 
 

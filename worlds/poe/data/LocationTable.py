@@ -18,11 +18,8 @@ for i, item in enumerate(level_location_array,
     level_location_table[i] = item
 
 data = pkgutil.get_data("worlds.poe.data", "Bosses.json")
-_bosses = json.loads(data.decode("utf-8"))
-bosses = {}
-for i, (key,value) in enumerate(_bosses.items(), start=(len(base_item_location_array) + len(level_location_array) + 1)):
-    value["id"] = i
-    bosses[key] = value
+bosses = json.loads(data.decode("utf-8"))
+
 
 if __name__ == "__main__":
     full_location_table = base_item_location_table | level_location_table
