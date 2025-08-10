@@ -63,7 +63,7 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
     victory_task = check_for_victory(ctx, zone, char)
 
     # THIS IS FOR DEBUGGING PURPOSES, I'm tired of respeccing my character to test the logic, lol
-    if True:
+    if False:
         is_char_in_logic = True
 
     if not is_char_in_logic:
