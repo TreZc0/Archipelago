@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import traceback
+import typing
 from random import Random
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
@@ -14,6 +15,7 @@ from pathlib import Path
 from .poeClient.fileHelper import load_settings, save_settings
 from .poeClient import main as poe_main
 from .poeClient import gggAPI
+from .poeClient import textUpdate
 
 class PathOfExileCommandProcessor(ClientCommandProcessor):
     if TYPE_CHECKING:
@@ -198,7 +200,9 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
 
     def _cmd_deathlink(self):
         """Toggles deathlink"""
-        self.ctx.update_death_link(not self.ctx.get_is_death_linked())
+        def on_complete(task):
+            self.output(f"Death link mode {'enabled' if self.ctx.get_is_death_linked() else 'disabled'}.")
+        asyncio.create_task(self.ctx.update_death_link(not self.ctx.get_is_death_linked())).add_done_callback(on_complete)
 
 def handle_task_errors(task: asyncio.Task, ctx: "PathOfExileContext", cmdprocessor: PathOfExileCommandProcessor):
     """Handle errors in the task."""
@@ -263,6 +267,12 @@ class PathOfExileContext(CommonContext):
         await self.get_username()
         await self.send_connect(game="Path of Exile")
 
+    def on_deathlink(self, data: typing.Dict[str, typing.Any]) -> None:
+        self.command_processor.output(f"Death link event received from {data.get('source'), 'unknown'}")
+        if self.get_is_death_linked():
+            asyncio.create_task(textUpdate.receive_deathlink(self)).add_done_callback(lambda task: handle_task_errors(task, self.ctx, self))
+
+
     def on_package(self, cmd: str, args: dict):
         super().on_package(cmd, args)
 
@@ -270,6 +280,10 @@ class PathOfExileContext(CommonContext):
             self.slot_data = args.get('slot_data', {})
             self.game_options = self.slot_data.get('game_options', {})
             self.client_options = self.slot_data.get('client_options', {})
+
+            if self.game_options.get("deathlink", False):
+                asyncio.create_task(self.update_death_link(True)).add_done_callback(
+                    lambda: self.command_processor.output(f"Death link mode {'enabled' if self.get_is_death_linked() else 'disabled'}."))
 
             # Request info for all locations after connecting
             location_ids = list(self.missing_locations)

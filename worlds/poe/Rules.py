@@ -22,7 +22,7 @@ ACT_0_FLASK_SLOTS = 3
 ACT_0_NORMAL_WEAPONS = 2
 ACT_0_NORMAL_ARMOUR = 2
 ACT_0_ADDITIONAL_LOCATIONS = 8
-_debug = True
+_debug = False
 _very_debug = False
 
 
@@ -138,24 +138,25 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
            passive_count >= passive_amount
 
     if not reachable:
-        log = f"[DEBUG] Act {act} not reachable with gear:"
-        if gear_count < gear_amount:
-            log += f"gear: {gear_count}/{gear_amount},"
-        if flask_count < flask_amount:
-            log += f" flask: {flask_count}/{flask_amount},"
-        if gem_slot_count < gem_slot_amount:
-            log += f" gem slots: {gem_slot_count}/{gem_slot_amount},"
-        if usable_skill_gem_count < skill_gem_amount:
-            log += f" skill gems: {usable_skill_gem_count}/{skill_gem_amount},"
-        if ascedancy_count < ascedancy_amount:
-            log += f" ascendancies: {ascedancy_count}/{ascedancy_amount},"
-        if passive_count < passive_amount:
-            log += f" levels:{passive_count}/{passive_amount}"
-        log += f" for {opt.starting_character.current_option_name}"
+        if _debug:
+            log = f"[DEBUG] Act {act} not reachable with gear:"
+            if gear_count < gear_amount:
+                log += f"gear: {gear_count}/{gear_amount},"
+            if flask_count < flask_amount:
+                log += f" flask: {flask_count}/{flask_amount},"
+            if gem_slot_count < gem_slot_amount:
+                log += f" gem slots: {gem_slot_count}/{gem_slot_amount},"
+            if usable_skill_gem_count < skill_gem_amount:
+                log += f" skill gems: {usable_skill_gem_count}/{skill_gem_amount},"
+            if ascedancy_count < ascedancy_amount:
+                log += f" ascendancies: {ascedancy_count}/{ascedancy_amount},"
+            if passive_count < passive_amount:
+                log += f" levels:{passive_count}/{passive_amount}"
+            log += f" for {opt.starting_character.current_option_name}"
 
-        #print (log)
+            #print (log)
 
-        logger.debug(log)
+            logger.debug(log)
         if _very_debug:
             logger.debug(f"[DEBUG] expecting Act {act} - Gear: {gear_amount}, Flask: {flask_amount}, Gem Slots: {gem_slot_amount}, Skill Gems: {skill_gem_amount}, Ascendancies: {ascedancy_amount}")
             logger.debug(f"[DEBUG] we have   Act {act} - Gear: {gear_count}, Flask: {flask_count}, Gem Slots: {gem_slot_count}, Skill Gems: {usable_skill_gem_count}, Ascendancies: {ascedancy_count}")
