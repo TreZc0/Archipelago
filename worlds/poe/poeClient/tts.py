@@ -43,8 +43,11 @@ def start_tts_engine():
     return _engine        
     
 def get_item_name_tts_text(ctx: "PathOfExileContext", network_item) -> str:
-    return ctx.player_names[network_item.player] + " ... " + ctx.item_names.lookup_in_slot(network_item.item,
-                                                                                               network_item.player)
+    if network_item.player == ctx.slot:
+        return ctx.item_names.lookup_in_slot(network_item.item, network_item.player)
+    else:
+        return (ctx.player_names[network_item.player] + " ... " +
+         ctx.item_names.lookup_in_slot(network_item.item, network_item.player))
 
 def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False):
     if not overwrite and Path(filename).exists():
