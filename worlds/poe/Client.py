@@ -12,7 +12,7 @@ import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, server_loop, gui_enabled
 from pathlib import Path
 
-from .poeClient.fileHelper import load_settings, save_settings
+from .poeClient.fileHelper import load_settings, save_settings, find_possible_client_txt_path
 from .poeClient import main as poe_main
 from .poeClient import gggAPI
 from .poeClient import textUpdate
@@ -148,8 +148,15 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
         """Start the Path of Exile client."""
         #required
         if not self.ctx.client_text_path:
-            self.output("Please set the client text path using the 'set_client_text_path <path>' command.")
-            return False
+            possible_path = find_possible_client_txt_path()
+            if possible_path:
+                self.ctx.client_text_path = possible_path
+                self.output(f"Using default a possible client text path located here: {self.ctx.client_text_path},\n "
+                            f"THIS MAY NOT BE THE CORRECT PATH, please verify it is correct, and change it otherwise "
+                            f"using the 'set_client_text_path <path>' command.")
+            else:
+                self.output("Please set the client text path using the 'set_client_text_path <path>' command.")
+                return False
         
         #optional to start
         if not self.ctx.character_name:
@@ -335,21 +342,15 @@ class PathOfExileContext(CommonContext):
         task = asyncio.create_task(save_settings(self))
         task.add_done_callback(set_settings)
 
-
     def run_gui(self) -> None:
-        #from .ClientGui import start_gui # custom UI
-
-        #
-
-        #start_gui(self)
-        super().run_gui()
-
+        from .ClientGui import start_gui # custom UI
+        start_gui(self)
+        #super().run_gui()
 
 async def main():
     Utils.init_logging("PathOfExileContext", exception_logger="Client")
 
     ctx = PathOfExileContext(None, None)
-
 
     #if gui_enabled:
     if True: # we can disable GUI for testing here

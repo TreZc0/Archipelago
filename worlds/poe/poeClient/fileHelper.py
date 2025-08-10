@@ -221,6 +221,7 @@ async def save_settings(ctx: "PathOfExileContext", path: Path = settings_file_pa
     
         # Create new world entry
         world_key = build_world_key(ctx)
+        default_key = "world default"
         new_world_data = {
             "tts_speed": str(ctx.client_options["ttsSpeed"]),
             "tts_enabled": str(ctx.client_options["ttsEnabled"]),
@@ -231,6 +232,7 @@ async def save_settings(ctx: "PathOfExileContext", path: Path = settings_file_pa
         
         # Add/update the world entry in existing settings
         existing_settings[world_key] = new_world_data
+        existing_settings[default_key] = new_world_data
         
         # Write back the merged settings
         await write_dict_to_pickle_file(existing_settings, path)
@@ -249,15 +251,25 @@ async def load_settings(ctx: "PathOfExileContext", path: Path = settings_file_pa
             all_settings = await read_dict_from_pickle_file(path)
         # Get settings for the specific world
         world_key = build_world_key(ctx)
+        default_key = "world default"
         world_settings = all_settings.get(world_key, {})
+        default_settings = all_settings.get(default_key, {})
         if _debug:
             logger.info(f"[DEBUG] Loaded settings from {path}.")
             if world_settings:
                 logger.info(f"[DEBUG] Found settings for {world_key}")
             else:
                 logger.info(f"[DEBUG] No settings found for {world_key}")
-        
-        return world_settings
+
+        loaded_data = {
+            "tts_speed": world_settings.get("tts_speed", default_settings.get("ttsSpeed")),
+            "tts_enabled": world_settings.get("tts_enabled", default_settings.get("ttsEnabled")),
+            "client_txt": world_settings.get("client_txt", default_settings.get("clientTextPath", find_possible_client_txt_path())),
+            "last_char": world_settings.get("last_char", default_settings.get("lastChar")),
+            "base_item_filter": world_settings.get("base_item_filter", default_settings.get("baseItemFilter")),
+        }
+
+        return loaded_data
         
     except Exception as e:
         logger.info(f"[ERROR] Failed to load settings from {path}: {e}")
@@ -285,3 +297,46 @@ async def read_dict_from_pickle_file(file_path: Path) -> dict:
         data = {}
     
     return data
+
+def find_possible_client_txt_path() -> Path | None:
+    """Return the first valid path for the client.txt file."""
+    intermediate_paths = [
+        Path(""),
+        Path("games"),
+        Path("Program Files (x86)"),
+        Path("Program Files"),
+        Path("Steam"),
+        Path("SteamLibrary"),
+        Path("games/SteamLibrary"),
+    ]
+    possible_paths = [
+        Path("steamapps/common/Path of Exile"),
+        Path("Path of Exile"),
+        Path("poe"),
+    ]
+    suffix_path = Path("logs") /"client.txt"
+    # Windows specific, I know....
+    for drive in ["D", "C", "E", "F", "G"]:
+        drive_path = Path(f"{drive}:/")
+        for intermediate in intermediate_paths:
+            for possible in possible_paths:
+                to_check = drive_path / intermediate / possible / suffix_path
+                print(f"Checking path: {to_check}")
+                if to_check.exists():
+                    print(f"Found client.txt at: {to_check}")
+                    return to_check
+
+    return None
+
+
+if __name__ == "__main__":
+    # For testing purposes, find the client.txt path
+
+    print("Finding client.txt path...")
+    client_txt_path = find_possible_client_txt_path()
+
+    print("log check")
+    if client_txt_path:
+        print(f"Found client.txt at: {client_txt_path}")
+    else:
+        print("Could not find client.txt in any of the expected locations.")
