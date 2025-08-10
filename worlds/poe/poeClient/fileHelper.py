@@ -9,6 +9,7 @@ import sys
 import types
 from collections import deque
 from pathlib import Path
+import winreg
 
 import typing
 if typing.TYPE_CHECKING:
@@ -298,13 +299,34 @@ async def read_dict_from_pickle_file(file_path: Path) -> dict:
     
     return data
 
+def get_poe_install_location_from_registry() -> str | None:
+    """Retrieve the Path of Exile install location from the Windows registry."""
+    try:
+        registry_key = r"Software\GrindingGearGames\Path of Exile"
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_key) as key:
+            install_location, _ = winreg.QueryValueEx(key, "InstallLocation")
+            return install_location
+    except FileNotFoundError:
+        print("Registry key not found.")
+        return None
+    except Exception as e:
+        print(f"Error accessing registry: {e}")
+        return None
+
 def find_possible_client_txt_path() -> Path | None:
     """Return the first valid path for the client.txt file."""
+    if get_poe_install_location_from_registry():
+        log_path = Path(get_poe_install_location_from_registry()) / "logs" / "client.txt"
+        if log_path.exists():
+            print(f"Found client.txt at: {log_path}")
+            return log_path
     intermediate_paths = [
         Path(""),
         Path("games"),
         Path("Program Files (x86)"),
         Path("Program Files"),
+        Path("Program Files (x86)/Steam"),
+        Path("Program Files/Steam"),
         Path("Steam"),
         Path("SteamLibrary"),
         Path("games/SteamLibrary"),
