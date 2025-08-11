@@ -209,6 +209,8 @@ async def split_send_message(ctx, message: str, max_length: int = 500):
         await asyncio.wait_for(inputHelper.send_poe_text(prefix + chunk, retry_times=len(chunks) + 1, retry_delay=0.5), SEND_MESSAGE_TIMEOUT * len(chunks))
 
 async def deathlink_callback(ctx:"PathOfExileContext", line: str):
+    if not ctx.character_name:
+        return
     if f"{ctx.character_name.lower()} has been slain." in line.lower():
         await asyncio.wait_for(ctx.send_death(f"{ctx.character_name} level {ctx.last_character_level} has been slain in {ctx.last_entered_zone}."), SEND_MESSAGE_TIMEOUT)
 
