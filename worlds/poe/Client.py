@@ -290,7 +290,7 @@ class PathOfExileContext(CommonContext):
 
             if self.game_options.get("deathlink", False):
                 asyncio.create_task(self.update_death_link(True)).add_done_callback(
-                    lambda: self.command_processor.output(f"Death link mode {'enabled' if self.get_is_death_linked() else 'disabled'}."))
+                    lambda task: self.command_processor.output(text=f"Death link mode {'enabled' if self.get_is_death_linked() else 'disabled'}."))
 
             # Request info for all locations after connecting
             location_ids = list(self.missing_locations)
