@@ -30,6 +30,9 @@ def get_char_name_and_message_from_line(line: str) -> tuple[str, str]:
     # Extract character name from the line
     match = re.search(r']\s?(<.*>)?\s?(@To|@From)?\s?(.+): (\\x00)?(.*)', line)
     if match:
+        if match.group(2) == "@From":
+            # We sent this message, so we can ignore it.
+            return ("", "")
         return (match.group(3), match.group(5))
     return ("", "")
 

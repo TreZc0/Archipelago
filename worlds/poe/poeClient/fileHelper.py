@@ -318,7 +318,8 @@ def find_possible_client_txt_path() -> Path | None:
     if get_poe_install_location_from_registry():
         log_path = Path(get_poe_install_location_from_registry()) / "logs" / "client.txt"
         if log_path.exists():
-            print(f"Found client.txt at: {log_path}")
+            print(f"Found client.txt (via registry) at: {log_path}")
+            logger.debug(f"Found client.txt (via registry) at: {log_path}")
             return log_path
     intermediate_paths = [
         Path(""),
@@ -347,6 +348,7 @@ def find_possible_client_txt_path() -> Path | None:
                 print(f"Checking path: {to_check}")
                 if to_check.exists():
                     print(f"Found client.txt at: {to_check}")
+                    logger.debug(f"Found client.txt at: {to_check}")
                     return to_check
 
     return None
