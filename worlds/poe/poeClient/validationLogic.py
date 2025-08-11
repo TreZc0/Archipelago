@@ -148,9 +148,10 @@ async def validate_and_update(ctx: "PathOfExileContext", char, found_items_list:
         return validate_errors
     # defenseive programming end.
 
-    total_received_items = list()
-    for network_item in ctx.items_received:
-        total_received_items.append(Items.item_table.get(network_item.item))
+    total_received_items = [
+        item for network_item in ctx.items_received
+        if (item := Items.item_table.get(network_item.item)) is not None
+    ]
     validate_errors = validate_char_equipment(char, ctx, total_received_items)
 
     location_ids_to_check = set()
@@ -219,6 +220,7 @@ def validate_char_equipment(character: gggAPI.Character, ctx: "PathOfExileContex
     errors = list()
 
     if not total_received_items:
+        logger.error("No valid items found in total_received_items. Are you sure the item table is correct?")
         return ["No items received from the server... are you sure you are connected?"]
 
     simple_equipment_slots = ["BodyArmour","Amulet","Belt","Boots","Gloves","Helmet"]

@@ -330,6 +330,7 @@ def find_possible_client_txt_path() -> Path | None:
         Path("Steam"),
         Path("SteamLibrary"),
         Path("games/SteamLibrary"),
+        Path("steamlibraryd"),
     ]
     possible_paths = [
         Path("steamapps/common/Path of Exile"),
