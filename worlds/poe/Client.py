@@ -18,7 +18,7 @@ from .poeClient import gggAPI
 from .poeClient import textUpdate
 
 
-CLIENT_VERSION="0.3.2"
+CLIENT_VERSION="0.3.3"
 
 class PathOfExileCommandProcessor(ClientCommandProcessor):
     if TYPE_CHECKING:
@@ -150,8 +150,8 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
     def _cmd_start_poe(self) -> bool:
         """Start the Path of Exile client."""
         #required
+        self.logger.info(f"Path of Exile apworld version: {CLIENT_VERSION}")
         self.output(f"Path of Exile apworld version: {CLIENT_VERSION}")
-        logger.info(f"Path of Exile apworld version: {CLIENT_VERSION}")
         if not self.ctx.client_text_path:
             possible_path = find_possible_client_txt_path()
             if possible_path:
