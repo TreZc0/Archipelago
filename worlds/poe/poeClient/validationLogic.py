@@ -282,7 +282,7 @@ def validate_char_equipment(character: gggAPI.Character, ctx: "PathOfExileContex
                 unique_flask_count += 1
                 
     # get count of items.name that match the progressive unlocks
-    if normal_flask_count > len([i["name"] for i in total_received_items if i["name"] == 'Progressive Flask Unlock Slot']):
+    if normal_flask_count > len([i["name"] for i in total_received_items if i["name"] == 'Progressive Normal Flask Unlock']):
         errors.append("Normal Flasks")
     if magic_flask_count > len([i["name"] for i in total_received_items if i["name"] == 'Progressive Magic Flask Unlock']):
         errors.append("Magic Flasks")

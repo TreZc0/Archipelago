@@ -347,9 +347,10 @@ class PathOfExileContext(CommonContext):
         task.add_done_callback(set_settings)
 
     def run_gui(self) -> None:
-        from .ClientGui import start_gui # custom UI
-        start_gui(self)
-        #super().run_gui()
+        #from .ClientGui import start_gui # custom UI
+        #start_gui(self)
+
+        super().run_gui()
 
 async def main():
     Utils.init_logging("PathOfExileContext", exception_logger="Client")
