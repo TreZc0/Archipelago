@@ -59,7 +59,7 @@ def safe_tts(text, filename, rate=250, volume=1, voice_id=None, overwrite=False)
     run_tts_tasks()
 
 async def safe_tts_async(text, filename, rate=250, volume=1, voice_id=None, overwrite=False):
-    if _debug:
+    if _verbose:
         logger.info(f"[DEBUG] Async TTS: text='{text}', filename='{filename}'")
 
     if not overwrite and Path(filename).exists():
@@ -77,6 +77,7 @@ def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WP
         return
     
     missing_location_ids = ctx.missing_locations
+    logger.debug(f"[DEBUG] Generating TTS for {len(missing_location_ids)} items...")
     for base_item_location_id in missing_location_ids:
         network_item = ctx.locations_info[base_item_location_id]
         item_text = get_item_name_tts_text(ctx, network_item)
@@ -86,7 +87,7 @@ def generate_tts_from_missing_locations(ctx: "PathOfExileContext", WPM: int = WP
         full_path = itemFilter.filter_sounds_path / f"{filename}"
 
         if not os.path.exists(full_path):
-            if _debug:
+            if _verbose:
                 logger.info(f"[DEBUG] Generating TTS for item: {item_text} at {full_path}")
                 safe_tts(
                     text=item_text,
@@ -107,6 +108,7 @@ def generate_tts_tasks_from_missing_locations(ctx: "PathOfExileContext", tts_spe
         speed = int(ctx.tts_options.speed)
 
     missing_location_ids = ctx.missing_locations
+    logger.debug(f"[DEBUG] Generating TTS for {len(missing_location_ids)} items...")
     for base_item_location_id in missing_location_ids:
         network_item = ctx.locations_info[base_item_location_id]
         item_text = get_item_name_tts_text(ctx, network_item)
