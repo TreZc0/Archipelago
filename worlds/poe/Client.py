@@ -17,6 +17,9 @@ from .poeClient import main as poe_main
 from .poeClient import gggAPI
 from .poeClient import textUpdate
 
+
+CLIENT_VERSION="0.3.2"
+
 class PathOfExileCommandProcessor(ClientCommandProcessor):
     if TYPE_CHECKING:
         ctx: "PathOfExileContext"
@@ -147,6 +150,8 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
     def _cmd_start_poe(self) -> bool:
         """Start the Path of Exile client."""
         #required
+        self.output(f"Path of Exile apworld version: {CLIENT_VERSION}")
+        logger.info(f"Path of Exile apworld version: {CLIENT_VERSION}")
         if not self.ctx.client_text_path:
             possible_path = find_possible_client_txt_path()
             if possible_path:
@@ -308,8 +313,7 @@ class PathOfExileContext(CommonContext):
                         self.client_text_path = settings.get("client_txt", self.client_text_path)
                         self.character_name = settings.get("last_char", self.character_name)
                         self.base_item_filter = settings.get("base_item_filter", self.base_item_filter)
-                        if self._debug:
-                            logger.info(f"[DEBUG] Loaded settings: {settings}")
+                        logger.debug(f"[DEBUG] Loaded settings: {settings}")
                 except Exception as e:
                     logger.info(f"[ERROR] Failed to load settings: {e}")
             def load_client_settings(task=None):
