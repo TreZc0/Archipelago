@@ -370,7 +370,7 @@ def get_held_item_names_ilvls_from_char(char: gggAPI.Character) -> list[tuple[st
     Returns a list of all items from the character's inventory and equipment.
     """
     all_items: list[tuple[str, int]] = []
-    full_found_list = char.inventory + char.equipment
+    full_found_list = char.inventory #+ char.equipment #check only non-equipped items
     for item in full_found_list:
         all_items.append((item.name if item.name else item.baseType, item.ilvl))  # Item is a dataclass, not a dict
 

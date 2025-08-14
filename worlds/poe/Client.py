@@ -284,7 +284,6 @@ class PathOfExileContext(CommonContext):
         if self.get_is_death_linked():
             asyncio.create_task(textUpdate.receive_deathlink(self)).add_done_callback(lambda task: handle_task_errors(task, self.ctx, self))
 
-
     def on_package(self, cmd: str, args: dict):
         super().on_package(cmd, args)
 

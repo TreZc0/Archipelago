@@ -7,6 +7,7 @@ from NetUtils import ClientStatus
 from worlds.poe import Items
 from worlds.poe.poeClient import inputHelper
 from worlds.poe.poeClient import fileHelper
+from worlds.poe import Options
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from worlds.poe.Client import PathOfExileContext
@@ -87,6 +88,11 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
     if not char_name == ctx.character_name:
         return
     item_ids = [item.item for item in ctx.items_received]
+    
+    if "!help" in message or "!commands" in message:
+            help_message = """!ap char - Set your character | !deathlink | !goal | !passive or !p | !usable skill gems - by level | !usable support gems | !usable utility gems | !usable gems | !main gems | !support gems | !utility gems | !all gems or !gems | !gear | !weapons | !armor | !links | !flasks | !ascendancy | !help | Note: use @yourname followed a command."""
+            await split_send_message(ctx, help_message)
+            
     if "!main gems" in message:
         # Get all main skill gem items in item_ids
         gems = [item for item in Items.get_main_skill_gem_items() if item["id"] in item_ids]
@@ -159,12 +165,21 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
 
     if "!flasks" in message or "!flask" in message:
         # Get all flask items in item_ids
-        flasks = [item for item in Items.get_flask_items() if item["id"] in item_ids]
         flask_counts: dict[str, int] = {}
-        for flask in flasks:
-            flask_counts[flask["name"]] = flask_counts.get(flask["name"], 0) + 1
+        
+        # Count each occurrence of each flask item
+        for item_id in item_ids:
+            # Find the flask item with this ID
+            flask_item = next((item for item in Items.get_flask_items() if item["id"] == item_id), None)
+            if flask_item:
+                flask_counts[flask_item["name"]] = flask_counts.get(flask_item["name"], 0) + 1
+
         # Create a message with flask names and counts
-        flask_message = ', '.join(f"{name}: {count}" for name, count in flask_counts.items())
+        if flask_counts:
+            flask_message = ', '.join(f"{name}: {count}" for name, count in flask_counts.items())
+        else:
+            flask_message = "No flask items found"
+
         await split_send_message(ctx, flask_message)
 
     if "!ascendancy" in message:
@@ -185,10 +200,70 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
     if "!passive" in message or "!p" in message:
         message = f"You have {ctx.passives_available - ctx.passives_used} passive skill points available. ( {ctx.passives_used} / {ctx.passives_available} total for character {ctx.character_name} )"
         await inputHelper.send_poe_text(message)
+    
+    if "!deathlink" in message:
+        # If the user has deathlink enabled, send a message to the server to enable deathlink
+        deathlinked = ctx.get_is_death_linked()
+        await ctx.update_death_link(not deathlinked)
+        await inputHelper.send_poe_text(f"@{ctx.character_name} Deathlink {"enabled" if not deathlinked else "disabled"}.")
+        
+    if "!goal" in message:
+        goal = ctx.game_options.get("goal", -1)
+        goal_message = ""
+        
+        if goal == Options.Goal.option_complete_act_1:
+            goal_message = "Goal: Complete Act 1 (reach The Southern Forest)"
+        elif goal == Options.Goal.option_complete_act_2:
+            goal_message = "Goal: Complete Act 2 (reach The City of Sarn)"
+        elif goal == Options.Goal.option_complete_act_3:
+            goal_message = "Goal: Complete Act 3 (reach The Aqueduct)"
+        elif goal == Options.Goal.option_complete_act_4:
+            goal_message = "Goal: Complete Act 4 (reach The Slave Pens)"
+        elif goal == Options.Goal.option_kauri_fortress_act_6:
+            goal_message = "Goal: Reach Karui Fortress in Act 6"
+        elif goal == Options.Goal.option_complete_act_6:
+            goal_message = "Goal: Complete Act 6 (reach The Bridge Encampment)"
+        elif goal == Options.Goal.option_complete_act_7:
+            goal_message = "Goal: Complete Act 7 (reach The Sarn Ramparts)"
+        elif goal == Options.Goal.option_complete_act_8:
+            goal_message = "Goal: Complete Act 8 (reach The Blood Aqueduct)"
+        elif goal == Options.Goal.option_complete_act_9:
+            goal_message = "Goal: Complete Act 9 (reach Oriath Docks)"
+        elif goal == Options.Goal.option_complete_the_campaign:
+            goal_message = "Goal: Complete the campaign (reach Karui Shores)"
+        elif goal == Options.Goal.option_defeat_bosses:
+            # Show boss defeat progress using the same logic as validationLogic
+            bosses_for_goal = ctx.game_options.get("bosses_for_goal", [])
+            if not bosses_for_goal:
+                goal_message = "Goal: Defeat bosses (no bosses configured)"
+            else:
+                # Get completion items we've received
+                received_item_names = set()
+                for network_item in ctx.items_received:
+                    item_data = Items.item_table.get(network_item.item)
+                    if item_data:
+                        received_item_names.add(item_data["name"])
+                
+                # Find bosses we haven't completed yet
+                incomplete_bosses = []
+                complete_bosses = []
+                for boss in bosses_for_goal:
+                    completion_item = f"complete {boss}"
+                    if completion_item not in received_item_names:
+                        incomplete_bosses.append(boss)
+                    else:
+                        complete_bosses.append(boss)
+                
+                if incomplete_bosses:
+                    goal_message = f"Goal: Defeat bosses - ✗{', ✗'.join(incomplete_bosses)}" + f"  ✓{', ✓'.join(complete_bosses)}" if complete_bosses else ""
+                else:
+                    goal_message = "Goal: Defeat bosses - All bosses completed!"
+        else:
+            goal_message = "Goal: Unknown or not set"
+        
+        await split_send_message(ctx, goal_message)
+    
 
-    if "!help" in message or "!commands" in message:
-            help_message = """!ap char - Set your character | !passive | !usable skill gems - Usable by level | !usable support gems | !usable utility gems | !usable gems | !main gems | !support gems | !utility gems | !all gems or !gems | !gear | !weapons | !armor | !links | !flasks | !ascendancy | !help | Note: use @yourname followed a command."""
-            await split_send_message(ctx, help_message)
 async def split_send_message(ctx, message: str, max_length: int = 500):
     """
     Splits a message into chunks and sends each chunk separately.
