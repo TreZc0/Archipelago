@@ -41,124 +41,82 @@ _auth_url = f"https://www.pathofexile.com/oauth/authorize?{urllib.parse.urlencod
 access_token = ""
 token_expire_time = None
 # === Step 3: Start local callback server ===
-class OAuthHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        global access_token
-        parsed = urllib.parse.urlparse(self.path)
-        if parsed.path == "/oauth-callback":
 
-            params = urllib.parse.parse_qs(parsed.query)
-            code = params.get("code", [None])[0]
-            if code:
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(b"<h1>Authorization successful! You can close this tab.</h1>")
-                logger.info("\n✅ Authorization code received.")
-                logger.info("🔄 Exchanging for access token...")
-                logger.info(f"\n🔑 code_verifier = {_code_verifier}")
-                logger.info(f"\n✅ code = {code}")
 
-                # Step 4: Exchange code for token
-                token_response = requests.post(
-                    "https://www.pathofexile.com/oauth/token",
-                    data={
-                        "grant_type": "authorization_code",
-                        "code": code,
-                        "redirect_uri": REDIRECT_URI,
-                        "client_id": CLIENT_ID,
-                        "code_verifier": _code_verifier,
-                    },
-                    headers={
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        "User-Agent": "Archipelago-PoE",
-                    },
-                )
-
-                if token_response.ok:
-                    tokens = token_response.json()
-                    logger.info(f"\n✅ Access Token: {tokens["access_token"]}")
-                    access_token = tokens["access_token"]
-                    token_expire_time = tokens["expires_in"] + time.time()
-                    logger.info(f"⏳ Token expires at:{token_expire_time} seconds since epoch, or {token_expire_time - time.time()} seconds from now")
-                    logger.info(f"🔁 Refresh Token: {tokens.get("refresh_token")}")
-                else:
-                    logger.info("\n❌ Token exchange failed:")
-                    logger.info(token_response.text)
-
-                # Shut down server after response
-                def shutdown_server(server):
-                    server.shutdown()
-
-                import threading
-                threading.Thread(target=shutdown_server, args=(self.server,), daemon=True).start()
-            else:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(b"<h1>Error: Missing authorization code</h1>")
+#create a lock for async_oauth_login
+_oauth_lock = asyncio.Lock()
 
 async def async_oauth_login() -> dict:
     """
     Async version of oauth_login. Returns a new access_token.
     """
-    code_future = asyncio.get_event_loop().create_future()
 
-    class AsyncOAuthHandler(http.server.SimpleHTTPRequestHandler):
-        global access_token, token_expire_time
+    async with _oauth_lock:
+        code_future = asyncio.get_event_loop().create_future()
 
-        def do_GET(self):
-            parsed = urllib.parse.urlparse(self.path)
-            if parsed.path == "/oauth-callback":
-                params = urllib.parse.parse_qs(parsed.query)
-                code = params.get("code", [None])[0]
-                if code:
-                    self.send_response(200)
-                    self.end_headers()
-                    self.wfile.write(b"<h1>Authorization successful! You can close this tab.</h1>")
-                    if not code_future.done():
-                        code_future.set_result(code)
-                    def shutdown_server(server):
-                        server.shutdown()
-                    import threading
-                    threading.Thread(target=shutdown_server, args=(self.server,), daemon=True).start()
-                else:
-                    self.send_response(400)
-                    self.end_headers()
-                    self.wfile.write(b"<h1>Error: Missing authorization code</h1>")
+        class AsyncOAuthHandler(http.server.SimpleHTTPRequestHandler):
+            global access_token, token_expire_time
 
-    webbrowser.open(_auth_url)
-    logger.info(f"🔊 Listening for callback on {REDIRECT_URI} ...")
-    server = socketserver.TCPServer(("", PORT), AsyncOAuthHandler)
-    loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, server.serve_forever)
-    code = await code_future
+            def do_GET(self):
+                parsed = urllib.parse.urlparse(self.path)
+                if parsed.path == "/oauth-callback":
+                    params = urllib.parse.parse_qs(parsed.query)
+                    code = params.get("code", [None])[0]
+                    if code:
+                        self.send_response(200)
+                        self.end_headers()
+                        self.wfile.write(b"<h1>Authorization successful! You can close this tab.</h1>")
+                        if not code_future.done():
+                            code_future.set_result(code)
+                        def shutdown_server(server):
+                            server.shutdown()
+                        import threading
+                        threading.Thread(target=shutdown_server, args=(self.server,), daemon=True).start()
+                    else:
+                        self.send_response(400)
+                        self.end_headers()
+                        self.wfile.write(b"<h1>Error: Missing authorization code</h1>")
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            "https://www.pathofexile.com/oauth/token",
-            data={
-                "grant_type": "authorization_code",
-                "code": code,
-                "redirect_uri": REDIRECT_URI,
-                "client_id": CLIENT_ID,
-                "code_verifier": _code_verifier,
-            },
-            headers={
-                "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": "Archipelago-PoE",
-            },
-        )
-        resp.raise_for_status()
-        tokens = resp.json()
-        token_expire_time = tokens["expires_in"] + time.time()
-        access_token = tokens["access_token"]
-        logger.info("\n✅ Access Token:" + tokens["access_token"])
-        logger.info(f"⏳ Token expires at:{token_expire_time} seconds since epoch, or {token_expire_time - time.time()} seconds from now")
 
-        # return a dict with expire time and access token
-        return {
-            "access_token": access_token,
-            "expires_at": token_expire_time
-        }
+        logger.info(f"🔊 Listening for callback on {REDIRECT_URI} ...")
+        try:
+            server = socketserver.TCPServer(("", PORT), AsyncOAuthHandler)
+        except Exception as e:
+            await asyncio.sleep(10)
+            logger.error(f"Failed to start local server on port {PORT}: {e}")
+            raise e
+        webbrowser.open(_auth_url)
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, server.serve_forever)
+        code = await code_future
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                "https://www.pathofexile.com/oauth/token",
+                data={
+                    "grant_type": "authorization_code",
+                    "code": code,
+                    "redirect_uri": REDIRECT_URI,
+                    "client_id": CLIENT_ID,
+                    "code_verifier": _code_verifier,
+                },
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "User-Agent": "Archipelago-PoE",
+                },
+            )
+            resp.raise_for_status()
+            tokens = resp.json()
+            token_expire_time = tokens["expires_in"] + time.time()
+            access_token = tokens["access_token"]
+            logger.info("\n✅ Access Token:" + tokens["access_token"])
+            logger.info(f"⏳ Token expires at:{token_expire_time} seconds since epoch, or {token_expire_time - time.time()} seconds from now")
+
+            # return a dict with expire time and access token
+            return {
+                "access_token": access_token,
+                "expires_at": token_expire_time
+            }
 
 
 
