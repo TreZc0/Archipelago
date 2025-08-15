@@ -5,6 +5,7 @@ import random
 import re
 from NetUtils import ClientStatus
 from worlds.poe import Items
+from worlds.poe import Locations
 from worlds.poe.poeClient import inputHelper
 from worlds.poe.poeClient import fileHelper
 from worlds.poe import Options
@@ -208,61 +209,63 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
         await inputHelper.send_poe_text(f"@{ctx.character_name} Deathlink {"enabled" if not deathlinked else "disabled"}.")
         
     if "!goal" in message:
-        goal = ctx.game_options.get("goal", -1)
-        goal_message = ""
-        
-        if goal == Options.Goal.option_complete_act_1:
-            goal_message = "Goal: Complete Act 1 (reach The Southern Forest)"
-        elif goal == Options.Goal.option_complete_act_2:
-            goal_message = "Goal: Complete Act 2 (reach The City of Sarn)"
-        elif goal == Options.Goal.option_complete_act_3:
-            goal_message = "Goal: Complete Act 3 (reach The Aqueduct)"
-        elif goal == Options.Goal.option_complete_act_4:
-            goal_message = "Goal: Complete Act 4 (reach The Slave Pens)"
-        elif goal == Options.Goal.option_kauri_fortress_act_6:
-            goal_message = "Goal: Reach Karui Fortress in Act 6"
-        elif goal == Options.Goal.option_complete_act_6:
-            goal_message = "Goal: Complete Act 6 (reach The Bridge Encampment)"
-        elif goal == Options.Goal.option_complete_act_7:
-            goal_message = "Goal: Complete Act 7 (reach The Sarn Ramparts)"
-        elif goal == Options.Goal.option_complete_act_8:
-            goal_message = "Goal: Complete Act 8 (reach The Blood Aqueduct)"
-        elif goal == Options.Goal.option_complete_act_9:
-            goal_message = "Goal: Complete Act 9 (reach Oriath Docks)"
-        elif goal == Options.Goal.option_complete_the_campaign:
-            goal_message = "Goal: Complete the campaign (reach Karui Shores)"
-        elif goal == Options.Goal.option_defeat_bosses:
-            # Show boss defeat progress using the same logic as validationLogic
-            bosses_for_goal = ctx.game_options.get("bosses_for_goal", [])
-            if not bosses_for_goal:
-                goal_message = "Goal: Defeat bosses (no bosses configured)"
-            else:
-                # Get completion items we've received
-                received_item_names = set()
-                for network_item in ctx.items_received:
-                    item_data = Items.item_table.get(network_item.item)
-                    if item_data:
-                        received_item_names.add(item_data["name"])
-                
-                # Find bosses we haven't completed yet
-                incomplete_bosses = []
-                complete_bosses = []
-                for boss in bosses_for_goal:
-                    completion_item = f"complete {boss}"
-                    if completion_item not in received_item_names:
-                        incomplete_bosses.append(boss)
-                    else:
-                        complete_bosses.append(boss)
-                
-                if incomplete_bosses:
-                    goal_message = f"Goal: Defeat bosses - ✗{', ✗'.join(incomplete_bosses)}" + f"  ✓{', ✓'.join(complete_bosses)}" if complete_bosses else ""
-                else:
-                    goal_message = "Goal: Defeat bosses - All bosses completed!"
+        await send_goal_message(ctx)
+
+
+async def send_goal_message(ctx):
+    goal = ctx.game_options.get("goal", -1)
+    goal_message = ""
+    if goal == Options.Goal.option_complete_act_1:
+        goal_message = "Goal: Complete Act 1 (reach The Southern Forest)"
+    elif goal == Options.Goal.option_complete_act_2:
+        goal_message = "Goal: Complete Act 2 (reach The City of Sarn)"
+    elif goal == Options.Goal.option_complete_act_3:
+        goal_message = "Goal: Complete Act 3 (reach The Aqueduct)"
+    elif goal == Options.Goal.option_complete_act_4:
+        goal_message = "Goal: Complete Act 4 (reach The Slave Pens)"
+    elif goal == Options.Goal.option_kauri_fortress_act_6:
+        goal_message = "Goal: Reach Karui Fortress in Act 6"
+    elif goal == Options.Goal.option_complete_act_6:
+        goal_message = "Goal: Complete Act 6 (reach The Bridge Encampment)"
+    elif goal == Options.Goal.option_complete_act_7:
+        goal_message = "Goal: Complete Act 7 (reach The Sarn Ramparts)"
+    elif goal == Options.Goal.option_complete_act_8:
+        goal_message = "Goal: Complete Act 8 (reach The Blood Aqueduct)"
+    elif goal == Options.Goal.option_complete_act_9:
+        goal_message = "Goal: Complete Act 9 (reach Oriath Docks)"
+    elif goal == Options.Goal.option_complete_the_campaign:
+        goal_message = "Goal: Complete the campaign (reach Karui Shores)"
+    elif goal == Options.Goal.option_defeat_bosses:
+        # Show boss defeat progress using the same logic as validationLogic
+        bosses_for_goal = ctx.game_options.get("bosses_for_goal", [])
+        if not bosses_for_goal:
+            goal_message = "Goal: Defeat bosses (no bosses configured)"
         else:
-            goal_message = "Goal: Unknown or not set"
-        
-        await split_send_message(ctx, goal_message)
-    
+            # Get completion items we've received
+            received_item_names = set()
+            for network_item in ctx.items_received:
+                item_data = [i for i in Locations.bosses.values() if i.get("id") == network_item.item]
+                if item_data:
+                    received_item_names.add(item_data[0]["name"])
+
+            # Find bosses we haven't completed yet
+            incomplete_bosses = []
+            complete_bosses = []
+            for boss in bosses_for_goal:
+                completion_item = f"defeat {boss}"
+                if completion_item not in received_item_names:
+                    incomplete_bosses.append(boss)
+                else:
+                    complete_bosses.append(boss)
+
+            if incomplete_bosses:
+                goal_message = f"Goal: Defeat bosses - ✗{', ✗'.join(incomplete_bosses)}" + f"  ✓{', ✓'.join(complete_bosses)}" if complete_bosses else ""
+            else:
+                goal_message = "Goal: Defeat bosses - All bosses completed!"
+    else:
+        goal_message = "Goal: Unknown or not set"
+    await split_send_message(ctx=ctx, message=goal_message)
+
 
 async def split_send_message(ctx, message: str, max_length: int = 500):
     """

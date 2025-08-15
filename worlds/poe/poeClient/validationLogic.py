@@ -117,7 +117,8 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str, char: gggAPI.Charact
                         continue # item is not high enough level
                     logger.info(f"Found goal item {item} in {zone}.")
                     boss_sent.append(boss)
-                    ctx.check_locations({boss_data['id']})
+                    send_boss = boss
+                    return asyncio.create_task(ctx.check_locations({boss_data['id']})).add_done_callback(lambda x: inputHelper.send_poe_text(f"@{ctx.character_name} You have defeated {send_boss}!", retry_times=40, retry_delay=0.5))
 
         received_item_names = {item.item for item in ctx.items_received} | {f"complete {boss}" for boss in boss_sent}
         required_completion_items = {f"complete {boss}" for boss in bosses_for_goal} 
