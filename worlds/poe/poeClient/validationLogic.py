@@ -76,6 +76,7 @@ async def when_enter_new_zone(ctx: "PathOfExileContext", line: str):
 
 def check_for_victory(ctx: "PathOfExileContext", zone: str, char: gggAPI.Character) -> asyncio.Task | None:
     goal = ctx.game_options.get("goal", -1)
+    return_task: asyncio.Task | None = None
     if goal == -1:
         logger.info("ERROR: No goal set in client options.")
         raise ValueError("No goal set in client options.")
@@ -100,6 +101,15 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str, char: gggAPI.Charact
     (goal == Options.Goal.option_complete_the_campaign and zone == "Karui Shores"):
         return asyncio.create_task(textUpdate.callback_if_valid_char(ctx, send_goal))
 
+
+    async def send_boss_update_text(boss_set: set[int]):
+        #ids of bosses defeated
+        boss_names = ""
+        bosses = []
+        for i in boss_set:
+            bosses.append(Locations.bosses_by_id[i].get("name", "Unknown Boss"))
+        if bosses:
+            await asyncio.create_task(inputHelper.send_poe_text(f"@{ctx.character_name} You have defeated {", ".join(bosses)}!", retry_times=40, retry_delay=0.5))
     # we should probably create a location and fill it with a goal item for each boss.
     if goal == Options.Goal.option_defeat_bosses:
         held_items = get_held_item_names_ilvls_from_char(char)
@@ -117,11 +127,12 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str, char: gggAPI.Charact
                         continue # item is not high enough level
                     logger.info(f"Found goal item {item} in {zone}.")
                     boss_sent.append(boss)
-                    send_boss = boss
-                    return asyncio.create_task(ctx.check_locations({boss_data['id']})).add_done_callback(lambda x: inputHelper.send_poe_text(f"@{ctx.character_name} You have defeated {send_boss}!", retry_times=40, retry_delay=0.5))
+                    return_task = (asyncio.create_task(ctx.check_locations({boss_data['id']}))
+                            .add_done_callback(lambda x: asyncio.create_task(
+                        send_boss_update_text(x.result()))))
 
-        received_item_names = {item.item for item in ctx.items_received} | {f"complete {boss}" for boss in boss_sent}
-        required_completion_items = {f"complete {boss}" for boss in bosses_for_goal} 
+        received_item_names = {Locations.bosses_by_id[i].get("name","") for i in {j.item for j in ctx.items_received} if i in Locations.bosses_by_id} | {f"defeat {boss}" for boss in boss_sent}
+        required_completion_items = {f"defeat {boss}" for boss in bosses_for_goal}
         
         # Check if we have ALL required boss completion items
         if required_completion_items.issubset(received_item_names):
@@ -131,7 +142,7 @@ def check_for_victory(ctx: "PathOfExileContext", zone: str, char: gggAPI.Charact
             missing = required_completion_items - received_item_names
             logger.debug(f"Still missing boss completions: {missing}")
     
-    return None
+    return return_task
 
 
 async def validate_and_update(ctx: "PathOfExileContext", char, found_items_list: list[Locations.LocationDict]) -> list[str]:

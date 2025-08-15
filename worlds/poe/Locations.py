@@ -67,3 +67,4 @@ full_locations = {**base_item_type_locations, **level_locations}
 base_item_locations_by_base_item_name: Dict[str, LocationDict] = {loc['baseItem']: loc for loc in base_item_type_locations.values()}
 
 bosses = LocationTable.bosses
+bosses_by_id = {b['id']: b for b in bosses.values()}
