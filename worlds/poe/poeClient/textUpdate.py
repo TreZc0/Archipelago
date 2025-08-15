@@ -259,7 +259,7 @@ async def send_goal_message(ctx):
                     complete_bosses.append(boss)
 
             if incomplete_bosses:
-                goal_message = f"Goal: Defeat bosses - ✗{', ✗'.join(incomplete_bosses)}" + f"  ✓{', ✓'.join(complete_bosses)}" if complete_bosses else ""
+                goal_message = f"Goal: Defeat bosses - ✗{', ✗'.join(incomplete_bosses)}" + (f"  ✓{', ✓'.join(complete_bosses)}" if complete_bosses else "")
             else:
                 goal_message = "Goal: Defeat bosses - All bosses completed!"
     else:
