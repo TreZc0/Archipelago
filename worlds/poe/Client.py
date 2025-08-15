@@ -18,7 +18,7 @@ from .poeClient import gggAPI
 from .poeClient import textUpdate
 
 
-CLIENT_VERSION="1.0.0"
+CLIENT_VERSION="1.0.1"
 
 class PathOfExileCommandProcessor(ClientCommandProcessor):
     if TYPE_CHECKING:
@@ -298,7 +298,7 @@ class PathOfExileContext(CommonContext):
 
             # Request info for all locations after connecting
             location_ids = list(self.missing_locations)
-            
+
             asyncio.create_task(self.send_msgs([{"cmd": "LocationScouts", "locations": location_ids}]))
 
         if cmd == 'RoomInfo':
@@ -330,6 +330,10 @@ class PathOfExileContext(CommonContext):
                 if self._debug:
                     self.logger.info(f"[DEBUG] RoomInfo received with seed name: {self.seed_name}")
                 load_client_settings()
+
+            msg = f"Starting Character: {self.game_options.get('starting_character', 'no starting character found')}"
+            # self.command_processor.output(self=self, text=f"[color=green]{msg}[/color]") #TODO: color in GUI
+            self.command_processor.output(self=self, text=msg)
 
     def update_settings(self):
         """Update a setting and save it to the settings file."""

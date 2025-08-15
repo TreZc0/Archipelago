@@ -179,6 +179,7 @@ class PathOfExileWorld(World):
             "passivePointsAsItems": options.add_passive_skill_points_to_item_pool.value,
             "LevelingUpAsLocations": options.add_leveling_up_to_location_pool.value,
             "goal": options.goal.value,
+            "starting_character": Options.option_starting_character_to_class_name(options.starting_character.value),
             "bosses_for_goal": self.bosses_for_goal,
             "deathlink": options.death_link.value,
         }

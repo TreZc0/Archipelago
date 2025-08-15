@@ -236,3 +236,17 @@ class PathOfExileOptions(DeathLinkMixin, PerGameCommonOptions):
     gucci_hobo_mode: GucciHoboMode
     enable_tts: EnableTTS
     tts_speed: TTSSpeed
+
+
+
+def option_starting_character_to_class_name(option_id: int) -> str:
+    mapping = {
+        1: "Marauder",
+        2: "Ranger",
+        3: "Witch",
+        4: "Duelist",
+        5: "Templar",
+        6: "Shadow",
+        7: "Scion",
+    }
+    return mapping.get(option_id, "Unknown")
