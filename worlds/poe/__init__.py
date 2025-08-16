@@ -85,7 +85,19 @@ class PathOfExileWorld(World):
         self.bosses_for_goal: list[str] = []
 
         super().__init__(*args, **kwargs)
-        self.items_to_place = Items.item_table.copy()
+
+        # ``Items.item_table`` is a module level dictionary whose values are
+        # mutable ``dict`` objects.  The original implementation only created a
+        # shallow copy of this mapping which meant that any modification to the
+        # nested dictionaries (for example changing an item's classification
+        # from progression to filler) would also mutate the global item table.
+        #
+        # By performing a deep copy we ensure every world gets its own private
+        # copy of the item table and mutations no longer leak between runs.
+        # self.items_to_place = Items.item_table.copy()
+        import copy
+        self.items_to_place = copy.deepcopy(Items.item_table)
+
 
     def remove_and_create_item_by_itemdict(self, item: Items.ItemDict) -> list[Items.PathOfExileItem]:
         item_id = item["id"]
