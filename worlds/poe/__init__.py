@@ -57,23 +57,33 @@ class PathOfExileWorld(World):
     options_dataclass = PathOfExileOptions
     origin_region_name = "Menu"
 
-    items_to_place = {}
-    items_procollected = {}
-    locations_to_place = {}
-    total_items_to_place_count = 0
-    
-    goal_act = 0
-    #generate the location and item tables from Locations.py and Items.py
-    # location_name_to_id = { loc.name: loc.id for loc in Locations.base_item_types }
-    location_name_to_id = ({ loc["name"]: id for id, loc in Locations.full_locations.items() } 
-    | { loc["name"]: loc["id"] for loc in Locations.bosses.values() })
-    item_name_to_id = { item["name"]: item["id"] for item in Items.item_table.values() } | { item["name"]: item["id"] for item in Locations.bosses.values() }
+# Instance variables, but made in __init__ so they are per-instance
+#    items_to_place = {}
+#    items_procollected = {}
+#    locations_to_place = {}
+#    total_items_to_place_count = 0
+#
+#    goal_act = 0
 
-    bosses_for_goal: list[str] = []
+    location_name_to_id = ({ loc["name"]: id for id, loc in Locations.full_locations.items() } 
+                        | { loc["name"]: loc["id"] for loc in Locations.bosses.values() })
+
+    item_name_to_id = ({ item["name"]: item["id"] for item in Items.item_table.values() }
+                       | { item["name"]: item["id"] for item in Locations.bosses.values() })
+
+
 
     item_name_groups: Dict[str, Set[str]] = Items.get_item_name_groups()
 
     def __init__(self, *args, **kwargs):
+
+        self.items_to_place = {}
+        self.items_procollected = {}
+        self.locations_to_place = {}
+        self.total_items_to_place_count = 0
+        self.goal_act = 0
+        self.bosses_for_goal: list[str] = []
+
         super().__init__(*args, **kwargs)
         self.items_to_place = Items.item_table.copy()
 
@@ -119,13 +129,21 @@ class PathOfExileWorld(World):
 
         table_total_item_count = sum(item.get("count", 1) for item in Items.item_table.values())
         if len(self.locations_to_place) <  self.total_items_to_place_count:
-            logger.debug(f"[Debug]: Not enough locations to place all items! {self.total_items_to_place_count} < { table_total_item_count}\nCulling...")
-            Items.cull_items_to_place(self, self.items_to_place, self.locations_to_place)
+            logger.debug(
+                f"[Debug]: Not enough locations to place all items! locations: {len(self.locations_to_place)} < items: {table_total_item_count}\nCulling...")
+            self.total_items_to_place_count = sum(item.get("count", 1) for item in self.items_to_place.values())
+            logger.debug(
+                f"[DEBUG]: total items to place before culling: {self.total_items_to_place_count} / {table_total_item_count} possible")
 
+            self.items_to_place = Items.cull_items_to_place(self, self.items_to_place, self.locations_to_place)
+            self.total_items_to_place_count = sum(item.get("count", 1) for item in self.items_to_place.values())
+            logger.debug(
+                f"[DEBUG]: total items to place after  culling: {self.total_items_to_place_count} / {table_total_item_count} possible")
+
+
+        table_total_item_count = sum(item.get("count", 1) for item in Items.item_table.values())
         logger.debug(f"[DEBUG]: total items to place: {self.total_items_to_place_count} / {table_total_item_count} possible")
-        logger.debug("Here 1")
         logger.debug(f"[DEBUG]: total locs in world.: {len(self.locations_to_place)} / {len(Locations.full_locations)} possible")
-        logger.debug("Here 2")
 
 
     def create_regions(self):
@@ -142,6 +160,10 @@ class PathOfExileWorld(World):
         #poeRegions.create_and_populate_regions(self, self.multiworld, self.player, locations_to_place, poeRegions.acts)
 
         self.multiworld.completion_condition[self.player] = lambda state: (poeRules.completion_condition(self, state))
+
+
+        logger.debug(f"[CreateRegion]: total items to place: {self.total_items_to_place_count}")
+        logger.debug(f"[CreateRegion]: total locs in world.: {len(self.locations_to_place)}")
 
         self.create_items_but_do_it_earlier()
 
@@ -168,8 +190,9 @@ class PathOfExileWorld(World):
         return Items.PathOfExileItem(item['name'], classification, item['id'], self.player)
 
     def create_items(self):
-        itempool = self.multiworld.itempool
-        logger.debug(f"[DEBUG]: in create_items {len(itempool)} ---- ")
+        #itempool = self.multiworld.itempool
+        #logger.debug(f"[DEBUG]: in create_items {len(itempool)} ---- ")
+        pass
 
 
     def fill_slot_data(self):

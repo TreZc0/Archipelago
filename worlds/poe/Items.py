@@ -131,13 +131,13 @@ def cull_items_to_place(world: "PathOfExileWorld", items: Dict[int, ItemDict], l
         if not filler_items and not useful_items:
             logger.error("[ERROR] No items available to remove. Cannot match location count.")
             break
-        
-        # Sort by count descending (remove high-count items first for efficiency)
+
         filler_items = world.random.sample(filler_items, k=min(len(filler_items), amount_to_cull))
         useful_items = world.random.sample(useful_items, k=min(len(useful_items), amount_to_cull))
 
         culled_count = 0
         def cull_item_func(cull_items, culled_count=0, amount_to_cull=amount_to_cull):
+            starting_culled_count = culled_count
             items_to_remove = []
 
             for item_id, item in cull_items:
@@ -159,10 +159,10 @@ def cull_items_to_place(world: "PathOfExileWorld", items: Dict[int, ItemDict], l
             # Remove items marked for removal
             for item_id in items_to_remove:
                 items.pop(item_id, None)
-            return culled_count
+            return culled_count - starting_culled_count
 
-        culled_count = cull_item_func(filler_items, culled_count, amount_to_cull)
-        culled_count = cull_item_func(useful_items, culled_count, amount_to_cull)
+        culled_count += cull_item_func(filler_items, culled_count, amount_to_cull)
+        culled_count += cull_item_func(useful_items, culled_count, amount_to_cull)
 
         logger.info(f"[INFO] Culled {culled_count} items.")
 
