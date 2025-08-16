@@ -192,12 +192,18 @@ class PathOfExileWorld(World):
 
         logger.debug(f"[DEBUG]: items left to place:{len(self.items_to_place)} /{self.total_items_to_place_count}.\n Created {len(self.locations_to_place)} locations.")
 
-    def create_item(self, item: str) -> Items.PathOfExileItem:
+    def create_item(self, item_name: str) -> Items.PathOfExileItem:
         # this is called when AP wants to create an item by name (for plando, start inventory, item links) or when you call it from your own code
 
         # get the item from the item table, by name
-        id = self.item_name_to_id.get(item)
+        id = self.item_name_to_id.get(item_name)
         item = ItemTable.item_table.get(id)
+        if item is None:
+            if "defeat" in item_name:
+                #its a boss
+                item = Locations.bosses.get(item_name.replace("defeat ", ""))
+            else:
+                raise Exception(f"I don't know how to create the item {item}")
         classification = item.get("classification", ItemClassification.progression)  # progression I guess?
         return Items.PathOfExileItem(item['name'], classification, item['id'], self.player)
 
