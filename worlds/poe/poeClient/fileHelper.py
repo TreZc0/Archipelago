@@ -36,92 +36,53 @@ def _ensure_stdlib_shims():
 def load_vendor_modules():
     import os
     import sys
-    import importlib.util
     import zipfile
     import tempfile
     import atexit
     import shutil
+    import pkgutil
 
     # Prevent double-load
     if getattr(sys, "_vendor_modules_loaded", False):
         return
     sys._vendor_modules_loaded = True
 
-    # Use consistent temp directory for vendor extraction
-    temp_dir = os.path.join(tempfile.gettempdir(), "archipelago_vendor")
+    _ensure_stdlib_shims()
 
-    # Default vendor path (source mode)
-    base_dir = os.path.dirname(__file__)
-    base_vendor_dir = os.path.join(base_dir, "vendor")
 
-    if not os.path.isdir(base_vendor_dir):
-        # Try to detect if running from zip
-        archive_path = os.path.abspath(__file__)
-        while not os.path.isfile(archive_path) and archive_path != os.path.dirname(archive_path):
-            archive_path = os.path.dirname(archive_path)
+    from Utils import local_path
+    vendor_dir = local_path("lib")
 
-        if zipfile.is_zipfile(archive_path):
-            logger.info(f"[vendor] Extracting vendor from zip: {archive_path}")
+    try:
+        vendor_zip_data = pkgutil.get_data("worlds.poe.poeClient", "vendor/vendor_modules.zip")
+        
+        if vendor_zip_data is None:
+            base_dir = os.path.dirname(__file__)
+            vendor_zip_path = os.path.join(base_dir, "vendor_modules.zip")
+            
+            if not os.path.isfile(vendor_zip_path):
+                logger.warning("[vendor] vendor_modules.zip not found in package or current directory")
+                return
 
-            # Clean up the temp dir first
-            if os.path.exists(temp_dir):
-                shutil.rmtree(temp_dir, ignore_errors=True)
-            os.makedirs(temp_dir, exist_ok=True)
+            zip_dest = os.path.join(vendor_dir, "vendor_modules.zip")
+            shutil.copy2(vendor_zip_path, zip_dest)
+        else:
+            zip_dest = os.path.join(vendor_dir, "vendor_modules.zip")
+            with open(zip_dest, "wb") as f:
+                f.write(vendor_zip_data)
 
-            with zipfile.ZipFile(archive_path, 'r') as z:
-                for name in z.namelist():
-                    if name.startswith("poe/poeClient/vendor/") and not name.endswith("/"):
-                        z.extract(name, temp_dir)
 
-            base_vendor_dir = os.path.join(temp_dir, "poe", "poeClient", "vendor")
+        with zipfile.ZipFile(zip_dest, 'r') as vendor_zip:
+            vendor_zip.extractall(vendor_dir)
+        
+        os.remove(zip_dest)
 
-            # Clean up after exit
-            atexit.register(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
+        if vendor_dir not in sys.path:
+            sys.path.insert(0, vendor_dir)
 
-        if not os.path.isdir(base_vendor_dir):
-            raise FileNotFoundError(f"Vendor directory could not be found or extracted: {base_vendor_dir}")
-
-    _ensure_stdlib_shims()  # ensure shims before importing vendor modules
-
-    for entry in os.listdir(base_vendor_dir):
-        entry_path = os.path.join(base_vendor_dir, entry)
-
-        if entry in sys.modules:
-            continue
-
-        # Single-file module
-        if os.path.isfile(entry_path) and entry_path.endswith(".py"):
-            modname = os.path.splitext(entry)[0]
-            if modname in sys.modules:
-                continue
-            spec = importlib.util.spec_from_file_location(modname, entry_path)
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            sys.modules[modname] = mod
-            logger.info(f"[vendor] Loaded single-file module '{modname}' from {entry_path}")
-
-        # Single-layer or double-layer package
-        elif os.path.isdir(entry_path):
-            single_layer = os.path.join(entry_path, "__init__.py")
-            double_layer = os.path.join(entry_path, entry, "__init__.py")
-
-            if os.path.isfile(double_layer):
-                if entry_path not in sys.path:
-                    sys.path.insert(0, entry_path)
-                spec = importlib.util.spec_from_file_location(entry, double_layer)
-                mod = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(mod)
-                sys.modules[entry] = mod
-                logger.info(f"[vendor] Loaded double-layer package '{entry}' from {double_layer}")
-
-            elif os.path.isfile(single_layer):
-                if base_vendor_dir not in sys.path:
-                    sys.path.insert(0, base_vendor_dir)
-                spec = importlib.util.spec_from_file_location(entry, single_layer)
-                mod = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(mod)
-                sys.modules[entry] = mod
-                logger.info(f"[vendor] Loaded single-layer package '{entry}' from {single_layer}")
+    except Exception as e:
+        logger.error(f"[vendor] Failed to load vendor modules: {e}")
+        raise
 
 
 def safe_filename(filename: str) -> str:
