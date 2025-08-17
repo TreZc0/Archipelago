@@ -169,7 +169,7 @@ async def validate_and_update(ctx: "PathOfExileContext", char, found_items_list:
     location_ids_to_check = set()
     #add items to locations_to_check
     for location_dict in found_items_list:
-        logger.debug(f"[DEBUG] Found item: {location_dict["name"]}")
+        logger.debug(f"Found item: {location_dict["name"]}")
         location_id = location_dict["id"]
         if location_id is not None:
             location_ids_to_check.add(location_id)

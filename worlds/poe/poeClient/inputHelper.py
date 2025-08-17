@@ -73,7 +73,7 @@ async def send_multiple_poe_text(commands: list[str], retry_times: int = 1, retr
     async with _send_lock:  # Acquire lock before any operations
         if window is not None and window.title == "Path of Exile" and not (_last_called is not None and now - _last_called < _debounce_time):
 
-            logger.debug("[DEBUG] Found active Path of Exile window")
+            logger.debug("Found active Path of Exile window")
 
             _last_called = now
 
@@ -81,7 +81,7 @@ async def send_multiple_poe_text(commands: list[str], retry_times: int = 1, retr
             for i, command in enumerate(commands):
                 if not i == 0:
                     set_clipboard(command)
-                logger.debug(f"[DEBUG] Sending command: {command}")
+                logger.debug(f"Sending command: {command}")
                 # Press Enter
                 keyboard_controller.press(Key.enter)
                 keyboard_controller.release(Key.enter)
@@ -100,7 +100,7 @@ async def send_multiple_poe_text(commands: list[str], retry_times: int = 1, retr
 
             set_clipboard(clipboard_value)
             if _debug:
-                logger.info("[DEBUG] Sent command to Path of Exile:" + command)
+                logger.info("Sent command to Path of Exile:" + command)
             await asyncio.sleep(0.05)
             return True
 
@@ -111,12 +111,12 @@ async def send_multiple_poe_text(commands: list[str], retry_times: int = 1, retr
         if _last_called is not None and now - _last_called < _debounce_time:
             delay += _debounce_time - (now - _last_called)
             if _debug:
-                logger.info(f"[DEBUG] Debounced: Waiting {delay} seconds before retrying")
+                logger.info(f"Debounced: Waiting {delay} seconds before retrying")
         await asyncio.sleep(delay)
         return await send_multiple_poe_text(commands, retry_times - 1, retry_delay)
     else:
         if _debug:
-            logger.info("[DEBUG] Path of Exile window not active, no retries left")
+            logger.info("Path of Exile window not active, no retries left")
         return False
 
 

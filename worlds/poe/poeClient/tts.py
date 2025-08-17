@@ -36,7 +36,7 @@ def start_tts_engine():
                 _engine = pyttsx3.init()
             else:
                 _engine = pyttsx3.init(driverName='espeak')
-            logger.debug("[DEBUG] TTS engine initialized successfully.")
+            logger.debug("TTS engine initialized successfully.")
         except Exception as e:
             logger.error(f"[ERROR] Failed to initialize TTS engine: {e}")
             _engine = None

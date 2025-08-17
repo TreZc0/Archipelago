@@ -56,8 +56,7 @@ async def validate_char(ctx: "PathOfExileContext" = context):
     global last_ran_validate_char, _run_update_item_filter
     current_time = time.time()
     if current_time - last_ran_validate_char < validate_char_debounce_time:
-        if _debug:
-            logger.info(f"[DEBUG] Debounced: validate_char called too soon. Last ran at {last_ran_validate_char}, current time is {current_time}.")
+        logger.debug(f"Debounced: validate_char called too soon. Last ran at {last_ran_validate_char}, current time is {current_time}.")
         return
     logger.debug(f"[DEBUG] Validating character: {ctx.character_name} at {current_time}")
     _run_update_item_filter = True

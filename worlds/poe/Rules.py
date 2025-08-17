@@ -139,7 +139,7 @@ def can_reach(act: int, world , state: CollectionState) -> bool:
 
     if not reachable:
         if _debug:
-            log = f"[DEBUG] Act {act} not reachable with gear:"
+            log = f"Act {act} not reachable with gear:"
             if gear_count < gear_amount:
                 log += f"gear: {gear_count}/{gear_amount},"
             if flask_count < flask_amount:

@@ -13,6 +13,7 @@ from worlds.poe import Locations
 import logging
 logger = logging.getLogger("poe.Items")
 logger.setLevel(logging.DEBUG)
+_verbose_debug = False  # Set to True to enable verbose debug logging
 
 class ItemDict(TypedDict, total=False): 
     classification: ItemClassification 
@@ -44,7 +45,8 @@ class PathOfExileItem(Item):
 
 
 item_table: Dict[int, ItemDict] = ItemTable.item_table
-logger.debug(f"Loaded {len(item_table)} items from ItemTable.")
+if _verbose_debug:
+    logger.debug(f"Loaded {len(item_table)} items from ItemTable.")
 memoize_cache: Dict[str, list[ItemDict]] = {}
 
 def deprioritize_non_logic_gems(world: "PathOfExileWorld", table: Dict[int, ItemDict]) -> Dict[int, ItemDict]:
