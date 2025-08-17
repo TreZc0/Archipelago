@@ -136,6 +136,7 @@ class PathOfExileCommandProcessor(ClientCommandProcessor):
 
     def _cmd_base_item_filter(self, filter_name: str = "") -> bool:
         """Set the base item filter. (this needs to be a local file, and remember to add the .filter extension)"""
+        filter_name = Path(filter_name).name
         if not filter_name:
             self.output("ERROR: Please provide a valid item filter name.")
             return False
