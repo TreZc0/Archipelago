@@ -106,7 +106,8 @@ class GearUpgradesPerAct(Range):
     
 class AddFlaskSlotsToItemPool(Toggle):
     """
-    Specifies if the number of flask slots should be restricted, unlockable through items found in the multiworld.
+    Specifies if flasks should be restricted, unlockable through items found in the multiworld.
+    You may equip up to 5 flasks of a given rarity, and can unlock more flasks of a rarity through items.
     """
     display_name = "Flask Slot Upgrades"
     default = False
@@ -123,19 +124,19 @@ class FlaskSlotsPerAct(Range):
 
 class AddMaxLinksToItemPool(Toggle):
     """
-    Specifies if the number of linked support gem slots you can use should be restricted, unlockable through items found in the multiworld.
+    Specifies if the number of linked support gem slots you can use in gear should be restricted, unlockable through items found in the multiworld.
     """
     display_name = "Support Gem Slot Upgrades"
     default = True
 
 class MaxLinksPerAct(Range):
     """
-    Specifies a minimum number of available support gem slots (maximum usable links in items) per act. (there are 21 total)
+    Specifies a minimum number of available linked support gem slots per act. (there are 22 total)
     This will be ignored if the "Support Gem Slot Upgrades" option is turned off.
     """
     display_name = "Support Gem Slots Per Act"
     range_start = 0
-    range_end = 21
+    range_end = 22
     default = 2
 
 

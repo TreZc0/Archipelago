@@ -14,7 +14,7 @@ logger.setLevel(logging.DEBUG)
 MAX_GUCCI_GEAR_UPGRADES = 20
 MAX_GEAR_UPGRADES       = 50
 MAX_FLASK_SLOTS         = 10
-MAX_LINK_UPGRADES       = 21
+MAX_LINK_UPGRADES       = 22
 MAX_SKILL_GEMS          = 30 # you will get more, but this is the max required for "logic"
 
 ACT_0_USABLE_GEMS = 4
