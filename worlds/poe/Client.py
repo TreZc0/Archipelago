@@ -280,7 +280,7 @@ class PathOfExileContext(CommonContext):
         await self.send_connect(game="Path of Exile")
 
     def on_deathlink(self, data: typing.Dict[str, typing.Any]) -> None:
-        self.command_processor.output(f"Death link event received from {data.get('source'), 'unknown'}")
+        self.command_processor.output(self=self, text=f"Death link event received from {data.get('source'), 'unknown'}")
         if self.get_is_death_linked():
             asyncio.create_task(textUpdate.receive_deathlink(self)).add_done_callback(lambda task: handle_task_errors(task, self.ctx, self))
 

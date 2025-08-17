@@ -72,6 +72,8 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
     
     global _random_string
     char_name, message = get_char_name_and_message_from_line(line)
+    message = message.lower()
+
     if "!ap char" in message:
         _random_string = random.randbytes(8).hex()
         await inputHelper.send_poe_text(f"char_{_random_string}")
@@ -200,13 +202,13 @@ async def chat_commands_callback(ctx: "PathOfExileContext", line: str):
 
     if "!passive" in message or "!p" in message:
         message = f"You have {ctx.passives_available - ctx.passives_used} passive skill points available. ( {ctx.passives_used} / {ctx.passives_available} total for character {ctx.character_name} )"
-        await inputHelper.send_poe_text(message)
+        await split_send_message(ctx, message)
     
     if "!deathlink" in message:
         # If the user has deathlink enabled, send a message to the server to enable deathlink
         deathlinked = ctx.get_is_death_linked()
         await ctx.update_death_link(not deathlinked)
-        await inputHelper.send_poe_text(f"@{ctx.character_name} Deathlink {"enabled" if not deathlinked else "disabled"}.")
+        await split_send_message(ctx, f"Deathlink {"enabled" if not deathlinked else "disabled"}.")
         
     if "!goal" in message:
         await send_goal_message(ctx)
