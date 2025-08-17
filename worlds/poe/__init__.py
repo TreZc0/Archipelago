@@ -52,13 +52,6 @@ class PathOfExileWebWorld(WebWorld):
     )
     tutorials = [setup_en]
 
-    #tutorial_name: str
-    #description: str
-    #language: str
-    #file_name: str
-    #link: str  # unused
-    #authors: List[str]
-
 # ----- PathOfExile World ----- #
 
 
@@ -70,7 +63,7 @@ class PathOfExileWorld(World):
     """
     _debug = True
     game = "Path of Exile"
-    web_world_class = PathOfExileWebWorld
+    web = PathOfExileWebWorld()
     options_dataclass = PathOfExileOptions
     origin_region_name = "Menu"
 
