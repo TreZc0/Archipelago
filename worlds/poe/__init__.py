@@ -34,22 +34,39 @@ components.append(Component("Path of Exile Client",
 icon_paths["poe"] = f"ap:{__name__}/icons/poeicon.png"
 
 # ----- PathOfExile Web World ----- #
-
+from BaseClasses import Tutorial
 class PathOfExileWebWorld(WebWorld):
     """
     Web interface for the Path of Exile world.
     This class can be extended to include specific web functionalities.
     """
     theme = "stone"
-    bug_report_page = "https://github.com/stubobis1/Archipelago/issues" # if anyone else wants to maintain this, please do so
+    bug_report_page = "https://github.com/stubobis1/Archipelago/issues" # if anyone else wants to help maintain this, please do so
+    setup_en = Tutorial(
+        tutorial_name="Path of Exile Setup Guide",
+        description="A guide to setting up Archipelago Path of Exile.",
+        language="English",
+        file_name="setup_en.md",
+        link="setup/en",
+        authors=["StuBob"]
+    )
+    tutorials = [setup_en]
+
+    #tutorial_name: str
+    #description: str
+    #language: str
+    #file_name: str
+    #link: str  # unused
+    #authors: List[str]
 
 # ----- PathOfExile World ----- #
 
 
 class PathOfExileWorld(World):
     """
-    Represents the Path of Exile world in Archipelago.
-    This class can be extended to include specific world properties and methods.
+    Path of Exile is a free-to-play online action RPG set in a dark, gritty world where you explore, fight monsters,
+    and collect powerful loot. The game is known for its deep character customization, with an enormous passive skill
+    tree, thousands of items, and a huge endgame full of challenging bosses, and a wide variety of skill gems that define abilities.
     """
     _debug = True
     game = "Path of Exile"
