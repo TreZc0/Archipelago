@@ -1,0 +1,223 @@
+import logging
+from typing import Any, Callable, Optional
+
+from BaseClasses import CollectionState
+from .ALttPDoorRandomizer.BaseClasses import World as DoorRandoWorld
+
+
+logger = logging.getLogger("alttpr")
+
+class StateAdapter:
+    ###############################################
+    # Wraps Archipelago's CollectionState to provide DoorRandomizer-compatible state methods.
+    #
+    # This allows DoorRandomizer access_rule functions to work without modification by intercepting
+    # calls to methods that don't exist on CollectionState, and translating them to equivalent
+    # Archipelago item checks. In other words, we get to reuse the DR lambda's that define logical
+    # access to different regions and locations, by passing in StateAdapter instead of AP's CollectionState.
+    ###############################################
+
+    def __init__(self, state: CollectionState, world: DoorRandoWorld, player: int):
+        self.placing_items = None  # Used inside Door Randomizer
+        self.state = state
+        self.player = player
+        self.world = world
+
+
+    def __getattr__(self, name: str) -> Any:
+        # Forward attribute access to the wrapped state if the attribute exists there.
+        # This allows direct access to standard CollectionState methods/properties.
+        return getattr(self.state, name)
+
+    # NOTE: Every method takes an argument "player", which Door Randomizer uses for
+    # multiworld logic. We ignore the argument and use AP's player value to check AP's state.
+
+    # Core generic item checking methods
+    def can_reach(self, location_name: str, location_type: Optional[str]=None, player=None) -> bool:
+        return self.state.can_reach(location_name, location_type, self.player)
+
+
+    def has(self, item: str, player: int, count: int = 1) -> bool:
+        # TODO: I don't know why I thought changing the name of "Cape" was a good idea, I should undo that
+        return self.state.has(item, self.player, count) or \
+               (item == "Bow" and self.state.has("Progressive Bow", self.player, count)) or \
+               (item == "Cape" and self.state.has("Magic Cape", self.player, count))
+
+
+    def has_item(self, item: str, count: int = 1) -> bool:
+        # A wrapper for has() that doesn't require the useless player argument
+        return self.has(item, self.player, count)
+
+
+    def item_count(self, item: str, player):
+        return self.count(item, self.player)
+
+
+    # More specific item checking methods
+    def can_avoid_lasers(self, player) -> bool:
+        return self.has_item("Progressive Shield", 3) or self.has_item("Cane of Byrna") or self.has_item("Magic Cape")
+
+
+    def can_extend_magic(self, player, smallmagic=16, fullrefill=False) -> bool:
+        # Check if the player has enough magic. smallmagic is the total amount needed,
+        # with a full magic meter being 8 magic.
+        # TODO: Check for hard/expert mode, and whether the player can buy potions.
+        return smallmagic <= 8 or self.has_item("Magic Upgrade (1/2)") and smallmagic <= 16
+
+
+    def can_flute(self, player) -> bool:
+        # TODO: Check if player is in the escape sequence of a standard run,
+        # or for inverted shenanigans
+        return self.has_item('Flute')
+
+
+    def can_hit_crystal(self, player) -> bool:
+        return (self.can_use_bombs(self.player)
+                or self.can_shoot_arrows(self.player)
+                or self.has_blunt_weapon(self.player)
+                or self.has('Blue Boomerang', self.player)
+                or self.has('Red Boomerang', self.player)
+                or self.has('Hookshot', self.player)
+                or self.has('Fire Rod', self.player)
+                or self.has('Ice Rod', self.player)
+                or self.has('Cane of Somaria', self.player)
+                or self.has('Cane of Byrna', self.player))
+
+
+    def can_hit_crystal_through_barrier(self, player) -> bool:
+        return (self.can_use_bombs(self.player)
+                or self.can_shoot_arrows(self.player)
+                or self.has('Blue Boomerang', self.player)
+                or self.has('Red Boomerang', self.player)
+                or self.has('Fire Rod', self.player)
+                or self.has('Ice Rod', self.player)
+                or self.has('Cane of Somaria', self.player))
+
+
+    def can_kill_most_things(self, player, enemies=5) -> bool:
+        return (self.has_blunt_weapon(self.player)
+                or self.has_item('Cane of Somaria')
+                or (self.has_item('Cane of Byrna') and (enemies < 6 or self.can_extend_magic(player)))
+                or self.can_shoot_arrows(self.player)
+                or self.has_item('Fire Rod')
+                )
+
+
+    def can_lift_heavy_rocks(self, player) -> bool:
+        return self.has_item('Progressive Glove', 2)
+
+
+    def can_lift_rocks(self, player) -> bool:
+        return self.has_item('Progressive Glove', 1)
+
+
+    def can_melt_things(self, player) -> bool:
+        return self.has_item('Fire Rod') or self.has_item('Bombos')
+
+
+    def can_reach_blue(self, region, player) -> bool:
+        # TODO: Door rando
+        return True
+
+
+    def can_reach_orange(self, region, player) -> bool:
+        # TODO: Door rando
+        return True
+
+
+    def can_shoot_arrows(self, player) -> bool:
+        # TODO: Retro
+        return self.has('Progressive Bow', player) or self.has("Bow", player)
+
+
+    def can_take_damage(self) -> bool:
+        # TODO: Needed for OHKO mode
+        return True
+
+
+    def can_use_bombs(self, player) -> bool:
+        # TODO: Bomb bag
+        return True
+
+
+    def everything(self) -> bool:
+        # TODO: Completionist goal
+        return False
+
+
+    def has_beam_sword(self, player) -> bool:
+        return self.has_item("Progressive Sword", 2)
+
+
+    def has_blunt_weapon(self, player) -> bool:
+        return self.has_item("Hammer") or self.has_item("Progressive Sword")
+
+
+    def has_bottle(self, player) -> bool:
+        return self.state.has_group("Bottles", self.player)
+
+
+    def has_Boots(self, player) -> bool:
+        return self.has_item('Pegasus Boots')
+
+
+    def has_crystals(self, count: int, player) -> bool:
+        # TODO: Make the crystals a group of event items
+        num_crystals = 0
+        for i in range(1, 8):
+            if self.has_item(f'Crystal {i}'):
+                num_crystals += 1
+        return num_crystals >= count
+
+
+    def has_fire_source(self, player) -> bool:
+        return self.has_item('Fire Rod') or self.has_item('Lamp')
+
+
+    def has_hearts(self, player, count: int) -> bool:
+        # TODO: I really don't want to make a heart container a progression item.
+        # Might make the sanc heart container progression later, not sure.
+        return False
+
+
+    def has_Mirror(self, player) -> bool:
+        return self.has_item('Magic Mirror')
+
+
+    def has_misery_mire_medallion(self, player) -> bool:
+        # TODO: Implement medallion checks
+        return self.has_item("Bombos") and self.has_item("Ether") and self.has_item("Quake")
+
+
+    def has_Pearl(self, player) -> bool:
+        return self.has_item('Moon Pearl')
+
+
+    def has_sm_key(self, small_key_name, player, number=1):
+        return self.has_item(small_key_name, number)
+
+
+    def has_sword(self, player) -> bool:
+        return self.has_item("Progressive Sword")
+
+
+    def has_turtle_rock_medallion(self, player) -> bool:
+        # TODO: Implement medallion checks
+        return self.has_item("Bombos") and self.has_item("Ether") and self.has_item("Quake")
+
+
+    def is_door_open(self, door_name: str, player) -> bool:
+        # Force the key logic to be handled
+        return False
+
+
+def adapt_door_rando_rule(rule_func: Callable[[StateAdapter], bool], world: DoorRandoWorld, player: int) -> Callable[[CollectionState], bool]:
+    # Convert a DoorRandomizer rule function to work with Archipelago's CollectionState.
+    def adapted_rule(state: CollectionState) -> bool:
+        try:
+            return rule_func(StateAdapter(state, world, player))
+        except Exception as e:
+            logger.warning(f"Error evaluating adapted DoorRandomizer rule for player {player}: {e}")
+            raise e
+
+    return adapted_rule
