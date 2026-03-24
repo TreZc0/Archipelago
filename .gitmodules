@@ -1,3 +1,6 @@
 [submodule "worlds/alttpr/ALttPDoorRandomizer"]
 	path = worlds/alttpr/ALttPDoorRandomizer
 	url = git@github.com:aurabot24/ALttPDoorRandomizer.git
+[submodule "worlds/alttpr/python_bps_continued"]
+	path = worlds/alttpr/python_bps_continued
+	url = git@github.com:aurabot24/python-bps-continued.git

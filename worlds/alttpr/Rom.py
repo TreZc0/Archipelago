@@ -1,17 +1,14 @@
 import hashlib
+import io
 import logging
-import os
+import pkgutil
 import typing
-
-try:
-    import bps.apply
-    import bps.io
-except ImportError:
-    raise Exception('Could not load BPS module')
 
 from worlds.Files import APPatchExtension, APProcedurePatch, APTokenMixin, APTokenTypes
 from .ALttPDoorRandomizer.InitialSram import InitialSram
 from .ALttPDoorRandomizer.Rom import JAP10HASH, RANDOMIZERBASEHASH
+from .python_bps_continued.bps.apply import apply_to_bytearrays
+from .python_bps_continued.bps.io import read_bps
 
 
 logger = logging.Logger("alttpr")
@@ -63,8 +60,8 @@ def patch_base_rom(buffer):
     buffer.extend(bytearray([0x00] * (0x200000 - len(buffer))))
 
     # load randomizer patches
-    with open(os.path.join(os.path.dirname(__file__), "ALttPDoorRandomizer", 'data', 'base2current.bps'), 'rb') as stream:
-        bps.apply.apply_to_bytearrays(bps.io.read_bps(stream), orig_buffer, buffer)
+    data = pkgutil.get_data(__name__, "ALttPDoorRandomizer/data/base2current.bps")
+    apply_to_bytearrays(read_bps(io.BytesIO(data)), orig_buffer, buffer)
 
     # verify md5
     patchedmd5 = hashlib.md5()
