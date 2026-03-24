@@ -185,8 +185,7 @@ class StateAdapter:
 
 
     def has_misery_mire_medallion(self, player) -> bool:
-        # TODO: Implement medallion checks
-        return self.has_item("Bombos") and self.has_item("Ether") and self.has_item("Quake")
+        return self.has_item(self.world.required_medallions[player][0])
 
 
     def has_Pearl(self, player) -> bool:
@@ -202,8 +201,7 @@ class StateAdapter:
 
 
     def has_turtle_rock_medallion(self, player) -> bool:
-        # TODO: Implement medallion checks
-        return self.has_item("Bombos") and self.has_item("Ether") and self.has_item("Quake")
+        return self.has_item(self.world.required_medallions[player][1])
 
 
     def is_door_open(self, door_name: str, player) -> bool:

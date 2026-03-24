@@ -114,7 +114,6 @@ class ALttPRWorld(World):
         self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
         self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
         self.door_rando_world.overworld_map = {1: "default"}
-        self.door_rando_world.player_names = {1: {1: "Insert team(?) name here"}}  # TODO: What's a team name?
         self.door_rando_world.pottery = {1: "none"}
         self.door_rando_world.pseudoboots = {1: self.options.pseudoboots.value}
         self.door_rando_world.rom_seeds = {1: self.random.randint(0, 999999999)}
@@ -123,6 +122,10 @@ class ALttPRWorld(World):
         self.door_rando_world.skullwoods = {1: "followlinked" if self.options.zelgawoods.value else "original"}  # How to handle Skull Woods in entrance shuffle.
         self.door_rando_world.treasure_hunt_count = {1: self.options.triforce_hunt_goal.value}
         self.door_rando_world.treasure_hunt_total = {1: self.options.triforce_hunt_total.value}
+
+        self.door_rando_world.player_names = {}
+        for player_id, player_name in self.multiworld.player_name.items():
+            self.door_rando_world.player_names[player_id] = {1: player_name}
 
         self.door_rando_world.finish_init()
         self.finished_generating = threading.Event()
@@ -215,9 +218,9 @@ class ALttPRWorld(World):
             else:
                 # Using the green/blue/red clocks as placeholders for AP items.
                 # TODO: Edit the base ROM to add AP items and matching sprites
-                if location.item.classification == ItemClassification.progression:
+                if location.item.classification & ItemClassification.progression:
                     dr_item = ItemFactory("Green Clock", 1)
-                elif location.item.classification == ItemClassification.useful:
+                elif location.item.classification & ItemClassification.useful:
                     dr_item = ItemFactory("Blue Clock", 1)
                 else:
                     dr_item = ItemFactory("Red Clock", 1)

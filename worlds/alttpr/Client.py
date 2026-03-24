@@ -65,7 +65,6 @@ class ALttPRSNIClient(SNIClient):
 
         if recv_index < len(ctx.items_received) and recv_item == 0:
             item = ctx.items_received[recv_index]
-            logger.info(f"Received item {item}")
             recv_index += 1
             snes_buffered_write(ctx, RomAddresses.RECV_PROGRESS_ADDR, bytes([recv_index & 0xFF, (recv_index >> 8) & 0xFF]))
             snes_buffered_write(ctx, RomAddresses.RECV_ITEM_ADDR, bytes([item.item]))
