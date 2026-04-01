@@ -7,6 +7,7 @@ import typing
 
 # Imports of base Archipelago modules must be absolute.
 from BaseClasses import ItemClassification
+from Options import OptionError
 import settings
 from worlds.AutoWorld import World
 from worlds.Files import APProcedurePatch
@@ -82,7 +83,9 @@ class ALttPRWorld(World):
         if "Triforce Piece" in start_inventory or "Green Clock" in start_inventory:
             # TODO: What's the proper way to throw generation errors?
             # TODO: Should do something like "If any item in start_inventory isn't a valid item"
-            raise Exception("ALttPR: There is an invalid item in the start_inventory.")
+            raise OptionError("ALttPR: There is an invalid item in the start_inventory.")
+        if self.options.goal.value == "triforcehunt" and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
+            raise OptionError("ALttPR: Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
 
         # Have the Door Randomizer generate a world with all the locations, entrances, items, etc.
         # Items should not be placed except for not-fully-randomized stuff like dungeon items without keysanity,

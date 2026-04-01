@@ -300,12 +300,15 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
         # The small key for the escape sequence should be sphere 1, to prevent the player
         # from being near-instantly BK'd.
         if world.options.small_key_shuffle.value:
-            small_key_locations = ["Link's House", "Secret Passage", "Hyrule Castle - Map Chest",
+            small_key_locations = ["Link's House", "Link's Uncle", "Secret Passage", "Hyrule Castle - Map Chest",
                                    "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
-            key_location_name = world.random.choice(small_key_locations)
-            key_location = world.multiworld.get_location(key_location_name, world.player)
-            key_item = ALttPRItem("Small Key (Escape)", ItemClassification.progression, ItemFactory("Small Key (Escape)", 1).code, world.player)
-            key_location.place_locked_item(key_item)
+            world.random.shuffle(small_key_locations)
+            for key_location_name in small_key_locations:
+                key_location = world.multiworld.get_location(key_location_name, world.player)
+                if key_location.item is None:
+                    key_item = ALttPRItem("Small Key (Escape)", ItemClassification.progression, ItemFactory("Small Key (Escape)", 1).code, world.player)
+                    key_location.place_locked_item(key_item)
+                    break
 
     event_locations = get_event_locations(world)
     for event_location_name, event_item_name in event_locations.items():
