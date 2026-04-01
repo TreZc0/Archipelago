@@ -22,47 +22,15 @@ lookup_name_to_id = {}
 logger = logging.getLogger("alttpr")
 
 
-# TODO: I feel like most of these aren't needed until door randomizer is added, and some of them still seem unnecessary (e.g. Skull Star Tile).
-# It's fine if it doesn't affect anything for players, but if it shows up in the player log or Poptracker than that could be an annoyance.
-event_locations = {
-    "Ganon": "Triforce",
-    "Agahnim 1": "Beat Agahnim 1",
-    "Agahnim 2": "Beat Agahnim 2",
-    "Frog": "Get Frog",
-    "Missing Smith": "Return Smith",
-    "Dark Blacksmith Ruins": "Pick Up Purple Chest",
-    "Floodgate": "Open Floodgate",
-    "Trench 1 Switch": "Trench 1 Filled",
-    "Trench 2 Switch": "Trench 2 Filled",
-    "Swamp Drain": "Drained Swamp",
-    "Attic Cracked Floor": "Shining Light",
-    "Suspicious Maiden": "Maiden Rescued",
-    "Revealing Light": "Maiden Unmasked",
-    "Ice Block Drop": "Convenient Block",
-    "Skull Star Tile": "Hidden Pits",
-    # Some events are only created in certain modes
-    # "Zelda Pickup": "Zelda Herself",
-    # "Zelda Drop Off": "Zelda Delivered",
-    # "Murahdahla": "Triforce",
-}
-
-
 class ALttPRLocation(Location):
     game = "The Legend of Zelda: A Link to the Past"
 
 
 def create_and_connect_regions(world: ALttPRWorld) -> None:
-    goal = world.options.goal.value
-    if goal == "triforcehunt":
-        event_locations["Murahdahla"] = "Triforce"
-        event_locations["Ganon"] = "Nothing"
-    if world.options.world_mode.value == "standard":
-        event_locations["Zelda Pickup"] = "Zelda Herself"
-        event_locations["Zelda Drop Off"] = "Zelda Delivered"
-
     # First define every region, then loop through a second time to connect them.
     # Otherwise we're trying to connect to regions that don't exist yet.
     ap_regions = {}
+    event_locations = get_event_locations(world)
 
     for region in world.door_rando_world.regions:
         ap_region = Region(region.name, world.player, world.multiworld)
@@ -105,6 +73,43 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
             ap_entrance.connect(ap_regions[exit.connected_region.name])
 
     world.multiworld.regions += list(ap_regions.values())
+
+
+def get_event_locations(world: ALttPRWorld):
+    # TODO: I feel like most of these aren't needed until door randomizer is added, and some of them still seem unnecessary (e.g. Skull Star Tile).
+    # It's fine if it doesn't affect anything for players, but if it shows up in the player log or Poptracker than that could be an annoyance.
+    event_locations = {
+        "Ganon": "Triforce",
+        "Agahnim 1": "Beat Agahnim 1",
+        "Agahnim 2": "Beat Agahnim 2",
+        "Frog": "Get Frog",
+        "Missing Smith": "Return Smith",
+        "Dark Blacksmith Ruins": "Pick Up Purple Chest",
+        "Floodgate": "Open Floodgate",
+        "Trench 1 Switch": "Trench 1 Filled",
+        "Trench 2 Switch": "Trench 2 Filled",
+        "Swamp Drain": "Drained Swamp",
+        "Attic Cracked Floor": "Shining Light",
+        "Suspicious Maiden": "Maiden Rescued",
+        "Revealing Light": "Maiden Unmasked",
+        "Ice Block Drop": "Convenient Block",
+        "Skull Star Tile": "Hidden Pits",
+        # Some events are only created in certain modes
+        # "Zelda Pickup": "Zelda Herself",
+        # "Zelda Drop Off": "Zelda Delivered",
+        # "Murahdahla": "Triforce",
+    }
+
+    goal = world.options.goal.value
+    if goal == "triforcehunt":
+        event_locations["Murahdahla"] = "Triforce"
+        event_locations["Ganon"] = "Nothing"
+    if world.options.world_mode.value == "standard":
+        event_locations["Zelda Pickup"] = "Zelda Herself"
+        event_locations["Zelda Drop Off"] = "Zelda Delivered"
+
+    return event_locations
+
 
 
 # Add info on all locations to lookup_id_to_name and lookup_name_to_id.

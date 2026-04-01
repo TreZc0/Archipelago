@@ -6,7 +6,7 @@ from typing import List, TYPE_CHECKING
 from BaseClasses import Item, ItemClassification
 
 from .ALttPDoorRandomizer.Items import ItemFactory, item_table
-from .Regions import event_locations
+from .Regions import get_event_locations
 
 if TYPE_CHECKING:
     from .World import ALttPRWorld
@@ -256,15 +256,6 @@ def create_item(world: ALttPRWorld, name: str, classification: ItemClassificatio
 
 
 def create_all_items(world: ALttPRWorld) -> None:
-    number_of_unfilled_locations = len(world.multiworld.get_unfilled_locations(world.player))
-    needed_number_of_filler_items = number_of_unfilled_locations - (216 + 10 + 33 + len(event_locations))
-    if needed_number_of_filler_items != 0:
-        # TODO: That's a lot of log info in case of an unexpected error for any non-developers
-        logger.info(f"Incorrect number of items, it is expecting {needed_number_of_filler_items} filler items")
-        logger.info(f"Filled locations: {world.multiworld.get_filled_locations(world.player)}")
-        logger.info(f"Unfilled locations: {world.multiworld.get_unfilled_locations(world.player)}")
-        raise Exception()
-
     # If we're playing Standard mode with keysanity, we need to manually place the escape small key to prevent
     # getting BK'd in the escape sequence. This key is placed later in the pre_fill() stage of generation.
     dr_itempool = world.door_rando_world.itempool.copy()
@@ -297,11 +288,13 @@ def create_all_items(world: ALttPRWorld) -> None:
 def place_pre_fill_items(world: ALttPRWorld) -> None:
     # Place all items that cannot be randomized into any world, such as pendants/crystals, dungeon items, and special events like killing Agahnim
     if world.options.world_mode.value == "standard":
-        # In Standard mode, Link's Uncle will always have a progressive weapon which was not added to the multiworld itempool
+        # In Standard mode, Link's Uncle will always have a weapon which was not added to the multiworld itempool,
+        # unless the player starts with a sword or hammer.
         uncle_item = world.door_rando_world.get_location("Link's Uncle", 1).item
-        ap_item = ALttPRItem(uncle_item.name, ItemClassification.progression, uncle_item.code, world.player)
-        links_uncle_location = world.multiworld.get_location("Link's Uncle", world.player)
-        links_uncle_location.place_locked_item(ap_item)
+        if uncle_item is not None:
+            ap_item = ALttPRItem(uncle_item.name, ItemClassification.progression, uncle_item.code, world.player)
+            links_uncle_location = world.multiworld.get_location("Link's Uncle", world.player)
+            links_uncle_location.place_locked_item(ap_item)
 
         # TODO: Key drop
         # The small key for the escape sequence should be sphere 1, to prevent the player
@@ -314,6 +307,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             key_item = ALttPRItem("Small Key (Escape)", ItemClassification.progression, ItemFactory("Small Key (Escape)", 1).code, world.player)
             key_location.place_locked_item(key_item)
 
+    event_locations = get_event_locations(world)
     for event_location_name, event_item_name in event_locations.items():
         ap_item = ALttPRItem(event_item_name, ItemClassification.progression, None, world.player)
         event_location = world.multiworld.get_location(event_location_name, world.player)
