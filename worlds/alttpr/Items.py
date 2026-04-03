@@ -287,29 +287,6 @@ def create_all_items(world: ALttPRWorld) -> None:
 
 def place_pre_fill_items(world: ALttPRWorld) -> None:
     # Place all items that cannot be randomized into any world, such as pendants/crystals, dungeon items, and special events like killing Agahnim
-    if world.options.world_mode.value == "standard":
-        # In Standard mode, Link's Uncle will always have a weapon which was not added to the multiworld itempool,
-        # unless the player starts with a sword or hammer.
-        uncle_item = world.door_rando_world.get_location("Link's Uncle", 1).item
-        if uncle_item is not None:
-            ap_item = ALttPRItem(uncle_item.name, ItemClassification.progression, uncle_item.code, world.player)
-            links_uncle_location = world.multiworld.get_location("Link's Uncle", world.player)
-            links_uncle_location.place_locked_item(ap_item)
-
-        # TODO: Key drop
-        # The small key for the escape sequence should be sphere 1, to prevent the player
-        # from being near-instantly BK'd.
-        if world.options.small_key_shuffle.value:
-            small_key_locations = ["Link's House", "Link's Uncle", "Secret Passage", "Hyrule Castle - Map Chest",
-                                   "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
-            world.random.shuffle(small_key_locations)
-            for key_location_name in small_key_locations:
-                key_location = world.multiworld.get_location(key_location_name, world.player)
-                if key_location.item is None:
-                    key_item = ALttPRItem("Small Key (Escape)", ItemClassification.progression, ItemFactory("Small Key (Escape)", 1).code, world.player)
-                    key_location.place_locked_item(key_item)
-                    break
-
     event_locations = get_event_locations(world)
     for event_location_name, event_item_name in event_locations.items():
         ap_item = ALttPRItem(event_item_name, ItemClassification.progression, None, world.player)
@@ -345,3 +322,26 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             ap_item = ALttPRItem(dungeon_item, classification, dr_dungeon_item.code, world.player)
             target_location = world.multiworld.get_location(dr_dungeon_item.location.name, world.player)
             target_location.place_locked_item(ap_item)
+
+    if world.options.world_mode.value == "standard":
+        # In Standard mode, Link's Uncle will always have a weapon which was not added to the multiworld itempool,
+        # unless the player starts with a sword or hammer.
+        uncle_item = world.door_rando_world.get_location("Link's Uncle", 1).item
+        if uncle_item is not None:
+            ap_item = ALttPRItem(uncle_item.name, ItemClassification.progression, uncle_item.code, world.player)
+            links_uncle_location = world.multiworld.get_location("Link's Uncle", world.player)
+            links_uncle_location.place_locked_item(ap_item)
+
+        # TODO: Key drop
+        # The small key for the escape sequence should be sphere 0, to prevent the player
+        # from being near-instantly BK'd.
+        if world.options.small_key_shuffle.value:
+            small_key_locations = ["Link's Uncle", "Secret Passage", "Hyrule Castle - Map Chest",
+                                   "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
+            world.random.shuffle(small_key_locations)
+            for key_location_name in small_key_locations:
+                key_location = world.multiworld.get_location(key_location_name, world.player)
+                if key_location.item is None:
+                    key_item = ALttPRItem("Small Key (Escape)", ItemClassification.progression, ItemFactory("Small Key (Escape)", 0).code, world.player)
+                    key_location.place_locked_item(key_item)
+                    break

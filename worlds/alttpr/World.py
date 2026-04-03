@@ -25,7 +25,7 @@ from .ALttPDoorRandomizer.source.item.FillUtil import create_item_pool_config, m
 from .ALttPDoorRandomizer.ItemList import difficulties, fill_prizes, generate_itempool
 from .ALttPDoorRandomizer.Items import ItemFactory
 from .ALttPDoorRandomizer.OverworldShuffle import create_dynamic_exits, link_overworld
-from .ALttPDoorRandomizer.Regions import adjust_locations, create_regions, create_dungeon_regions, create_shops, lookup_name_to_id
+from .ALttPDoorRandomizer.Regions import adjust_locations, create_regions, create_dungeon_regions, create_shops, lookup_name_to_id, mark_light_dark_world_regions
 from .ALttPDoorRandomizer.Rom import apply_rom_settings, patch_rom
 from .ALttPDoorRandomizer.RoomData import create_rooms
 from .ALttPDoorRandomizer.Rules import set_rules
@@ -161,6 +161,7 @@ class ALttPRWorld(World):
         link_doors_prep(self.door_rando_world, 1)
         create_item_pool_config(self.door_rando_world)
         link_doors(self.door_rando_world, 1)
+        mark_light_dark_world_regions(self.door_rando_world, 1)
         generate_itempool(self.door_rando_world, 1)
         set_rules(self.door_rando_world, 1)
         dungeon_tracking(self.door_rando_world)
