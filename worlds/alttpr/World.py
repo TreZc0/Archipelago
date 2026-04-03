@@ -105,6 +105,7 @@ class ALttPRWorld(World):
 
         # There are sooo many fields that aren't set in the
         # door rando's world constructor :(
+        self.door_rando_world.any_enemy_logic = {1: "none" if self.options.enemy_shuffle.value != "logical" else "allow_all"}
         self.door_rando_world.bigkeyshuffle = {1: True if self.options.big_key_shuffle.value else False}
         self.door_rando_world.boots_hint = {1: False}
         self.door_rando_world.bow_mode = {1: "progressive"}
@@ -113,6 +114,7 @@ class ALttPRWorld(World):
         self.door_rando_world.customizer = None
         self.door_rando_world.dropshuffle = {1: "none"}
         self.door_rando_world.dungeon_counters = {1: "default"}
+        self.door_rando_world.enemy_shuffle = {1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
         self.door_rando_world.intensity = {1: 0}  # No door shuffle
         self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
         self.door_rando_world.linked_drops = {1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting

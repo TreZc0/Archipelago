@@ -6,21 +6,21 @@ from Options import PerGameCommonOptions, Range, TextChoice, Toggle
 
 class WorldMode(TextChoice):
     """Open: Start from Link's House or Sanctuary, without needing to save Zelda in Hyrule Castle
-    Standard: Start at Link's House and save Zelda in Hyrule Castle before accessing the rest of the world"""
-    # Inverted: The Light World and Dark World have been flipped.
-    #     - Link starts at their house (swapped with the Bomb Shop) or Dark Sanctuary
-    #     - All Dark World portals now take you to the Light World
-    #     - Link is a bunny in the Light World unless you have the Moon Pearl
-    #     - Agahnim's Tower and Ganon's Tower have swapped places. Agahnim's Tower now requires crystals to enter
-    #     - Ganon is hiding in a new hole on top of Hyrule Castle
-    #     - The Magic Mirror takes you from the Light World to the Dark World
-    #     - The Flute must be activated in Kakariko Village, but will then take you to locations across the Dark World
-    #     - Light World terrain has been modified so that mirror-locked locations can be reached without the mirror
-    #     - The top of Turtle Rock can be accessed by jumping from its tail
+    Standard: Start at Link's House and save Zelda in Hyrule Castle before accessing the rest of the world
+    Inverted: The Light World and Dark World have been flipped.
+        - Link starts at their house (swapped with the Bomb Shop) or Dark Sanctuary
+        - All Dark World portals now take you to the Light World
+        - Link is a bunny in the Light World unless you have the Moon Pearl
+        - Agahnim's Tower and Ganon's Tower have swapped places. Agahnim's Tower now requires crystals to enter
+        - Ganon is hiding in a new hole on top of Hyrule Castle
+        - The Magic Mirror takes you from the Light World to the Dark World
+        - The Flute must be activated in Kakariko Village, but will then take you to locations across the Dark World
+        - Light World terrain has been modified so that mirror-locked locations can be reached without the mirror
+        - The top of Turtle Rock can be accessed by jumping from its tail"""
     display_name = "World Mode"
     option_open = "open"
     option_standard = "standard"
-    # option_inverted = "inverted"
+    option_inverted = "inverted"
     # option_retro = "retro"
     default = "open"
 
@@ -112,6 +112,16 @@ class Zelgawoods(Toggle):
     display_name = "Zelgawoods"
 
 
+class EnemyShuffle(TextChoice):
+    """All enemies except bosses are randomized. Logical enemy shuffle might require defeating enemies that
+    require specific items (Eyegore, Freezors, etc.) to progress in a dungeon."""
+    display_name = "Enemy Shuffle"
+    option_vanilla = "none"
+    option_shuffled = "random"
+    option_logical = "logical"
+    default = "none"
+
+
 class Pseudoboots(Toggle):
     """Psuedoboots give Link the ability to dash like Pegasus Boots, but they cannot bonk rocks, open King's Tomb, knock items off torches/the Library, or clear small gaps"""
     display_name = "Pseudoboots"
@@ -136,5 +146,6 @@ class ALttPROptions(PerGameCommonOptions):
     big_key_shuffle: BigKeyShuffle
     entrance_shuffle: EntranceShuffle
     zelgawoods: Zelgawoods
+    enemy_shuffle: EnemyShuffle
     pseudoboots: Pseudoboots
     mirror_scroll: MirrorScroll
