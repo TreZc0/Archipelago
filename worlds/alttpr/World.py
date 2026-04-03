@@ -58,6 +58,7 @@ class ALttPRWorld(World):
     door_rando_world = None
     game = "The Legend of Zelda: A Link to the Past"
     rom_name = None
+    seed_hash = None  # This is the 5-item hash that appears on the file select screen.
 
     options_dataclass = alttpr_options.ALttPROptions
     options: alttpr_options.ALttPROptions
@@ -78,6 +79,8 @@ class ALttPRWorld(World):
     finished_generating: threading.Event
 
     def generate_early(self) -> None:
+        self.seed_hash = self.random.randbytes(4)
+
         # TODO: Error check all of the options
         start_inventory = self.options.start_inventory.value.keys()
         if "Triforce Piece" in start_inventory or "Green Clock" in start_inventory:
@@ -231,7 +234,7 @@ class ALttPRWorld(World):
 
             self.door_rando_world.push_item(self.door_rando_world.get_location(location.name, 1), dr_item, collect=False)
 
-        rom = ALttPRRom(self.player, self.player_name)
+        rom = ALttPRRom(self.player, self.player_name, self.seed_hash)
         try:
             patch_rom(self.door_rando_world, rom, 1, 1, is_mystery=False)
         except RuntimeError as e:

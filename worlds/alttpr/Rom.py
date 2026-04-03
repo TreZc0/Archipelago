@@ -2,7 +2,7 @@ import hashlib
 import io
 import logging
 import pkgutil
-import typing
+from typing import Callable, Sequence
 
 from worlds.Files import APPatchExtension, APProcedurePatch, APTokenMixin, APTokenTypes
 from .ALttPDoorRandomizer.InitialSram import InitialSram
@@ -78,7 +78,7 @@ def patch_base_rom(buffer):
 # be a child of LocalRom to reuse some its logic, and only overwrite the methods we need to?
 # Was focused on getting it working rather than correct architecture while writing this code.
 class ALttPRRom:
-    def __init__(self, player: int, player_name: str):
+    def __init__(self, player: int, player_name: str, seed_hash: bytes):
         self.initial_sram = InitialSram()
         self.name = None
         self.orig_buffer = None
@@ -86,19 +86,13 @@ class ALttPRRom:
         self.hash = JAP10HASH
         self.player = player
         self.player_name = player_name
+        self.seed_hash = seed_hash  # This is the 5-item hash that appears on the file select screen.
 
 
     def get_hash(self):
-        return self.hash
-
-
-    def read_rom(self, stream):
-        "Reads rom into bytearray and strips off any smc header"
-        self.buffer = bytearray(stream.read())
-        self.has_smc_header = False
-        if len(self.buffer)%0x400 == 0x200:
-            self.buffer = self.buffer[0x200:]
-            self.has_smc_header = True
+        # This is a random code. An accurate hash would require the ROM file, and we
+        # don't want the ROM to be required for generating the seed.
+        return self.seed_hash.hex()
 
 
     def write_initial_sram(self):
@@ -114,7 +108,7 @@ class ALttPRRom:
         self.write_bytes(address, value)
 
 
-    def write_bytes(self, address: int, data: typing.Sequence[int] | int):
+    def write_bytes(self, address: int, data: Sequence[int] | int):
         if isinstance(data, int):
             data = bytes([data])
         else:
