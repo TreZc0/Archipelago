@@ -38,6 +38,11 @@ class StateAdapter:
 
 
     def has(self, item: str, player: int, count: int = 1) -> bool:
+        if item.endswith("Sword"):
+            sword_count = {"Fighter Sword": 1, "Master Sword": 2, "Tempered Sword": 3, "Golden Sword": 4, "Progressive Sword": count}
+            item = "Progressive Sword"
+            count = sword_count[item]
+
         # TODO: I don't know why I thought changing the name of "Cape" was a good idea, I should undo that
         return self.state.has(item, self.player, count) or \
                (item == "Bow" and self.state.has("Progressive Bow", self.player, count)) or \
@@ -66,9 +71,10 @@ class StateAdapter:
 
 
     def can_flute(self, player) -> bool:
-        # TODO: Check if player is in the escape sequence of a standard run,
-        # or for inverted shenanigans
-        return self.has_item('Flute')
+        if self.world.mode == 'standard' and not self.has_item('Zelda Delivered'):
+            return False  # can't flute in rain state
+        lw = self.world.get_region('Kakariko Village', 1)
+        return self.has_item('Ocarina') and self.state.can_reach_region("Kakariko Village", self.player) and self.is_not_bunny(lw, player)
 
 
     def can_hit_crystal(self, player) -> bool:
@@ -207,6 +213,12 @@ class StateAdapter:
     def is_door_open(self, door_name: str, player) -> bool:
         # Force the key logic to be handled
         return False
+
+
+    def is_not_bunny(self, region, player) -> bool:
+        if self.has_item('Moon Pearl'):
+            return True
+        return region.is_light_world if self.world.mode != 'inverted' else region.is_dark_world
 
 
 def adapt_door_rando_rule(rule_func: Callable[[StateAdapter], bool], world: DoorRandoWorld, player: int) -> Callable[[CollectionState], bool]:

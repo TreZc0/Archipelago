@@ -103,9 +103,7 @@ default_items_dict = {
 # TODO: Should have two separate dicts/functions, one for dr_to_ap and one for ap_to_dr
 dr_ap_different_names = {
     "Cape": "Magic Cape",
-    "Flute": "Ocarina",
     "Magic Cape": "Cape",
-    "Ocarina": "Flute",
     "Progressive Armor": "Progressive Mail",
     "Progressive Mail": "Progressive Armor",
 }
@@ -137,7 +135,6 @@ progressive_items = [
     "Ether",
     "Fire Rod",
     "Flippers",
-    "Flute",
     "Hammer",
     "Hookshot",
     "Ice Rod",
@@ -148,6 +145,7 @@ progressive_items = [
     "Magic Upgrade (1/2)",
     "Moon Pearl",
     "Mushroom",
+    "Ocarina",
     "Pegasus Boots",
     "Progressive Bow",
     "Progressive Glove",

@@ -193,6 +193,12 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                     if spot_to_fill is None:
                         # Can't place this item, move on to the next
                         unplaced_items.append(item_to_place)
+                        logging.error(f"Failed to place {item_to_place} by swapping. Swap attempts: {swap_attempts}")
+                        logging.error(f"Current maximum state is {maximum_exploration_state}, {maximum_exploration_state.prog_items}")
+                        temp = multiworld.worlds[item_to_place.player].door_rando_world.get_region("Hyrule Castle Courtyard Northeast", 1)
+                        logging.error(f"Hyrule Castle Courtyard Northeast is_light_world, is_dark_world: {temp.is_light_world}, {temp.is_dark_world}")
+                        for region in multiworld.get_regions(item_to_place.player):
+                            logging.error(f"Can reach {region.name}: {region.can_reach(maximum_exploration_state)}")
                         continue
                 else:
                     unplaced_items.append(item_to_place)
@@ -250,6 +256,7 @@ def fill_restrictive(multiworld: MultiWorld, base_state: CollectionState, locati
                             f"{', '.join(str(location) for location in locations)}\n"
                             f"Already placed {len(placements)}:\n"
                             f"{', '.join(str(place) for place in placements)}", multiworld=multiworld)
+
 
     item_pool.extend(unplaced_items)
 

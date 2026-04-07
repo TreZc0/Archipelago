@@ -14,11 +14,13 @@ from worlds.Files import APProcedurePatch
 
 # Imports of your world's files must be relative.
 from .ALttPDoorRandomizer.BaseClasses import World as DoorRandoWorld  # Avoid naming conflict with AP's World class
+from .ALttPDoorRandomizer.Bosses import place_bosses
 from .ALttPDoorRandomizer.source.enemizer.DamageTables import DamageTable
 from .ALttPDoorRandomizer.source.rom.DataTables import init_data_tables
 from .ALttPDoorRandomizer.Doors import create_doors
 from .ALttPDoorRandomizer.DoorShuffle import link_doors, link_doors_prep
 from .ALttPDoorRandomizer.Dungeons import create_dungeons
+from .ALttPDoorRandomizer.source.enemizer.Enemizer import randomize_enemies
 from .ALttPDoorRandomizer.source.overworld.EntranceShuffle2 import link_entrances_new
 from .ALttPDoorRandomizer.Fill import dungeon_tracking, fill_dungeons_restrictive, promote_dungeon_items
 from .ALttPDoorRandomizer.source.item.FillUtil import create_item_pool_config, massage_item_pool
@@ -159,6 +161,8 @@ class ALttPRWorld(World):
         create_dungeons(self.door_rando_world, 1)
         self.door_rando_world.damage_table[1] = DamageTable()
         self.door_rando_world.data_tables[1] = init_data_tables(self.door_rando_world, 1)
+        place_bosses(self.door_rando_world, 1)
+        randomize_enemies(self.door_rando_world, 1)
         adjust_locations(self.door_rando_world, 1)
         link_overworld(self.door_rando_world, 1)
         create_dynamic_exits(self.door_rando_world, 1)
@@ -167,6 +171,15 @@ class ALttPRWorld(World):
         create_item_pool_config(self.door_rando_world)
         link_doors(self.door_rando_world, 1)
         mark_light_dark_world_regions(self.door_rando_world, 1)
+
+        # There appears to be a glitch in DR where standard/crosskeys seeds with a HC entrance in the dark world,
+        # will mark HC as requiring the Moon Pearl. At least that's what appears to be happening.
+        # TODO: Fix this in DR/OWR if it is a bug there.
+        for region in self.door_rando_world.get_regions():
+            if region.name.startswith("Hyrule") or region.name.startswith("Sewers") or region.name == "Sanctuary":
+                region.is_light_world = True
+                region.is_dark_world = False
+
         generate_itempool(self.door_rando_world, 1)
         set_rules(self.door_rando_world, 1)
         dungeon_tracking(self.door_rando_world)

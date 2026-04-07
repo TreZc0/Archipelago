@@ -115,10 +115,11 @@ class Zelgawoods(Toggle):
 class EnemyShuffle(TextChoice):
     """All enemies except bosses are randomized. Logical enemy shuffle might require defeating enemies that
     require specific items (Eyegore, Freezors, etc.) to progress in a dungeon."""
+    #WARNING: Logical enemy shuffle fails to generate at a significant rate (~20%)."""
     display_name = "Enemy Shuffle"
     option_vanilla = "none"
     option_shuffled = "random"
-    option_logical = "logical"
+    #option_logical = "logical"
     default = "none"
 
 
