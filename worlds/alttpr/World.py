@@ -110,6 +110,7 @@ class ALttPRWorld(World):
         self.door_rando_world.any_enemy_logic = {1: "none" if self.options.enemy_shuffle.value != "logical" else "allow_all"}
         self.door_rando_world.bigkeyshuffle = {1: True if self.options.big_key_shuffle.value else False}
         self.door_rando_world.boots_hint = {1: False}
+        self.door_rando_world.boss_shuffle = {1: self.options.boss_shuffle.value}
         self.door_rando_world.bow_mode = {1: "progressive"}
         self.door_rando_world.compassshuffle = {1: True if self.options.compass_shuffle.value else False}
         self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}

@@ -16,6 +16,7 @@ class TestMaxSettings(ALttPRTestBase):
         "small_key_shuffle": "true",
         "big_key_shuffle": "true",
         "enemy_shuffle": "logical",
+        "boss_shuffle": "chaos",
         "pseudoboots": "true",
         "mirror_scroll": "true",
         "zelgawoods": "true",

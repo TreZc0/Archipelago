@@ -122,6 +122,21 @@ class EnemyShuffle(TextChoice):
     default = "none"
 
 
+class BossShuffle(TextChoice):
+    """Bosses are randomized. This includes the Armos/Lanmolas/Moldorm rematches in Ganon's Tower, but not Ganon or either Aganhim fight. Some bosses cannot appear in some locations.
+
+    * Vanilla: Bosses are in their original locations.
+    * Simple: Bosses are shuffled randomly. Armos Knights, Lanmolas, and Moldorm will be fought twice.
+    * Full: Bosses are shuffled randomly, and three random bosses will be fought twice.
+    * Chaos: Bosses are shuffled randomly, and any boss can be fought any number of times."""
+    display_name = "Boss Shuffle"
+    option_vanilla = "none"
+    option_simple = "simple"
+    option_full = "full"
+    option_chaos = "random"
+    default = "none"
+
+
 class Pseudoboots(Toggle):
     """Psuedoboots give Link the ability to dash like Pegasus Boots, but they cannot bonk rocks, open King's Tomb, knock items off torches/the Library, or clear small gaps"""
     display_name = "Pseudoboots"
@@ -147,5 +162,6 @@ class ALttPROptions(PerGameCommonOptions):
     entrance_shuffle: EntranceShuffle
     zelgawoods: Zelgawoods
     enemy_shuffle: EnemyShuffle
+    boss_shuffle: BossShuffle
     pseudoboots: Pseudoboots
     mirror_scroll: MirrorScroll
