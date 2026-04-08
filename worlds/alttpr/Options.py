@@ -118,7 +118,7 @@ class EnemyShuffle(TextChoice):
     display_name = "Enemy Shuffle"
     option_vanilla = "none"
     option_shuffled = "random"
-    #option_logical = "logical"
+    option_logical = "logical"
     default = "none"
 
 
