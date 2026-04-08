@@ -230,13 +230,13 @@ def get_dungeon_items(world: ALttPRWorld) -> List[str]:
     if not world.options.compass_shuffle.value:
         dungeon_items.extend([item for item in filler_items if item.startswith("Compass")])
 
-    # TODO: Key drop shuffle + keysanity should remove this line
-    dungeon_items.extend([item for item in progressive_items if item.startswith("Small Key")])
+    if not (world.options.small_key_shuffle.value and world.options.key_drop_shuffle.value):
+        dungeon_items.extend([item for item in progressive_items if item.startswith("Small Key")])
 
     if not world.options.big_key_shuffle.value:
         dungeon_items.extend([item for item in progressive_items if item.startswith("Big Key")])
-    #elif not world.options.key_drop_shuffle.value:
-    else:
+    elif not world.options.key_drop_shuffle.value:
+        # Big keys are shuffled, except for the HC BK
         dungeon_items.append("Big Key (Escape)")
 
     return dungeon_items
@@ -254,12 +254,18 @@ def create_item(world: ALttPRWorld, name: str, classification: ItemClassificatio
 
 
 def create_all_items(world: ALttPRWorld) -> None:
-    # If we're playing Standard mode with keysanity, we need to manually place the escape small key to prevent
+    # If we're playing Standard mode with keysanity, we need to manually place the escape keys to prevent
     # getting BK'd in the escape sequence. This key is placed later in the pre_fill() stage of generation.
     dr_itempool = world.door_rando_world.itempool.copy()
-    if world.options.world_mode.value == "standard" and world.options.small_key_shuffle.value:
-        escape_key = [item for item in world.door_rando_world.get_items() if item.name == "Small Key (Escape)"][0]
-        dr_itempool.remove(escape_key)
+    if world.options.world_mode.value == "standard":
+        if world.options.small_key_shuffle.value:
+            escape_keys = [item for item in world.door_rando_world.get_items() if item.name == "Small Key (Escape)"]
+            for key in escape_keys:
+                dr_itempool.remove(key)
+        if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
+            escape_keys = [item for item in world.door_rando_world.get_items() if item.name == "Big Key (Escape)"]
+            if len(escape_keys) > 0:
+                dr_itempool.remove(escape_keys[0])
 
     # Itempool will not include dungeon items unless keysanity is enabled.
     # Key drop keys are also not in the item pool unless key drop in enabled.
@@ -317,7 +323,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
                 classification = ItemClassification.progression
             else:
                 classification = ItemClassification.filler
-            code = dr_dungeon_item.code if not world.is_key_drop_location(location) else None
+            code = dr_dungeon_item.code if not world.is_excluded_key_drop_location(location) else None
             ap_item = ALttPRItem(dungeon_item, classification, code, world.player)
             target_location = world.multiworld.get_location(dr_dungeon_item.location.name, world.player)
             target_location.place_locked_item(ap_item)
@@ -331,16 +337,42 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             links_uncle_location = world.multiworld.get_location("Link's Uncle", world.player)
             links_uncle_location.place_locked_item(ap_item)
 
-        # TODO: Key drop
-        # The small key for the escape sequence should be sphere 0, to prevent the player
+        # The small keys for the escape sequence should be sphere 0, to prevent the player
         # from being near-instantly BK'd.
         if world.options.small_key_shuffle.value:
-            small_key_locations = ["Link's Uncle", "Secret Passage", "Hyrule Castle - Map Chest",
-                                   "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
-            world.random.shuffle(small_key_locations)
-            for key_location_name in small_key_locations:
-                key_location = world.multiworld.get_location(key_location_name, world.player)
-                if key_location.item is None:
-                    key_item = ALttPRItem("Small Key (Escape)", ItemClassification.progression, ItemFactory("Small Key (Escape)", 0).code, world.player)
-                    key_location.place_locked_item(key_item)
-                    break
+            if world.options.key_drop_shuffle.value:
+                key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop"]
+                key_location = place_escape_key(key_locations, world, "Small")
+                key_locations.remove(key_location)
+
+                key_locations.extend(["Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop"])
+                key_location = place_escape_key(key_locations, world, "Small")
+                key_locations.remove(key_location)
+
+                key_locations.append("Hyrule Castle - Big Key Drop")
+                key_location = place_escape_key(key_locations, world, "Big")
+                key_locations.remove(key_location)
+
+                key_locations.extend(["Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"])
+                key_location = place_escape_key(key_locations, world, "Small")
+                key_locations.remove(key_location)
+
+                key_locations.append("Hyrule Castle - Key Rat Key Drop")
+                place_escape_key(key_locations, world, "Small")
+            else:
+                small_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest",
+                                    "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
+                place_escape_key(small_key_locations, world, "Small")
+
+
+def place_escape_key(possible_locations: List[str], world: ALttPRWorld, key_size: str) -> str:
+    world.random.shuffle(possible_locations)
+    for key_location_name in possible_locations:
+        key_location = world.multiworld.get_location(key_location_name, world.player)
+        if key_location.item is None:
+            key_item = ALttPRItem(f"{key_size} Key (Escape)", ItemClassification.progression, ItemFactory(f"{key_size} Key (Escape)", 0).code, world.player)
+            key_location.place_locked_item(key_item)
+            return key_location_name
+
+    # Should never reach this
+    raise Exception("ALttPR: Could not place escape small key, no empty locations found.")

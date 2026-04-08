@@ -15,6 +15,7 @@ class TestMaxSettings(ALttPRTestBase):
         "compass_shuffle": "true",
         "small_key_shuffle": "true",
         "big_key_shuffle": "true",
+        "key_drop_shuffle": "true",
         "enemy_shuffle": "logical",
         "boss_shuffle": "chaos",
         "pseudoboots": "true",

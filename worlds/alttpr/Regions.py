@@ -10,6 +10,7 @@ from .ALttPDoorRandomizer.source.dungeon import EnemyList
 from .ALttPDoorRandomizer import PotShuffle
 from .ALttPDoorRandomizer import Regions as DoorRandomizerRegions
 from .ALttPDoorRandomizer.source.rom import DataTables
+from .RomAddresses import location_table_pot_items, location_table_sprite_items
 from .StateAdapter import adapt_door_rando_rule
 
 if TYPE_CHECKING:
@@ -51,7 +52,7 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
                     logger.error(f"Found unknown location {location.name} in region {region.name}.")
                     raise Exception()
 
-                if world.is_key_drop_location(location):
+                if world.is_excluded_key_drop_location(location):
                     id = None
 
                 ap_location = ALttPRLocation(
@@ -128,25 +129,33 @@ def init_lookups():
                     loc_name = next(loc for loc, datum in PotShuffle.key_drop_data.items()
                                     if datum[1] == super_tile)
                 else:
-                    # TODO: Pottery lottery
+                    continue
+                    # TODO: Pottery Lottery
                     # descriptor = 'Large Block' if pot.flags & PotFlags.Block else f'Pot #{pot_index+1}'
                     # loc_name = f'{pot.room} {descriptor}'
-                    continue
+                location_table_pot_items[loc_name] = (2 * super_tile, 0x8000 >> pot_index)
                 location_id = DoorRandomizerRegions.pot_address(pot_index, super_tile)
                 lookup_name_to_id[loc_name] = location_id
                 lookup_id_to_name[location_id] = loc_name
     uw_table = DataTables.get_uw_enemy_table()
     key_drop_data = {(v[1][1], v[1][2]): k for k, v in PotShuffle.key_drop_data.items() if v[0] == 'Drop'}
     for super_tile, enemy_list in uw_table.room_map.items():
+        index_adj = 0
         for index, sprite in enumerate(enemy_list):
+            # if sprite.sub_type == 0x07:  # overlord
+            #     index_adj += 1
+            #     continue
             if (super_tile, index) in key_drop_data:
                 loc_name = key_drop_data[(super_tile, index)]
                 location_id = PotShuffle.key_drop_data[loc_name][1][0]
             else:
-                # TODO: Enemizer
+                continue
+                # TODO: Enemy drop shuffle
                 # loc_name = f'{sprite.region} Enemy #{index+1}'
                 # location_id = EnemyList.drop_address(index, super_tile)
-                continue
+            # if index < index_adj:
+            #     logging.info(f'Problem at {hex(super_tile)} {loc_name}')
+            location_table_sprite_items[loc_name] = (2 * super_tile, 0x8000 >> (index-index_adj))
             lookup_name_to_id[loc_name] = location_id
             lookup_id_to_name[location_id] = loc_name
 

@@ -294,3 +294,7 @@ location_table_misc = {'Bottle Merchant': (0x3c9, 0x2),
                        'Purple Chest': (0x3c9, 0x10),
                        "Link's Uncle": (0x3c6, 0x1),
                        'Hobo': (0x3c9, 0x1)}
+
+location_table_pot_items = {}
+
+location_table_sprite_items = {}

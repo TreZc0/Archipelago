@@ -95,6 +95,12 @@ class BigKeyShuffle(Toggle):
     display_name = "Big Key Shuffle"
 
 
+class KeyDropShuffle(Toggle):
+    """Shuffle keys that are dropped by enemies or hidden under pots."""
+    display_name = "Key Drop Shuffle"
+    default = False
+
+
 class EntranceShuffle(TextChoice):
     """Randomize where each building, cave, and dungeon entrance leads to."""
     display_name = "Entrance Shuffle"
@@ -159,6 +165,7 @@ class ALttPROptions(PerGameCommonOptions):
     compass_shuffle: CompassShuffle
     small_key_shuffle: SmallKeyShuffle
     big_key_shuffle: BigKeyShuffle
+    key_drop_shuffle: KeyDropShuffle
     entrance_shuffle: EntranceShuffle
     zelgawoods: Zelgawoods
     enemy_shuffle: EnemyShuffle

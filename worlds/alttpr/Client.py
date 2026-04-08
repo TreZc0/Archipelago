@@ -228,6 +228,22 @@ class ALttPRSNIClient(SNIClient):
                 if misc_data_changed:
                     snes_buffered_write(ctx, RomAddresses.SAVEDATA_START + 0x3c6, bytes(misc_data))
 
+        if not all([location in ctx.locations_checked for location in RomAddresses.location_table_pot_items.keys()]):
+            pot_items_data = await snes_read(ctx, RomAddresses.POT_ITEMS_SRAM_START, RomAddresses.ITEM_SRAM_SIZE)
+            if pot_items_data is not None:
+                for location, (offset, mask) in RomAddresses.location_table_pot_items.items():
+                    pot_value = pot_items_data[offset] | (pot_items_data[offset + 1] << 8)
+                    if pot_value & mask != 0 and location not in ctx.locations_checked:
+                        new_check(Regions.lookup_name_to_id[location])
+
+        if not all([location in ctx.locations_checked for location in RomAddresses.location_table_sprite_items.keys()]):
+            sprite_items_data = await snes_read(ctx, RomAddresses.SPRITE_ITEMS_SRAM_START, RomAddresses.ITEM_SRAM_SIZE)
+            if sprite_items_data is not None:
+                for location, (offset, mask) in RomAddresses.location_table_sprite_items.items():
+                    sprite_value = sprite_items_data[offset] | (sprite_items_data[offset + 1] << 8)
+                    if sprite_value & mask != 0 and location not in ctx.locations_checked:
+                        new_check(Regions.lookup_name_to_id[location])
+
         if new_locations:
             # verify rom is still the same:
             rom_name = await snes_read(ctx, RomAddresses.ROMNAME_START, RomAddresses.ROMNAME_SIZE)

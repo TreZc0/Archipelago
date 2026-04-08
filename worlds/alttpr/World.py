@@ -115,8 +115,8 @@ class ALttPRWorld(World):
         self.door_rando_world.compassshuffle = {1: True if self.options.compass_shuffle.value else False}
         self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
         self.door_rando_world.customizer = None
-        self.door_rando_world.dropshuffle = {1: "none"}
-        self.door_rando_world.dungeon_counters = {1: "default"}
+        self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
+        self.door_rando_world.dungeon_counters = {1: "off"}  # TODO: What to do with this, the code for this is in DoorRandomizer Rom.py, line 1207
         self.door_rando_world.enemy_shuffle = {1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
         self.door_rando_world.intensity = {1: 0}  # No door shuffle
         self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
@@ -125,7 +125,7 @@ class ALttPRWorld(World):
         self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
         self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
         self.door_rando_world.overworld_map = {1: "default"}
-        self.door_rando_world.pottery = {1: "none"}
+        self.door_rando_world.pottery = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
         self.door_rando_world.pseudoboots = {1: self.options.pseudoboots.value}
         self.door_rando_world.rom_seeds = {1: self.random.randint(0, 999999999)}
         self.door_rando_world.shufflelinks = {1: False}
@@ -224,9 +224,6 @@ class ALttPRWorld(World):
     def generate_output(self, output_directory: str) -> None:
         for location in self.multiworld.get_filled_locations(self.player):
             if location.item.player == self.player:
-                # TODO: Key drop
-                if location.is_event or "Key Drop" in location.name or "Pot Key" in location.name:
-                    continue
                 dr_location = self.door_rando_world.get_location(location.name, 1)
                 if dr_location.item is not None:
                     # This is a prefilled location, probably a dungeon item
@@ -295,5 +292,5 @@ class ALttPRWorld(World):
             logger.error("ROM name is not set, cannot make needed multiworld changes in modify_multidata()")
 
 
-    def is_key_drop_location(self, location):
-        return "Key Drop" in location.name or "Pot Key" in location.name
+    def is_excluded_key_drop_location(self, location):
+        return not self.options.key_drop_shuffle.value and ("Key Drop" in location.name or "Pot Key" in location.name)
