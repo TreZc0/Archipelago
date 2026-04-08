@@ -317,7 +317,8 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
                 classification = ItemClassification.progression
             else:
                 classification = ItemClassification.filler
-            ap_item = ALttPRItem(dungeon_item, classification, dr_dungeon_item.code, world.player)
+            code = dr_dungeon_item.code if not world.is_key_drop_location(location) else None
+            ap_item = ALttPRItem(dungeon_item, classification, code, world.player)
             target_location = world.multiworld.get_location(dr_dungeon_item.location.name, world.player)
             target_location.place_locked_item(ap_item)
 

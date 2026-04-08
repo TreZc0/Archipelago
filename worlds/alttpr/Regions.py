@@ -47,11 +47,12 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
                 id = lookup_name_to_id.get(location.name, None)
                 if not id and \
                    " - Prize" not in location.name and \
-                   "Key Drop" not in location.name and \
-                   "Pot Key" not in location.name and \
                    location.name not in event_locations:
                     logger.error(f"Found unknown location {location.name} in region {region.name}.")
                     raise Exception()
+
+                if world.is_key_drop_location(location):
+                    id = None
 
                 ap_location = ALttPRLocation(
                     world.player, location.name, id, ap_region

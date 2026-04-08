@@ -292,3 +292,7 @@ class ALttPRWorld(World):
             multidata["connect_names"][new_name] = multidata["connect_names"][self.multiworld.player_name[self.player]]
         else:
             logger.error("ROM name is not set, cannot make needed multiworld changes in modify_multidata()")
+
+
+    def is_key_drop_location(self, location):
+        return "Key Drop" in location.name or "Pot Key" in location.name
