@@ -42,11 +42,16 @@ class StateAdapter:
             sword_count = {"Fighter Sword": 1, "Master Sword": 2, "Tempered Sword": 3, "Golden Sword": 4, "Progressive Sword": count}
             item = "Progressive Sword"
             count = sword_count[item]
+        elif item == "Bow":
+            item = "Progressive Bow"
+        elif item == "Silver Arrows":
+            item = "Progressive Bow"
+            count = 2
+        elif item == "Cape":
+            # TODO: I don't know why I thought changing the name of "Cape" was a good idea, I should undo that
+            item = "Magic Cape"
 
-        # TODO: I don't know why I thought changing the name of "Cape" was a good idea, I should undo that
-        return self.state.has(item, self.player, count) or \
-               (item == "Bow" and self.state.has("Progressive Bow", self.player, count)) or \
-               (item == "Cape" and self.state.has("Magic Cape", self.player, count))
+        return self.state.has(item, self.player, count)
 
 
     def has_item(self, item: str, count: int = 1) -> bool:
@@ -59,15 +64,29 @@ class StateAdapter:
 
 
     # More specific item checking methods
+    def bottle_count(self, player) -> int:
+        return self.count_group("Bottles", self.player)
+
+
     def can_avoid_lasers(self, player) -> bool:
         return self.has_item("Progressive Shield", 3) or self.has_item("Cane of Byrna") or self.has_item("Magic Cape")
+
+
+    def can_buy_unlimited(self, item, player):
+        for shop in self.world.shops[1]:
+            if shop.has_unlimited(item) and shop.region.can_reach(self):
+                return True
+        return False
 
 
     def can_extend_magic(self, player, smallmagic=16, fullrefill=False) -> bool:
         # Check if the player has enough magic. smallmagic is the total amount needed,
         # with a full magic meter being 8 magic.
-        # TODO: Check for hard/expert mode, and whether the player can buy potions.
-        return smallmagic <= 8 or self.has_item("Magic Upgrade (1/2)") and smallmagic <= 16
+        # TODO: Check for hard/expert mode
+        basemagic = 8 if not self.has_item("Magic Upgrade (1/2)") else 16
+        if self.can_buy_unlimited('Green Potion', player) or self.can_buy_unlimited('Blue Potion', player):
+            basemagic = basemagic + basemagic * self.bottle_count(player)
+        return smallmagic <= basemagic
 
 
     def can_flute(self, player) -> bool:

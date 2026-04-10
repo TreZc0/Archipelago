@@ -259,11 +259,11 @@ def create_all_items(world: ALttPRWorld) -> None:
     dr_itempool = world.door_rando_world.itempool.copy()
     if world.options.world_mode.value == "standard":
         if world.options.small_key_shuffle.value:
-            escape_keys = [item for item in world.door_rando_world.get_items() if item.name == "Small Key (Escape)"]
+            escape_keys = [item for item in dr_itempool if item.name == "Small Key (Escape)"]
             for key in escape_keys:
                 dr_itempool.remove(key)
         if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
-            escape_keys = [item for item in world.door_rando_world.get_items() if item.name == "Big Key (Escape)"]
+            escape_keys = [item for item in dr_itempool if item.name == "Big Key (Escape)"]
             if len(escape_keys) > 0:
                 dr_itempool.remove(escape_keys[0])
 
@@ -337,8 +337,8 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             links_uncle_location = world.multiworld.get_location("Link's Uncle", world.player)
             links_uncle_location.place_locked_item(ap_item)
 
-        # The small keys for the escape sequence should be sphere 0, to prevent the player
-        # from being near-instantly BK'd.
+        # If keysanity is enabled, the keys for the escape sequence should still be sphere 0,
+        # to prevent the player from being near-instantly BK'd.
         if world.options.small_key_shuffle.value:
             if world.options.key_drop_shuffle.value:
                 key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop"]
@@ -349,11 +349,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
                 key_location = place_escape_key(key_locations, world, "Small")
                 key_locations.remove(key_location)
 
-                key_locations.append("Hyrule Castle - Big Key Drop")
-                key_location = place_escape_key(key_locations, world, "Big")
-                key_locations.remove(key_location)
-
-                key_locations.extend(["Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"])
+                key_locations.extend(["Hyrule Castle - Big Key Drop", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"])
                 key_location = place_escape_key(key_locations, world, "Small")
                 key_locations.remove(key_location)
 
@@ -363,6 +359,11 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
                 small_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest",
                                     "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
                 place_escape_key(small_key_locations, world, "Small")
+
+        if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
+            big_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop",
+                                 "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop", "Hyrule Castle - Big Key Drop"]
+            place_escape_key(big_key_locations, world, "Big")
 
 
 def place_escape_key(possible_locations: List[str], world: ALttPRWorld, key_size: str) -> str:
