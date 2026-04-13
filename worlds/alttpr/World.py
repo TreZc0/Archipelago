@@ -15,6 +15,7 @@ from worlds.Files import APProcedurePatch
 # Imports of your world's files must be relative.
 from .ALttPDoorRandomizer.BaseClasses import World as DoorRandoWorld  # Avoid naming conflict with AP's World class
 from .ALttPDoorRandomizer.Bosses import place_bosses
+from .ALttPDoorRandomizer.source.classes.CustomSettings import CustomSettings
 from .ALttPDoorRandomizer.source.enemizer.DamageTables import DamageTable
 from .ALttPDoorRandomizer.source.rom.DataTables import init_data_tables
 from .ALttPDoorRandomizer.Doors import create_doors
@@ -26,7 +27,8 @@ from .ALttPDoorRandomizer.Fill import dungeon_tracking, fill_dungeons_restrictiv
 from .ALttPDoorRandomizer.source.item.FillUtil import create_item_pool_config, massage_item_pool
 from .ALttPDoorRandomizer.ItemList import difficulties, fill_prizes, generate_itempool
 from .ALttPDoorRandomizer.Items import ItemFactory
-from .ALttPDoorRandomizer.OverworldShuffle import create_dynamic_exits, link_overworld
+from .ALttPDoorRandomizer.OverworldShuffle import link_overworld
+from .ALttPDoorRandomizer.OWEdges import create_owedges
 from .ALttPDoorRandomizer.Regions import adjust_locations, create_regions, create_dungeon_regions, create_shops, lookup_name_to_id, mark_light_dark_world_regions
 from .ALttPDoorRandomizer.Rom import apply_rom_settings, patch_rom
 from .ALttPDoorRandomizer.RoomData import create_rooms
@@ -99,10 +101,9 @@ class ALttPRWorld(World):
         # The world can create a multiworld with many players each with different options, but we only need to
         # generate for one player, hence all the "1"s everywhere.
         self.door_rando_world = DoorRandoWorld(
-            1, {1: self.options.entrance_shuffle.value}, {1: "vanilla"}, {1: "noglitches"}, {1: self.options.world_mode.value},
-            {1: "random"}, {1: "normal"}, {1: None}, "none", "on", {1: self.options.goal.value},
-            "balanced", {1: "locations"}, {1: True}, False, Items.default_items_dict,
-            {1: False}, "none"
+            1, {1: "vanilla"}, {1: False}, {1: "none"}, {1: False}, {1: self.options.entrance_shuffle.value}, {1: "vanilla"}, {1: "noglitches"},
+            {1: self.options.world_mode.value}, {1: "random"}, {1: "normal"}, {1: None}, "none", "on", {1: self.options.goal.value},
+            "balanced", {1: "locations"}, {1: True}, False, Items.default_items_dict, {1: False}, "none"
         )
 
         # There are sooo many fields that aren't set in the
@@ -118,6 +119,7 @@ class ALttPRWorld(World):
         self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
         self.door_rando_world.dungeon_counters = {1: "off"}  # TODO: What to do with this, the code for this is in DoorRandomizer Rom.py, line 1207
         self.door_rando_world.enemy_shuffle = {1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
+        self.door_rando_world.experimental = {1: False}  # This makes you a bunny if your spawn point is in the dark world
         self.door_rando_world.intensity = {1: 0}  # No door shuffle
         self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
         self.door_rando_world.linked_drops = {1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
@@ -125,9 +127,16 @@ class ALttPRWorld(World):
         self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
         self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
         self.door_rando_world.overworld_map = {1: "default"}
+        self.door_rando_world.owFluteShuffle = {1: "vanilla"}
+        self.door_rando_world.owKeepSimilar = {1: False}
+        self.door_rando_world.owTerrain = {1: False}
+        self.door_rando_world.owWhirlpoolShuffle = {1: False}
         self.door_rando_world.pottery = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
         self.door_rando_world.pseudoboots = {1: self.options.pseudoboots.value}
         self.door_rando_world.rom_seeds = {1: self.random.randint(0, 999999999)}
+        self.door_rando_world.settings = CustomSettings()
+        self.door_rando_world.shuffle_bonk_drops = {1: False}
+        self.door_rando_world.shuffle_followers = {1: False}
         self.door_rando_world.shufflelinks = {1: False}
         self.door_rando_world.shuffletavern = {1: False}
         self.door_rando_world.skullwoods = {1: "followlinked" if self.options.zelgawoods.value else "original"}  # How to handle Skull Woods in entrance shuffle.
@@ -156,6 +165,7 @@ class ALttPRWorld(World):
 
         create_regions(self.door_rando_world, 1)
         create_dungeon_regions(self.door_rando_world, 1)
+        create_owedges(self.door_rando_world, 1)
         create_shops(self.door_rando_world, 1)
         create_doors(self.door_rando_world, 1)
         create_rooms(self.door_rando_world, 1)  # Not sure if this is needed or what it does?
@@ -166,12 +176,13 @@ class ALttPRWorld(World):
         randomize_enemies(self.door_rando_world, 1)
         adjust_locations(self.door_rando_world, 1)
         link_overworld(self.door_rando_world, 1)
-        create_dynamic_exits(self.door_rando_world, 1)
+        mark_light_dark_world_regions(self.door_rando_world, 1)
+        #create_dynamic_exits(self.door_rando_world, 1)
         link_entrances_new(self.door_rando_world, 1)
         link_doors_prep(self.door_rando_world, 1)
         create_item_pool_config(self.door_rando_world)
         link_doors(self.door_rando_world, 1)
-        mark_light_dark_world_regions(self.door_rando_world, 1)
+        mark_light_dark_world_regions(self.door_rando_world, 1)  # This is run twice in OWR Main.py, not sure why but for now I'll do the same.
 
         # There appears to be a glitch in DR where standard/crosskeys seeds with a HC entrance in the dark world,
         # will mark HC as requiring the Moon Pearl. At least that's what appears to be happening.
