@@ -42,6 +42,10 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
             elif " Item " in location.name:
                 # TODO: Retro
                 continue
+            elif location.item and "Farmable" in location.item.name:
+                # These are in logic to see if the player can farm rupees or bombs.
+                # TODO: Overworld shuffle
+                continue
             else:
                 # The dungeon prize locations aren't in lookup_name_to_id (not sure how they're removed?),
                 # so they won't have an ID, which is how an event location is defined.
@@ -84,9 +88,17 @@ def get_event_locations(world: ALttPRWorld):
         "Ganon": "Triforce",
         "Agahnim 1": "Beat Agahnim 1",
         "Agahnim 2": "Beat Agahnim 2",
+        "Lost Old Man": "Escort Old Man",
+        "Old Man Drop Off": "Return Old Man",
+        "Locksmith": "Sign Vandalized",
+        "Kiki": "Pick Up Kiki",
+        "Kiki Assistance": "Dark Palace Opened",
         "Frog": "Get Frog",
         "Missing Smith": "Return Smith",
         "Dark Blacksmith Ruins": "Pick Up Purple Chest",
+        "Middle Aged Man": "Deliver Purple Chest",
+        "Big Bomb": "Pick Up Big Bomb",
+        "Pyramid Crack": "Detonate Big Bomb",
         "Floodgate": "Open Floodgate",
         "Trench 1 Switch": "Trench 1 Filled",
         "Trench 2 Switch": "Trench 2 Filled",
@@ -96,19 +108,30 @@ def get_event_locations(world: ALttPRWorld):
         "Revealing Light": "Maiden Unmasked",
         "Ice Block Drop": "Convenient Block",
         "Skull Star Tile": "Hidden Pits",
+        "Turtle Medallion Pad": "Turtle Opened",
+        'Eastern Palace - Boss Kill': 'Beat Boss',
+        "Desert Palace - Boss Kill": "Beat Boss",
+        "Tower of Hera - Boss Kill": "Beat Boss",
+        "Palace of Darkness - Boss Kill": "Beat Boss",
+        "Swamp Palace - Boss Kill": "Beat Boss",
+        "Skull Woods - Boss Kill": "Beat Boss",
+        "Thieves\' Town - Boss Kill": "Beat Boss",
+        "Ice Palace - Boss Kill": "Beat Boss",
+        "Misery Mire - Boss Kill": "Beat Boss",
+        "Turtle Rock - Boss Kill": "Beat Boss",
+        "Zelda Pickup": "Zelda Herself",
+        "Zelda Drop Off": "Zelda Delivered",
         # Some events are only created in certain modes
-        # "Zelda Pickup": "Zelda Herself",
-        # "Zelda Drop Off": "Zelda Delivered",
         # "Murahdahla": "Triforce",
+        # "Flute Activation": "Ocarina (Activated)",
     }
 
     goal = world.options.goal.value
     if goal == "triforcehunt":
         event_locations["Murahdahla"] = "Triforce"
         event_locations["Ganon"] = "Nothing"
-    if world.options.world_mode.value == "standard":
-        event_locations["Zelda Pickup"] = "Zelda Herself"
-        event_locations["Zelda Drop Off"] = "Zelda Delivered"
+    if world.options.world_mode.value != "inverted":
+        event_locations["Flute Activation"] = "Ocarina (Activated)"
 
     return event_locations
 

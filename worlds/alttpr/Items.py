@@ -146,6 +146,7 @@ progressive_items = [
     "Moon Pearl",
     "Mushroom",
     "Ocarina",
+    "Ocarina (Activated)",
     "Pegasus Boots",
     "Progressive Bow",
     "Progressive Glove",
@@ -303,6 +304,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
         ap_item = ALttPRItem(dr_prize_location.item.name, ItemClassification.progression, None, world.player)
         target_location = world.multiworld.get_location(prize_location.name, world.player)
         target_location.place_locked_item(ap_item)
+        target_location.address = None
 
     for dungeon_item in get_dungeon_items(world):
         dr_item_name = dungeon_item if dungeon_item not in dr_ap_different_names else dr_ap_different_names[dungeon_item]

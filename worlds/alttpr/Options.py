@@ -28,8 +28,9 @@ class WorldMode(TextChoice):
 class Goal(TextChoice):
     """Sets the goal for this seed.
 
-    crystals: Collect the required number of crystals and kill Ganon
-    triforcehunt: Collect the required number of pieces of the Triforce, then talk to Murahdahla outside Hyrule Castle"""
+    crystals: Collect the required number of crystals and kill Ganon.
+    ganon: Collect the required number of crystals, kill Agahnim on top of Ganon's Tower, then kill Ganon.
+    triforcehunt: Collect the required number of pieces of the Triforce, then talk to Murahdahla outside Hyrule Castle."""
     display_name = "Goal"
     option_crystals = "crystals"
     option_ganon = "ganon"

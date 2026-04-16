@@ -247,7 +247,7 @@ class ALttPRSNIClient(SNIClient):
         if new_locations:
             # verify rom is still the same:
             rom_name = await snes_read(ctx, RomAddresses.ROMNAME_START, RomAddresses.ROMNAME_SIZE)
-            if rom_name is None or all(byte == b"\x00" for byte in rom_name) or rom_name[:2] != b"DR" or \
+            if rom_name is None or all(byte == b"\x00" for byte in rom_name) or rom_name[:2] != b"OR" or \
                     rom_name != ctx.rom:
                 logger.info(f"Discarding recent {len(new_locations)} checks as ROM Status has changed.")
                 return False

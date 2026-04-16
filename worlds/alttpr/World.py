@@ -18,14 +18,15 @@ from .ALttPDoorRandomizer.Bosses import place_bosses
 from .ALttPDoorRandomizer.source.classes.CustomSettings import CustomSettings
 from .ALttPDoorRandomizer.source.enemizer.DamageTables import DamageTable
 from .ALttPDoorRandomizer.source.rom.DataTables import init_data_tables
+from .ALttPDoorRandomizer.source.item.District import init_districts
 from .ALttPDoorRandomizer.Doors import create_doors
 from .ALttPDoorRandomizer.DoorShuffle import link_doors, link_doors_prep
 from .ALttPDoorRandomizer.Dungeons import create_dungeons
 from .ALttPDoorRandomizer.source.enemizer.Enemizer import randomize_enemies
 from .ALttPDoorRandomizer.source.overworld.EntranceShuffle2 import link_entrances_new
-from .ALttPDoorRandomizer.Fill import dungeon_tracking, fill_dungeons_restrictive, promote_dungeon_items
+from .ALttPDoorRandomizer.Fill import dungeon_tracking, fill_dungeons_restrictive, promote_dungeon_items, set_prize_drops
 from .ALttPDoorRandomizer.source.item.FillUtil import create_item_pool_config, massage_item_pool
-from .ALttPDoorRandomizer.ItemList import difficulties, fill_prizes, generate_itempool
+from .ALttPDoorRandomizer.ItemList import create_farm_locations, difficulties, fill_prizes, generate_itempool
 from .ALttPDoorRandomizer.Items import ItemFactory
 from .ALttPDoorRandomizer.OverworldShuffle import link_overworld
 from .ALttPDoorRandomizer.OWEdges import create_owedges
@@ -109,11 +110,12 @@ class ALttPRWorld(World):
         # There are sooo many fields that aren't set in the
         # door rando's world constructor :(
         self.door_rando_world.any_enemy_logic = {1: "none" if self.options.enemy_shuffle.value != "logical" else "allow_all"}
-        self.door_rando_world.bigkeyshuffle = {1: True if self.options.big_key_shuffle.value else False}
+        self.door_rando_world.bigkeyshuffle = {1: "wild" if self.options.big_key_shuffle.value else "none"}
+        self.door_rando_world.bombbag = {1: False}
         self.door_rando_world.boots_hint = {1: False}
         self.door_rando_world.boss_shuffle = {1: self.options.boss_shuffle.value}
         self.door_rando_world.bow_mode = {1: "progressive"}
-        self.door_rando_world.compassshuffle = {1: True if self.options.compass_shuffle.value else False}
+        self.door_rando_world.compassshuffle = {1: "wild" if self.options.compass_shuffle.value else "none"}
         self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
         self.door_rando_world.customizer = None
         self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
@@ -123,11 +125,12 @@ class ALttPRWorld(World):
         self.door_rando_world.intensity = {1: 0}  # No door shuffle
         self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
         self.door_rando_world.linked_drops = {1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
-        self.door_rando_world.mapshuffle = {1: True if self.options.map_shuffle.value else False}
+        self.door_rando_world.mapshuffle = {1: "wild" if self.options.map_shuffle.value else "none"}
         self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
         self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
         self.door_rando_world.overworld_map = {1: "default"}
         self.door_rando_world.owFluteShuffle = {1: "vanilla"}
+        self.door_rando_world.owFog = {1: False}
         self.door_rando_world.owKeepSimilar = {1: False}
         self.door_rando_world.owTerrain = {1: False}
         self.door_rando_world.owWhirlpoolShuffle = {1: False}
@@ -177,7 +180,7 @@ class ALttPRWorld(World):
         adjust_locations(self.door_rando_world, 1)
         link_overworld(self.door_rando_world, 1)
         mark_light_dark_world_regions(self.door_rando_world, 1)
-        #create_dynamic_exits(self.door_rando_world, 1)
+        init_districts(self.door_rando_world)
         link_entrances_new(self.door_rando_world, 1)
         link_doors_prep(self.door_rando_world, 1)
         create_item_pool_config(self.door_rando_world)
@@ -192,6 +195,8 @@ class ALttPRWorld(World):
                 region.is_light_world = True
                 region.is_dark_world = False
 
+        set_prize_drops(self.door_rando_world, 1)
+        create_farm_locations(self.door_rando_world, 1)
         generate_itempool(self.door_rando_world, 1)
         set_rules(self.door_rando_world, 1)
         dungeon_tracking(self.door_rando_world)
@@ -280,16 +285,19 @@ class ALttPRWorld(World):
         fast_menu = "normal"
         disable_music = False
         sprite = None
+        triforce_gfx = None
         ow_palettes = "default"
         uw_palettes = "default"
         reduce_flashing = True
         shuffle_sfx = False
+        shuffle_sfxinstruments = False
+        shuffle_songinstruments = False
         msu_resume = True
 
         apply_rom_settings(rom, heart_beep_rate, heart_color, quickswap,
-                           fast_menu, disable_music, sprite,
+                           fast_menu, disable_music, sprite, triforce_gfx,
                            ow_palettes, uw_palettes, reduce_flashing,
-                           shuffle_sfx, msu_resume)
+                           shuffle_sfx, shuffle_sfxinstruments, shuffle_songinstruments, msu_resume)
 
 
     def modify_multidata(self, multidata: dict):

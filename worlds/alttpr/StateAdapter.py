@@ -79,6 +79,10 @@ class StateAdapter:
         return False
 
 
+    def can_collect_bonkdrops(self, player):
+        return self.has_Boots(player) or (self.has_sword(player) and self.has_item('Quake'))
+
+
     def can_extend_magic(self, player, smallmagic=16, fullrefill=False) -> bool:
         # Check if the player has enough magic. smallmagic is the total amount needed,
         # with a full magic meter being 8 magic.
@@ -89,11 +93,29 @@ class StateAdapter:
         return smallmagic <= basemagic
 
 
+    def can_farm_rupees(self, player):
+        # Bushes can always drop a green rupee at the bare minimum.
+        # OWR has the event item "Farmable Rupees" for access to less awful farming locations, such as
+        # bush crabs or a tree pull, but that would be a pain to implement correctly for an incredibly
+        # niche situation.
+        # (entrance shuffle with no rupee farming locations, no rupees from tree pulls/bush crabs, enemy shuffle with no killable
+        # enemies dropping rupees, item on Zora)
+        return True
+
+
+    def can_farm_bombs(self, player):
+        # Both the light and dark worlds have at least one bush that can drop bombs.
+        # South of dig spot or near bombable hut for LW, and next to brewery for DW.
+        # OWR has the event item "Farmable Bombs" for access to less awful farming locations, such as
+        # bush crabs or a tree pull, but that would be a pain to implement correctly.
+        # Might be required for overworld shuffle??
+        return True
+
+
     def can_flute(self, player) -> bool:
         if self.world.mode == 'standard' and not self.has_item('Zelda Delivered'):
             return False  # can't flute in rain state
-        lw = self.world.get_region('Kakariko Village', 1)
-        return self.has_item('Ocarina') and self.state.can_reach_region("Kakariko Village", self.player) and self.is_not_bunny(lw, player)
+        return self.has_item("Ocarina (Activated)")
 
 
     def can_hit_crystal(self, player) -> bool:
@@ -155,6 +177,10 @@ class StateAdapter:
         return self.has('Progressive Bow', player) or self.has("Bow", player)
 
 
+    def can_stun_enemies(self, player) -> bool:
+        return self.has_item("Blue Boomerang") or self.has_item("Red Boomerang") or self.has_item("Hookshot")
+
+
     def can_take_damage(self) -> bool:
         # TODO: Needed for OHKO mode
         return True
@@ -172,6 +198,10 @@ class StateAdapter:
 
     def has_beam_sword(self, player) -> bool:
         return self.has_item("Progressive Sword", 2)
+
+
+    def has_beaten_aga(self, player) -> bool:
+        return self.has_item("Beat Agahnim 1") and (self.world.mode[1] != "standard" or self.has_item("Zelda Delivered"))
 
 
     def has_blunt_weapon(self, player) -> bool:
