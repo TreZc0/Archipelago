@@ -191,9 +191,9 @@ class StateAdapter:
         return True
 
 
-    def everything(self) -> bool:
-        # TODO: Completionist goal
-        return False
+    def everything(self, player, all_except=0) -> bool:
+        locations = self.state.multiworld.get_locations(self.player)
+        return len([location for location in locations if not location.is_event and not location.can_reach(self.state)]) - all_except <= 0
 
 
     def has_beam_sword(self, player) -> bool:

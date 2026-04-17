@@ -53,10 +53,10 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
                 if not id and \
                    " - Prize" not in location.name and \
                    location.name not in event_locations:
-                    logger.error(f"Found unknown location {location.name} in region {region.name}.")
+                    logger.error(f"ALttPR: Found unknown location {location.name} in region {region.name}.")
                     raise Exception()
 
-                if world.is_excluded_key_drop_location(location):
+                if world.is_excluded_key_drop_location(location) or location.name in event_locations:
                     id = None
 
                 ap_location = ALttPRLocation(
@@ -122,14 +122,18 @@ def get_event_locations(world: ALttPRWorld):
         "Zelda Pickup": "Zelda Herself",
         "Zelda Drop Off": "Zelda Delivered",
         # Some events are only created in certain modes
+        # "Master Sword Pedestal": "Triforce",
         # "Murahdahla": "Triforce",
         # "Flute Activation": "Ocarina (Activated)",
     }
 
     goal = world.options.goal.value
     if goal == "triforcehunt":
-        event_locations["Murahdahla"] = "Triforce"
         event_locations["Ganon"] = "Nothing"
+    if goal == "triforcehunt" or goal == "trinity":
+        event_locations["Murahdahla"] = "Triforce"
+    if goal == "pedestal" or goal == "trinity":
+        event_locations["Master Sword Pedestal"] = "Triforce"
     if world.options.world_mode.value != "inverted":
         event_locations["Flute Activation"] = "Ocarina (Activated)"
 
@@ -145,6 +149,7 @@ def init_lookups():
 
     lookup_id_to_name = {x: y for x, y in DoorRandomizerRegions.lookup_id_to_name.items()}
     lookup_name_to_id = {x: y for x, y in DoorRandomizerRegions.lookup_name_to_id.items()}
+
     for super_tile, pot_list in PotShuffle.vanilla_pots.items():
         for pot_index, pot in enumerate(pot_list):
             if pot.item != PotItem.Hole:

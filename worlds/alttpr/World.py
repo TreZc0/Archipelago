@@ -92,7 +92,7 @@ class ALttPRWorld(World):
             # TODO: What's the proper way to throw generation errors?
             # TODO: Should do something like "If any item in start_inventory isn't a valid item"
             raise OptionError("ALttPR: There is an invalid item in the start_inventory.")
-        if self.options.goal.value == "triforcehunt" and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
+        if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
             raise OptionError("ALttPR: Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
 
         # Have the Door Randomizer generate a world with all the locations, entrances, items, etc.
@@ -116,6 +116,7 @@ class ALttPRWorld(World):
         self.door_rando_world.boss_shuffle = {1: self.options.boss_shuffle.value}
         self.door_rando_world.bow_mode = {1: "progressive"}
         self.door_rando_world.compassshuffle = {1: "wild" if self.options.compass_shuffle.value else "none"}
+        self.door_rando_world.crystals_needed_for_gt = {1: self.options.crystals_needed_for_ganons_tower.value}
         self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
         self.door_rando_world.customizer = None
         self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}

@@ -30,16 +30,21 @@ class Goal(TextChoice):
 
     crystals: Collect the required number of crystals and kill Ganon.
     ganon: Collect the required number of crystals, kill Agahnim on top of Ganon's Tower, then kill Ganon.
-    triforcehunt: Collect the required number of pieces of the Triforce, then talk to Murahdahla outside Hyrule Castle."""
+    dungeons: Complete all 12 dungeons, including Agahnim's Tower and Ganon's Tower, then kill Ganon.
+    pedestal: Collect all 3 pendants and pull the Master Sword from its pedestal.
+    triforcehunt: Collect the required number of pieces of the Triforce, then talk to Murahdahla outside Hyrule Castle.
+    ganonhunt: Collect the required number of pieces of the Triforce, then kill Ganon.
+    trinity: Either kill Ganon, pull the pedestal, or collect the required number of Triforce pieces and talk to Murahdahla outside Hyrule Castle.
+    completionist: Collect every check in the game, then kill Ganon."""
     display_name = "Goal"
     option_crystals = "crystals"
     option_ganon = "ganon"
-    # option_dungeons = "dungeons"
-    # option_pedestal = "pedestal"
+    option_dungeons = "dungeons"
+    option_pedestal = "pedestal"
     option_triforcehunt = "triforcehunt"
-    # option_ganonhunt = "ganonhunt"
-    # option_trinity = "trinity"
-    # option_completionist = "completionist"
+    option_ganonhunt = "ganonhunt"
+    option_trinity = "trinity"
+    option_completionist = "completionist"
     default = "crystals"
 
 
@@ -50,6 +55,14 @@ class OpenPyramid(TextChoice):
     option_open = "yes"
     option_closed = "no"
     default = "auto"
+
+
+class CrystalsNeededForGanonsTower(Range):
+    """How many crystals are needed to enter Ganon's Tower"""
+    display_name = "Crystals Needed for Ganon's Tower"
+    range_start = 0
+    range_end = 7
+    default = 7
 
 
 class CrystalsNeededForGanon(Range):
@@ -159,6 +172,7 @@ class ALttPROptions(PerGameCommonOptions):
     world_mode: WorldMode
     goal: Goal
     open_pyramid: OpenPyramid
+    crystals_needed_for_ganons_tower: CrystalsNeededForGanonsTower
     crystals_needed_for_ganon: CrystalsNeededForGanon
     triforce_hunt_goal: TriforceHuntGoal
     triforce_hunt_total: TriforceHuntTotal
