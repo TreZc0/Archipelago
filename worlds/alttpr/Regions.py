@@ -170,9 +170,9 @@ def init_lookups():
     for super_tile, enemy_list in uw_table.room_map.items():
         index_adj = 0
         for index, sprite in enumerate(enemy_list):
-            # if sprite.sub_type == 0x07:  # overlord
-            #     index_adj += 1
-            #     continue
+            if sprite.sub_type == 0x07:  # overlord
+                index_adj += 1
+                continue
             if (super_tile, index) in key_drop_data:
                 loc_name = key_drop_data[(super_tile, index)]
                 location_id = PotShuffle.key_drop_data[loc_name][1][0]

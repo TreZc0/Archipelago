@@ -83,17 +83,25 @@ class ALttPRWorld(World):
     # We need to modify the multiworld to recognize the ALttPR ROM hash, but only after that ROM has finished generating
     finished_generating: threading.Event
 
+
+    def validate_options(self) -> None:
+        start_inventory = self.options.start_inventory.value.keys()
+        always_invalid_starting_items = ["Triforce Piece", "Green Clock", "Blue Clock", "Red Clock"]
+        always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
+        invalid_items = []
+        for item in start_inventory:
+            if item in always_invalid_starting_items or item not in self.item_name_to_id:
+                invalid_items.append(item)
+        if len(invalid_items) > 0:
+            raise OptionError("The following items are not allowed in the starting inventory: " + ", ".join(invalid_items))
+
+        if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
+            raise OptionError("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
+
+
     def generate_early(self) -> None:
         self.seed_hash = self.random.randbytes(4)
-
-        # TODO: Error check all of the options
-        start_inventory = self.options.start_inventory.value.keys()
-        if "Triforce Piece" in start_inventory or "Green Clock" in start_inventory:
-            # TODO: What's the proper way to throw generation errors?
-            # TODO: Should do something like "If any item in start_inventory isn't a valid item"
-            raise OptionError("ALttPR: There is an invalid item in the start_inventory.")
-        if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
-            raise OptionError("ALttPR: Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
+        self.validate_options()
 
         # Have the Door Randomizer generate a world with all the locations, entrances, items, etc.
         # Items should not be placed except for not-fully-randomized stuff like dungeon items without keysanity,
