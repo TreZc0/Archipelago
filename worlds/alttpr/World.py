@@ -280,6 +280,10 @@ class ALttPRWorld(World):
             # But raising the exception freezes AP. Not sure what to do about errors in generate_output?
             logger.error(f"Unknown error occurred while patching the ALttPR ROM: {e}")
 
+        rom.name = bytearray(f"LTTP{self.world_version.as_simple_string().replace(".","")}_{self.player}_{self.multiworld.seed:11}", 'utf8')[:21]
+        rom.name.extend([0] * (21 - len(rom.name)))
+        rom.write_bytes(0x7FC0, rom.name)
+
         self.apply_player_settings(rom)  # Change settings which don't affect logic, like quickswapping
         rom.write(os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.apalttpr"))
         self.rom_name = rom.name
@@ -311,6 +315,7 @@ class ALttPRWorld(World):
 
     def modify_multidata(self, multidata: dict):
         self.finished_generating.wait()
+        print(f"ROM Name: {self.rom_name}, Player Name: {self.multiworld.player_name[self.player]}, Multidata Connect Names: {multidata['connect_names']}")
         if self.rom_name:
             # SNIClient connects to the AP server using an encoded ROM filename, instead of the player's name, for some reason.
             # This tells the AP server to associate the ROM filename with our player's name.
