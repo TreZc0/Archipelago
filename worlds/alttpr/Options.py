@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from Options import PerGameCommonOptions, Range, TextChoice, Toggle
+from Options import FreeText, PerGameCommonOptions, Range, TextChoice, Toggle
 
 
 class WorldMode(TextChoice):
@@ -167,6 +167,12 @@ class MirrorScroll(Toggle):
     display_name = "Mirror Scroll"
 
 
+class Sprite(FreeText):
+    """A custom sprite to use for Link. Must be the exact name of a sprite listed at https://alttpr.com/en/sprite_preview"""
+    display_name = "Sprite"
+    default = "Link"
+
+
 @dataclass
 class ALttPROptions(PerGameCommonOptions):
     world_mode: WorldMode
@@ -187,3 +193,4 @@ class ALttPROptions(PerGameCommonOptions):
     boss_shuffle: BossShuffle
     pseudoboots: Pseudoboots
     mirror_scroll: MirrorScroll
+    sprite: Sprite
