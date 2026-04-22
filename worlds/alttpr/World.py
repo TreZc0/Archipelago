@@ -31,7 +31,7 @@ from .ALttPDoorRandomizer.Items import ItemFactory
 from .ALttPDoorRandomizer.OverworldShuffle import link_overworld
 from .ALttPDoorRandomizer.OWEdges import create_owedges
 from .ALttPDoorRandomizer.Regions import adjust_locations, create_regions, create_dungeon_regions, create_shops, lookup_name_to_id, mark_light_dark_world_regions
-from .ALttPDoorRandomizer.Rom import apply_rom_settings, patch_rom
+from .ALttPDoorRandomizer.Rom import apply_rom_settings, hud_format_text, patch_rom
 from .ALttPDoorRandomizer.RoomData import create_rooms
 from .ALttPDoorRandomizer.Rules import set_rules
 from .Client import ALttPRSNIClient
@@ -280,9 +280,18 @@ class ALttPRWorld(World):
             # But raising the exception freezes AP. Not sure what to do about errors in generate_output?
             logger.error(f"Unknown error occurred while patching the ALttPR ROM: {e}")
 
+        # Set the ROM name with AP per-slot info, so AP can tell different LttP ROMs apart
         rom.name = bytearray(f"LTTP{self.world_version.as_simple_string().replace(".","")}_{self.player}_{self.multiworld.seed:11}", 'utf8')[:21]
         rom.name.extend([0] * (21 - len(rom.name)))
         rom.write_bytes(0x7FC0, rom.name)
+
+        # Set AP player names in the ROM
+        ROM_PLAYER_LIMIT = 255
+        encoded_players = self.multiworld.players + len(self.multiworld.groups)
+        for p in range(1, min(encoded_players, ROM_PLAYER_LIMIT) + 1):
+            rom.write_bytes(0x195FFC + ((p - 1) * 32), hud_format_text(self.multiworld.player_name[p]))
+        if encoded_players > ROM_PLAYER_LIMIT:
+            rom.write_bytes(0x195FFC + ((ROM_PLAYER_LIMIT - 1) * 32), hud_format_text("Archipelago"))
 
         self.apply_player_settings(rom)  # Change settings which don't affect logic, like quickswapping
         rom.write(os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.apalttpr"))
@@ -315,7 +324,6 @@ class ALttPRWorld(World):
 
     def modify_multidata(self, multidata: dict):
         self.finished_generating.wait()
-        print(f"ROM Name: {self.rom_name}, Player Name: {self.multiworld.player_name[self.player]}, Multidata Connect Names: {multidata['connect_names']}")
         if self.rom_name:
             # SNIClient connects to the AP server using an encoded ROM filename, instead of the player's name, for some reason.
             # This tells the AP server to associate the ROM filename with our player's name.
