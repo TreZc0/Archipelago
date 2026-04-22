@@ -2,8 +2,10 @@ import base64
 from collections.abc import Mapping
 import logging
 import os
+import shutil
 import threading
 import typing
+from urllib.request import urlopen
 
 # Imports of base Archipelago modules must be absolute.
 from BaseClasses import ItemClassification
@@ -252,8 +254,6 @@ class ALttPRWorld(World):
 
 
     def generate_output(self, output_directory: str) -> None:
-        sprite_file = self.get_sprite_file()
-
         for location in self.multiworld.get_filled_locations(self.player):
             if location.item.player == self.player:
                 dr_location = self.door_rando_world.get_location(location.name, 1)
@@ -300,10 +300,33 @@ class ALttPRWorld(World):
         if encoded_players > ROM_PLAYER_LIMIT:
             rom.write_bytes(0x195FFC + ((ROM_PLAYER_LIMIT - 1) * 32), hud_format_text("Archipelago"))
 
-        self.apply_player_settings(rom, sprite_file)  # Change settings which don't affect logic, like quickswapping
+        self.apply_player_settings(rom)  # Change settings which don't affect logic, like quickswapping
         rom.write(os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.apalttpr"))
         self.rom_name = rom.name
         self.finished_generating.set()
+
+
+    def apply_player_settings(self, rom):
+        # TODO: Player settings like heart color, heart beep rate, and palette swap
+        heart_beep_rate = "half"
+        heart_color = "red"
+        quickswap = True
+        fast_menu = "normal"
+        disable_music = False
+        sprite = self.get_sprite_file()
+        triforce_gfx = None
+        ow_palettes = "default"
+        uw_palettes = "default"
+        reduce_flashing = True
+        shuffle_sfx = False
+        shuffle_sfxinstruments = False
+        shuffle_songinstruments = False
+        msu_resume = True
+
+        apply_rom_settings(rom, heart_beep_rate, heart_color, quickswap,
+                           fast_menu, disable_music, sprite, triforce_gfx,
+                           ow_palettes, uw_palettes, reduce_flashing,
+                           shuffle_sfx, shuffle_sfxinstruments, shuffle_songinstruments, msu_resume)
 
 
     def get_sprite_file(self) -> str | None:
@@ -323,32 +346,15 @@ class ALttPRWorld(World):
 
         sprite_file = os.path.join(sprite_dir, Sprites.sprites[sprite_name]["filename"])
         if not os.path.exists(sprite_file):
-            # TODO: Download the sprite
-            return None
+            # TODO: Do this asynchronously
+            try:
+                with urlopen(Sprites.sprites[sprite_name]["url"], timeout=10) as response, open(sprite_file, "wb") as out:
+                    shutil.copyfileobj(response, out)
+            except Exception as e:
+                logger.error(f"Could not download sprite {sprite_name} from {Sprites.sprites[sprite_name]['url']}: {e}. No custom sprite will be applied.")
+                return None
 
         return sprite_file
-
-
-    def apply_player_settings(self, rom, sprite_file: str | None):
-        # TODO: Player settings like heart color, heart beep rate, and palette swap
-        heart_beep_rate = "half"
-        heart_color = "red"
-        quickswap = True
-        fast_menu = "normal"
-        disable_music = False
-        triforce_gfx = None
-        ow_palettes = "default"
-        uw_palettes = "default"
-        reduce_flashing = True
-        shuffle_sfx = False
-        shuffle_sfxinstruments = False
-        shuffle_songinstruments = False
-        msu_resume = True
-
-        apply_rom_settings(rom, heart_beep_rate, heart_color, quickswap,
-                           fast_menu, disable_music, sprite_file, triforce_gfx,
-                           ow_palettes, uw_palettes, reduce_flashing,
-                           shuffle_sfx, shuffle_sfxinstruments, shuffle_songinstruments, msu_resume)
 
 
     def modify_multidata(self, multidata: dict):
