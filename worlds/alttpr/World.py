@@ -307,26 +307,19 @@ class ALttPRWorld(World):
 
 
     def apply_player_settings(self, rom):
-        # TODO: Player settings like heart color, heart beep rate, and palette swap
-        heart_beep_rate = "half"
-        heart_color = "red"
-        quickswap = True
-        fast_menu = "normal"
-        disable_music = False
-        sprite = self.get_sprite_file()
-        triforce_gfx = None
         ow_palettes = "default"
-        uw_palettes = "default"
+        quickswap = True
         reduce_flashing = True
         shuffle_sfx = False
         shuffle_sfxinstruments = False
         shuffle_songinstruments = False
-        msu_resume = True
+        triforce_gfx = None
+        uw_palettes = "default"
 
-        apply_rom_settings(rom, heart_beep_rate, heart_color, quickswap,
-                           fast_menu, disable_music, sprite, triforce_gfx,
-                           ow_palettes, uw_palettes, reduce_flashing,
-                           shuffle_sfx, shuffle_sfxinstruments, shuffle_songinstruments, msu_resume)
+        apply_rom_settings(rom, self.options.heart_beep_rate.value, self.options.heart_color.value, quickswap,
+                           self.options.fast_menu.value, self.options.disable_music.value, self.get_sprite_file(), triforce_gfx,
+                           ow_palettes, uw_palettes, reduce_flashing, shuffle_sfx,
+                           shuffle_sfxinstruments, shuffle_songinstruments, self.options.msu_resume.value)
 
 
     def get_sprite_file(self) -> str | None:

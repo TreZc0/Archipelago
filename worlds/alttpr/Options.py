@@ -168,9 +168,91 @@ class MirrorScroll(Toggle):
 
 
 class Sprite(FreeText):
-    """A custom sprite to use for Link. Must be the exact name of a sprite listed at https://alttpr.com/en/sprite_preview"""
+    """A custom sprite to use for Link. Must be 'Link' or the exact name of a sprite listed at https://alttpr.com/en/sprite_preview.
+    If an error occurs when loading the sprite, the default Link sprite will be used."""
     display_name = "Sprite"
     default = "Link"
+
+
+class HeartBeepRate(TextChoice):
+    """The rate at which heart beeps are played when Link is at low health."""
+    display_name = "Heart Beep Rate"
+    option_double = "double"
+    option_normal = "normal"
+    option_half = "half"
+    option_quarter = "quarter"
+    option_never = "off"
+    default = "normal"
+
+
+class HeartColor(TextChoice):
+    """The color of Link's heart meter."""
+    display_name = "Heart Color"
+    option_red = "red"
+    option_blue = "blue"
+    option_green = "green"
+    option_yellow = "yellow"
+    default = "red"
+
+
+class FastMenu(TextChoice):
+    """The rate at which the menu opens and closes."""
+    display_name = "Fast Menu"
+    option_normal = "normal"
+    option_instant = "instant"
+    option_double = "double"
+    option_triple = "triple"
+    option_quadruple = "quadruple"
+    option_half = "half"
+    default = "normal"
+
+
+# class OWPalettes(TextChoice):
+#     """The palette of the overworld sprites."""
+#     display_name = "Overworld Palettes"
+#     option_default = "default"
+#     option_randomized = "randomized"
+#     option_blackout = "blackout"
+#     default = "default"
+
+
+# class UWPalettes(TextChoice):
+#     """The palette of the underworld sprites."""
+#     display_name = "Underworld Palettes"
+#     option_default = "default"
+#     option_randomized = "randomized"
+#     option_blackout = "blackout"
+#     default = "default"
+
+
+class DisableMusic(Toggle):
+    """Disables game music."""
+    display_name = "Disable Music"
+    default = False
+
+
+# class ShuffleSFX(Toggle):
+#     """Shuffles the soundtrack."""
+#     display_name = "Shuffle SFX"
+#     default = False
+
+
+# class ShuffleSFXInstruments(Toggle):
+#     """Shuffles the soundtrack instruments."""
+#     display_name = "Shuffle SFX Instruments"
+#     default = False
+
+
+# class ShuffleSongInstruments(Toggle):
+#     """Shuffles the soundtrack instruments on a per-song basis, so each song will have its own shuffled set of instruments."""
+#     display_name = "Shuffle Song Instruments"
+#     default = False
+
+
+class MSUResume(Toggle):
+    """While using an MSU, when entering and leaving a building/cave/dungeon, the overworld music will pick up where it left off, instead of restarting every time."""
+    display_name = "MSU Resume"
+    default = False
 
 
 @dataclass
@@ -194,3 +276,13 @@ class ALttPROptions(PerGameCommonOptions):
     pseudoboots: Pseudoboots
     mirror_scroll: MirrorScroll
     sprite: Sprite
+    heart_beep_rate: HeartBeepRate
+    heart_color: HeartColor
+    fast_menu: FastMenu
+    # ow_palettes: OWPalettes
+    # uw_palettes: UWPalettes
+    disable_music: DisableMusic
+    # shuffle_sfx: ShuffleSFX
+    # shuffle_sfxinstruments: ShuffleSFXInstruments
+    # shuffle_songinstruments: ShuffleSongInstruments
+    msu_resume: MSUResume
