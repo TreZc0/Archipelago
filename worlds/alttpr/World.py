@@ -99,7 +99,8 @@ class ALttPRWorld(World):
         if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
             raise OptionError("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
 
-        if self.options.sprite.value != "Link" and self.options.sprite.value not in Sprites.sprites:
+        sprite = self.options.sprite.value.lower()
+        if sprite != "link" and sprite not in Sprites.sprites:
             raise OptionError(f"{self.options.sprite.value} is not a valid sprite.")
 
 
@@ -306,9 +307,10 @@ class ALttPRWorld(World):
 
 
     def get_sprite_file(self) -> str | None:
-        if self.options.sprite.value == "Link":
+        sprite_name = self.options.sprite.value.lower()
+        if sprite_name == "link":
             return None
-        if not self.options.sprite.value in Sprites.sprites:
+        if not sprite_name in Sprites.sprites:
             # This should never happen because validate_options also checks this, but better safe than sorry.
             logger.error(f"Invalid sprite option {self.options.sprite.value}. No custom sprite will be applied.")
             return None
@@ -319,7 +321,7 @@ class ALttPRWorld(World):
             logger.warning(f"Sprite directory {sprite_dir} does not exist. No custom sprite will be applied.")
             return None
 
-        sprite_file = os.path.join(sprite_dir, Sprites.sprites[self.options.sprite.value]["filename"])
+        sprite_file = os.path.join(sprite_dir, Sprites.sprites[sprite_name]["filename"])
         if not os.path.exists(sprite_file):
             # TODO: Download the sprite
             return None
