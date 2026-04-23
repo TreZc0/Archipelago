@@ -160,11 +160,19 @@ class BossShuffle(TextChoice):
 class Pseudoboots(Toggle):
     """Psuedoboots give Link the ability to dash like Pegasus Boots, but they cannot bonk rocks, open King's Tomb, knock items off torches/the Library, or clear small gaps"""
     display_name = "Pseudoboots"
+    default = False
 
 
 class MirrorScroll(Toggle):
-    """Mirror Scroll is an inventory item that warps Link to the start of their current dungeon, and is replaced upon finding the Magic Mirror"""
+    """Mirror Scroll is an inventory item that warps Link to the start of their current dungeon, and is replaced upon finding the Magic Mirror."""
     display_name = "Mirror Scroll"
+    default = False
+
+
+class PreActivatedFlute(Toggle):
+    """The Flute does not need to be activated at the village statue after finding it."""
+    display_name = "Pre Activated Flute"
+    default = False
 
 
 class Sprite(FreeText):
@@ -275,6 +283,7 @@ class ALttPROptions(PerGameCommonOptions):
     boss_shuffle: BossShuffle
     pseudoboots: Pseudoboots
     mirror_scroll: MirrorScroll
+    pre_activated_flute: PreActivatedFlute
     sprite: Sprite
     heart_beep_rate: HeartBeepRate
     heart_color: HeartColor

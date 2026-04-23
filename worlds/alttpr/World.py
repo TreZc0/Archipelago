@@ -138,6 +138,7 @@ class ALttPRWorld(World):
         self.door_rando_world.dungeon_counters = {1: "off"}  # TODO: What to do with this, the code for this is in DoorRandomizer Rom.py, line 1207
         self.door_rando_world.enemy_shuffle = {1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
         self.door_rando_world.experimental = {1: False}  # This makes you a bunny if your spawn point is in the dark world
+        self.door_rando_world.flute_mode = {1: "active" if self.options.pre_activated_flute.value else "normal"}
         self.door_rando_world.intensity = {1: 0}  # No door shuffle
         self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
         self.door_rando_world.linked_drops = {1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
