@@ -157,6 +157,15 @@ class BossShuffle(TextChoice):
     default = "none"
 
 
+class FluteShuffle(TextChoice):
+    """Randomize the Flute spot destinations. Balanced will spread the Flute spots around the overworld, while Chaos will place them randomly."""
+    display_name = "Flute Shuffle"
+    option_vanilla = "vanilla"
+    option_balanced = "balanced"
+    option_chaos = "random"
+    default = "vanilla"
+
+
 class Pseudoboots(Toggle):
     """Psuedoboots give Link the ability to dash like Pegasus Boots, but they cannot bonk rocks, open King's Tomb, knock items off torches/the Library, or clear small gaps"""
     display_name = "Pseudoboots"
@@ -281,6 +290,7 @@ class ALttPROptions(PerGameCommonOptions):
     zelgawoods: Zelgawoods
     enemy_shuffle: EnemyShuffle
     boss_shuffle: BossShuffle
+    flute_shuffle: FluteShuffle
     pseudoboots: Pseudoboots
     mirror_scroll: MirrorScroll
     pre_activated_flute: PreActivatedFlute

@@ -146,7 +146,7 @@ class ALttPRWorld(World):
         self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
         self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
         self.door_rando_world.overworld_map = {1: "default"}
-        self.door_rando_world.owFluteShuffle = {1: "vanilla"}
+        self.door_rando_world.owFluteShuffle = {1: self.options.flute_shuffle.value}
         self.door_rando_world.owFog = {1: False}
         self.door_rando_world.owKeepSimilar = {1: False}
         self.door_rando_world.owTerrain = {1: False}
