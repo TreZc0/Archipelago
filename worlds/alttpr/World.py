@@ -152,6 +152,7 @@ class ALttPRWorld(World):
         self.door_rando_world.owTerrain = {1: False}
         self.door_rando_world.owWhirlpoolShuffle = {1: False}
         self.door_rando_world.pottery = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
+        self.door_rando_world.prizeshuffle = {1: "none" if not self.options.prize_shuffle.value else "wild"}
         self.door_rando_world.pseudoboots = {1: self.options.pseudoboots.value}
         self.door_rando_world.rom_seeds = {1: self.random.randint(0, 999999999)}
         self.door_rando_world.settings = CustomSettings()

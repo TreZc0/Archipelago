@@ -157,6 +157,12 @@ class BossShuffle(TextChoice):
     default = "none"
 
 
+class PrizeShuffle(Toggle):
+    """Adds Pendants and Crystals to the itempool."""
+    display_name = "Prize Shuffle"
+    default = False
+
+
 class FluteShuffle(TextChoice):
     """Randomize the Flute spot destinations. Balanced will spread the Flute spots around the overworld, while Chaos will place them randomly."""
     display_name = "Flute Shuffle"
@@ -290,10 +296,11 @@ class ALttPROptions(PerGameCommonOptions):
     zelgawoods: Zelgawoods
     enemy_shuffle: EnemyShuffle
     boss_shuffle: BossShuffle
+    prize_shuffle: PrizeShuffle
     flute_shuffle: FluteShuffle
+    pre_activated_flute: PreActivatedFlute
     pseudoboots: Pseudoboots
     mirror_scroll: MirrorScroll
-    pre_activated_flute: PreActivatedFlute
     sprite: Sprite
     heart_beep_rate: HeartBeepRate
     heart_color: HeartColor

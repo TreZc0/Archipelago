@@ -121,6 +121,7 @@ progressive_items = [
     "Big Key (Misery Mire)",
     "Big Key (Turtle Rock)",
     "Big Key (Ganons Tower)",
+    "Blue Pendant",
     "Bombos",
     "Book of Mudora",
     "Bottle",
@@ -132,9 +133,17 @@ progressive_items = [
     "Bottle (Good Bee)",
     "Cane of Byrna",
     "Cane of Somaria",
+    "Crystal 1",
+    "Crystal 2",
+    "Crystal 3",
+    "Crystal 4",
+    "Crystal 5",
+    "Crystal 6",
+    "Crystal 7",
     "Ether",
     "Fire Rod",
     "Flippers",
+    "Green Pendant",
     "Hammer",
     "Hookshot",
     "Ice Rod",
@@ -153,6 +162,7 @@ progressive_items = [
     "Progressive Shield",
     "Progressive Sword",
     "Quake",
+    "Red Pendant",
     "Shovel",
     "Small Key (Escape)",
     "Small Key (Eastern Palace)",
@@ -298,13 +308,14 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
         event_location = world.multiworld.get_location(event_location_name, world.player)
         event_location.place_locked_item(ap_item)
 
-    prize_locations = [location for location in world.multiworld.get_unfilled_locations(world.player) if " - Prize" in location.name]
-    for prize_location in prize_locations:
-        dr_prize_location = world.door_rando_world.get_location(prize_location.name, 1)
-        ap_item = ALttPRItem(dr_prize_location.item.name, ItemClassification.progression, None, world.player)
-        target_location = world.multiworld.get_location(prize_location.name, world.player)
-        target_location.place_locked_item(ap_item)
-        target_location.address = None
+    if not world.options.prize_shuffle.value:
+        prize_locations = [location for location in world.multiworld.get_unfilled_locations(world.player) if " - Prize" in location.name]
+        for prize_location in prize_locations:
+            dr_prize_location = world.door_rando_world.get_location(prize_location.name, 1)
+            ap_item = ALttPRItem(dr_prize_location.item.name, ItemClassification.progression, None, world.player)
+            target_location = world.multiworld.get_location(prize_location.name, world.player)
+            target_location.place_locked_item(ap_item)
+            target_location.address = None
 
     for dungeon_item in get_dungeon_items(world):
         dr_item_name = dungeon_item if dungeon_item not in dr_ap_different_names else dr_ap_different_names[dungeon_item]
