@@ -256,6 +256,8 @@ class ALttPRWorld(World):
 
 
     def generate_output(self, output_directory: str) -> None:
+        # Now that Archipelago has placed every item, we tell the standalone randomizer where every item belongs.
+        # Including creating AP items
         for location in self.multiworld.get_filled_locations(self.player):
             if location.item.player == self.player:
                 dr_location = self.door_rando_world.get_location(location.name, 1)
@@ -279,11 +281,22 @@ class ALttPRWorld(World):
                 else:
                     dr_item = ItemFactory("Red Clock", 1)
 
+                self.set_hint_and_credits_text(dr_item, location.item)
+
             self.door_rando_world.push_item(self.door_rando_world.get_location(location.name, 1), dr_item, collect=False)
 
+        # Create hints for Saha and the Bomb Shop, if their prizes are in another world
+        prize_hint_text = {}
+        if self.options.prize_shuffle.value:
+            for item_name in ["Crystal 5", "Crystal 6", "Green Pendant"]:
+                item_location = self.multiworld.find_item(item_name, self.player)
+                if item_location.player != self.player:
+                    prize_hint_text[item_name] = f"at {self.multiworld.player_name[item_location.player]}'s {item_location.name}"
+
+        # Create a ROM patch
         rom = ALttPRRom(self.player, self.player_name, self.seed_hash)
         try:
-            patch_rom(self.door_rando_world, rom, 1, 1, is_mystery=False)
+            patch_rom(self.door_rando_world, rom, 1, 1, is_mystery=False, hint_text=prize_hint_text)
         except RuntimeError as e:
             # TODO: We're in bad shape if this happens, because it still runs generate_output
             # But raising the exception freezes AP. Not sure what to do about errors in generate_output?
@@ -302,10 +315,33 @@ class ALttPRWorld(World):
         if encoded_players > ROM_PLAYER_LIMIT:
             rom.write_bytes(0x195FFC + ((ROM_PLAYER_LIMIT - 1) * 32), hud_format_text("Archipelago"))
 
-        self.apply_player_settings(rom)  # Change settings which don't affect logic, like quickswapping
+        # Change settings which don't affect logic, like quickswapping
+        self.apply_player_settings(rom)
         rom.write(os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.apalttpr"))
         self.rom_name = rom.name
         self.finished_generating.set()
+
+
+    # Set the text for hints and end credits for AP items
+    def set_hint_and_credits_text(self, dr_item, ap_item):
+        # Setting a maximum length for each text. If the total text is too long, we'll get an exception while patching,
+        # although we have ~14 KB of room for more text before that happens.
+        item_name = ap_item.name
+        if len(item_name) > 40:
+            if ap_item.classification == ItemClassification.progression:
+                item_name = "Progressive Item"
+            elif ap_item.classification == ItemClassification.useful:
+                item_name = "Useful Item"
+            else:
+                item_name = "Filler Item"
+
+        dr_item.fluteboy_credit_text = f"{item_name} boy returns"
+        dr_item.hint_text = f"a {item_name}"
+        dr_item.magicshop_credit_text = f"shrooms for {item_name}"
+        dr_item.pedestal_credit_text = f"and the {item_name}"
+        dr_item.pedestal_hint_text = f"{self.multiworld.player_name[ap_item.player]}'s\n{item_name}!"
+        dr_item.sickkid_credit_text = f"{item_name} kid"
+        dr_item.zora_credit_text = f"{item_name} for sale"
 
 
     def apply_player_settings(self, rom):
