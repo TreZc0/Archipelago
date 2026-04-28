@@ -285,18 +285,22 @@ class ALttPRWorld(World):
 
             self.door_rando_world.push_item(self.door_rando_world.get_location(location.name, 1), dr_item, collect=False)
 
-        # Create hints for Saha and the Bomb Shop, if their prizes are in another world
-        prize_hint_text = {}
+        # Create hints for Saha and the Bomb Shop, if their prizes are in another world, and silver arrows
+        hint_text = {}
         if self.options.prize_shuffle.value:
             for item_name in ["Crystal 5", "Crystal 6", "Green Pendant"]:
                 item_location = self.multiworld.find_item(item_name, self.player)
                 if item_location.player != self.player:
-                    prize_hint_text[item_name] = f"at {self.multiworld.player_name[item_location.player]}'s {item_location.name}"
+                    hint_text[item_name] = f"at {self.multiworld.player_name[item_location.player]}'s {item_location.name}"
+        bow_locations = self.multiworld.find_item_locations("Progressive Bow", self.player)
+        if any([location.player != self.player for location in bow_locations]):
+            bow_location_names = [location.name if location.player == self.player else f"{self.multiworld.player_name[location.player]}'s {location.name}" for location in bow_locations]
+            hint_text["Progressive Bow"] = " and ".join(bow_location_names)
 
         # Create a ROM patch
         rom = ALttPRRom(self.player, self.player_name, self.seed_hash)
         try:
-            patch_rom(self.door_rando_world, rom, 1, 1, is_mystery=False, hint_text=prize_hint_text)
+            patch_rom(self.door_rando_world, rom, 1, 1, is_mystery=False, hint_text=hint_text)
         except RuntimeError as e:
             # TODO: We're in bad shape if this happens, because it still runs generate_output
             # But raising the exception freezes AP. Not sure what to do about errors in generate_output?
@@ -326,22 +330,22 @@ class ALttPRWorld(World):
     def set_hint_and_credits_text(self, dr_item, ap_item):
         # Setting a maximum length for each text. If the total text is too long, we'll get an exception while patching,
         # although we have ~14 KB of room for more text before that happens.
+        # The bigger restriction is that the credits can only display 32 characters at a time
         item_name = ap_item.name
-        if len(item_name) > 40:
-            if ap_item.classification == ItemClassification.progression:
-                item_name = "Progressive Item"
-            elif ap_item.classification == ItemClassification.useful:
-                item_name = "Useful Item"
-            else:
-                item_name = "Filler Item"
+        if ap_item.classification == ItemClassification.progression:
+            short_item_name = "Progressive Item"
+        elif ap_item.classification == ItemClassification.useful:
+            short_item_name = "Useful Item"
+        else:
+            short_item_name = "Filler Item"
 
-        dr_item.fluteboy_credit_text = f"{item_name} boy returns"
+        dr_item.fluteboy_credit_text = f"{item_name if len(item_name) <= 20 else short_item_name} boy returns"
         dr_item.hint_text = f"a {item_name}"
-        dr_item.magicshop_credit_text = f"shrooms for {item_name}"
-        dr_item.pedestal_credit_text = f"and the {item_name}"
+        dr_item.magicshop_credit_text = f"shrooms for {item_name if len(item_name) <= 20 else short_item_name}"
+        dr_item.pedestal_credit_text = f"and the {item_name if len(item_name) <= 24 else short_item_name}"
         dr_item.pedestal_hint_text = f"{self.multiworld.player_name[ap_item.player]}'s\n{item_name}!"
-        dr_item.sickkid_credit_text = f"{item_name} kid"
-        dr_item.zora_credit_text = f"{item_name} for sale"
+        dr_item.sickkid_credit_text = f"{item_name if len(item_name) <= 28 else short_item_name} kid"
+        dr_item.zora_credit_text = f"{item_name if len(item_name) <= 23 else short_item_name} for sale"
 
 
     def apply_player_settings(self, rom):
