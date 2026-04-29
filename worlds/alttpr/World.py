@@ -27,9 +27,9 @@ from .ALttPDoorRandomizer.DoorShuffle import link_doors, link_doors_prep
 from .ALttPDoorRandomizer.Dungeons import create_dungeons
 from .ALttPDoorRandomizer.source.enemizer.Enemizer import randomize_enemies
 from .ALttPDoorRandomizer.source.overworld.EntranceShuffle2 import link_entrances_new
-from .ALttPDoorRandomizer.Fill import dungeon_tracking, fill_dungeons_restrictive, promote_dungeon_items, set_prize_drops
+from .ALttPDoorRandomizer.Fill import dungeon_tracking, fill_dungeons_restrictive, promote_dungeon_items, sell_potions, set_prize_drops
 from .ALttPDoorRandomizer.source.item.FillUtil import create_item_pool_config, massage_item_pool
-from .ALttPDoorRandomizer.ItemList import create_farm_locations, difficulties, fill_prizes, generate_itempool
+from .ALttPDoorRandomizer.ItemList import create_farm_locations, customize_shops, difficulties, fill_prizes, generate_itempool
 from .ALttPDoorRandomizer.Items import ItemFactory
 from .ALttPDoorRandomizer.OverworldShuffle import link_overworld
 from .ALttPDoorRandomizer.OWEdges import create_owedges
@@ -156,6 +156,7 @@ class ALttPRWorld(World):
         self.door_rando_world.pseudoboots = {1: self.options.pseudoboots.value}
         self.door_rando_world.rom_seeds = {1: self.random.randint(0, 999999999)}
         self.door_rando_world.settings = CustomSettings()
+        self.door_rando_world.shopsanity = {1: self.options.shopsanity.value}
         self.door_rando_world.shuffle_bonk_drops = {1: False}
         self.door_rando_world.shuffle_followers = {1: False}
         self.door_rando_world.shufflelinks = {1: False}
@@ -218,6 +219,8 @@ class ALttPRWorld(World):
         generate_itempool(self.door_rando_world, 1)
         set_rules(self.door_rando_world, 1)
         dungeon_tracking(self.door_rando_world)
+        if self.options.shopsanity.value:
+            sell_potions(self.door_rando_world, 1)
         massage_item_pool(self.door_rando_world)
         fill_prizes(self.door_rando_world)
         shuffled_locations = self.door_rando_world.get_unfilled_locations()
@@ -276,14 +279,21 @@ class ALttPRWorld(World):
                 # TODO: Edit the base ROM to add AP items and matching sprites
                 if location.item.classification & ItemClassification.progression:
                     dr_item = ItemFactory("Green Clock", 1)
+                    dr_item.price = 100 * self.options.shopsanity_prices.value
                 elif location.item.classification & ItemClassification.useful:
                     dr_item = ItemFactory("Blue Clock", 1)
+                    dr_item.price = 50 * self.options.shopsanity_prices.value
                 else:
                     dr_item = ItemFactory("Red Clock", 1)
+                    dr_item.price = 20 * self.options.shopsanity_prices.value
 
                 self.set_hint_and_credits_text(dr_item, location.item)
 
             self.door_rando_world.push_item(self.door_rando_world.get_location(location.name, 1), dr_item, collect=False)
+
+        # An extra function must be called to handle randomized items in shops
+        if self.options.shopsanity.value:
+            customize_shops(self.door_rando_world, 1)
 
         # Create hints for Saha and the Bomb Shop, if their prizes are in another world, and silver arrows
         hint_text = {}

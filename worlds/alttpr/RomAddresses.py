@@ -36,10 +36,6 @@ SCOUTREPLY_PLAYER_ADDR = SAVEDATA_START + 0x4DA     # 1 byte
 DYNAMIC_TOTAL_ADDR = SAVEDATA_START + 0x33E         # 2 bytes
 MODE_FLAGS = SAVEDATA_START + 0x33D                 # 1 byte
 
-# TODO: Shopsanity code
-# location_shop_order = [Regions.shop_to_location_table.keys()] + [Regions.retro_shops.keys()]
-# location_shop_ids = {0x0111, 0x0110, 0x010F, 0x00FF, 0x011F, 0x0109, 0x0115}
-
 # Copy/pasted from DoorRandomizer's MultiClient.py, because importing it would add a ton of extra dependencies
 
 location_table_uw = {"Blind's Hideout - Top": (0x11d, 0x10),

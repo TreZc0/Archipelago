@@ -36,8 +36,8 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
     for region in world.door_rando_world.regions:
         ap_region = Region(region.name, world.player, world.multiworld)
         for location in region.locations:
-            if "Shop - " in location.name or "Upgrade - " in location.name:
-                # TODO: Shopsanity
+            # Skip all locations that aren't randomized with the user's options
+            if ("Shop - " in location.name or "Upgrade - " in location.name) and not world.options.shopsanity:
                 continue
             elif " Item " in location.name:
                 # TODO: Retro
@@ -53,8 +53,7 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
                 if not id and \
                    " - Prize" not in location.name and \
                    location.name not in event_locations:
-                    logger.error(f"ALttPR: Found unknown location {location.name} in region {region.name}.")
-                    raise Exception()
+                    raise Exception(f"Found unknown location {location.name} in region {region.name}.")
 
                 if world.is_excluded_key_drop_location(location) or location.name in event_locations:
                     id = None

@@ -182,7 +182,9 @@ progressive_items = [
 ]
 
 useful_items = [
+    "Arrow Upgrade (+5)",
     "Blue Boomerang",
+    "Bomb Upgrade (+5)",
     "Boss Heart Container",
     "Progressive Mail",
     "Red Boomerang",
@@ -192,17 +194,25 @@ useful_items = [
 ]
 
 filler_items = [
-    "Bug Catching Net",
-    "Rupee (1)",
-    "Rupees (5)",
-    "Rupees (20)",
-    "Rupees (50)",
-    "Rupees (100)",
-    "Single Arrow",
     "Arrows (10)",
+    "Bee",
+    "Blue Potion",
+    "Blue Shield",
     "Bombs (3)",
     "Bombs (10)",
-    "Piece of Heart",
+    "Bug Catching Net",
+    "Compass (Eastern Palace)",
+    "Compass (Desert Palace)",
+    "Compass (Tower of Hera)",
+    "Compass (Palace of Darkness)",
+    "Compass (Swamp Palace)",
+    "Compass (Skull Woods)",
+    "Compass (Thieves Town)",
+    "Compass (Ice Palace)",
+    "Compass (Misery Mire)",
+    "Compass (Turtle Rock)",
+    "Compass (Ganons Tower)",
+    "Green Potion",
     "Map (Escape)",
     "Map (Eastern Palace)",
     "Map (Desert Palace)",
@@ -215,18 +225,17 @@ filler_items = [
     "Map (Misery Mire)",
     "Map (Turtle Rock)",
     "Map (Ganons Tower)",
-    "Compass (Eastern Palace)",
-    "Compass (Desert Palace)",
-    "Compass (Tower of Hera)",
-    "Compass (Palace of Darkness)",
-    "Compass (Swamp Palace)",
-    "Compass (Skull Woods)",
-    "Compass (Thieves Town)",
-    "Compass (Ice Palace)",
-    "Compass (Misery Mire)",
-    "Compass (Turtle Rock)",
-    "Compass (Ganons Tower)",
+    "Piece of Heart",
     "Red Clock",  # Placeholder for filler AP items
+    "Red Potion",
+    "Red Shield",
+    "Rupee (1)",
+    "Rupees (5)",
+    "Rupees (20)",
+    "Rupees (50)",
+    "Rupees (100)",
+    "Single Arrow",
+    "Small Heart",
 ]
 
 
@@ -290,6 +299,9 @@ def create_all_items(world: ALttPRWorld) -> None:
             classification = ItemClassification.useful
         elif ap_item_name in filler_items:
             classification = ItemClassification.filler
+        elif "Potion" in ap_item_name:
+            # Red/Green/Blue potions in Shopsanity are not a randomized item
+            continue
         else:
             logger.error(f"Item {item.name} not found in any item list, cannot determine classification.")
             raise Exception()
@@ -341,6 +353,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             target_location = world.multiworld.get_location(dr_dungeon_item.location.name, world.player)
             target_location.place_locked_item(ap_item)
 
+    # Standard mode requires a weapon and enough keys to be available early
     if world.options.world_mode.value == "standard":
         # In Standard mode, Link's Uncle will always have a weapon which was not added to the multiworld itempool,
         # unless the player starts with a sword or hammer.
@@ -377,6 +390,13 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             big_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop",
                                  "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop", "Hyrule Castle - Big Key Drop"]
             place_escape_key(big_key_locations, world, "Big")
+
+    # If Shopsanity is enabled, there should be one each of Red/Green/Blue Potions that can be repeatedly purchased
+    if world.options.shopsanity.value:
+        for potion_name in ["Red Potion", "Green Potion", "Blue Potion"]:
+            location = world.door_rando_world.find_items(potion_name, 1)[0]
+            potion = ALttPRItem(potion_name, ItemClassification.filler, ItemFactory(potion_name, 1).code, world.player)
+            world.multiworld.get_location(location.name, world.player).place_locked_item(potion)
 
 
 def place_escape_key(possible_locations: List[str], world: ALttPRWorld, key_size: str) -> str:

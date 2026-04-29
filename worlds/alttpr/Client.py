@@ -8,6 +8,7 @@ from NetUtils import ClientStatus
 from worlds.AutoSNIClient import SNIClient
 
 from . import Regions, RomAddresses
+from .ALttPDoorRandomizer import Regions as DRRegions
 
 if TYPE_CHECKING:
     from SNIClient import SNIContext
@@ -110,23 +111,16 @@ class ALttPRSNIClient(SNIClient):
             new_locations.append(location_id)
             ctx.locations_checked.add(location_id)
 
-        # TODO: Shopsanity code
-        # try:
-        #     shop_data = await snes_read(ctx, SHOP_ADDR, SHOP_LEN)
-        #     shop_data_changed = False
-        #     shop_data = list(shop_data)
-        #     for cnt, b in enumerate(shop_data):
-        #         location_id = Shops.SHOP_ID_START + cnt
-        #         if int(b) and location_id not in ctx.locations_checked:
-        #             new_check(location_id)
-        #         if should_collect(ctx, location_id):
-        #             if not int(b):
-        #                 shop_data[cnt] += 1
-        #                 shop_data_changed = True
-        #     if shop_data_changed:
-        #         snes_buffered_write(ctx, SHOP_ADDR, bytes(shop_data))
-        # except Exception as e:
-        #     snes_logger.info(f"Exception: {e}")
+        # Check for shops
+        try:
+            misc_data = await snes_read(ctx, RomAddresses.SHOP_SRAM_START, RomAddresses.SHOP_SRAM_LEN)
+            for cnt, b in enumerate(misc_data):
+                my_check = 0x400000 + cnt
+                if int(b) > 0 and my_check not in ctx.locations_checked:
+                    new_check(my_check)
+        except Exception as e:
+            print(e)
+            logging.warning(e)
 
         for location_id, (loc_roomid, loc_mask) in RomAddresses.location_table_uw.items():
             try:
@@ -141,9 +135,6 @@ class ALttPRSNIClient(SNIClient):
         uw_unchecked = {}
         uw_checked = {}
         for location, (roomid, mask) in RomAddresses.location_table_uw.items():
-            if location not in Regions.lookup_name_to_id:
-                logger.info(f"DEBUG: Cannot find {location} in lookup_name_to_id.")
-                logger.info(f"DEBUG: lookup_name_to_id: {Regions.lookup_name_to_id}")
             location_id = Regions.lookup_name_to_id[location]
             if location_id not in ctx.locations_checked:
                 uw_unchecked[location_id] = (roomid, mask)
@@ -252,6 +243,7 @@ class ALttPRSNIClient(SNIClient):
                 logger.info(f"Discarding recent {len(new_locations)} checks as ROM Status has changed.")
                 return False
             else:
+                print(f"Checking locations {new_locations}")
                 await ctx.check_locations(new_locations)
         await snes_flush_writes(ctx)
         return True
