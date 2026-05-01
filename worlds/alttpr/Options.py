@@ -115,13 +115,6 @@ class KeyDropShuffle(Toggle):
     default = False
 
 
-class Shopsanity(Toggle):
-    """All shops contain randomized items, including Potion Shop and Capacity Upgrade Fairy. Adds 32 items to the item pool. Each type of potion can be purchased
-    at a random shop."""
-    display_name = "Shopsanity"
-    default = False
-
-
 class EntranceShuffle(TextChoice):
     """Randomize where each building, cave, and dungeon entrance leads to."""
     display_name = "Entrance Shuffle"
@@ -162,6 +155,13 @@ class BossShuffle(TextChoice):
     option_full = "full"
     option_chaos = "random"
     default = "none"
+
+
+class Shopsanity(Toggle):
+    """All shops contain randomized items, including Potion Shop and Capacity Upgrade Fairy. Adds 32 items to the item pool. Each type of potion can be purchased
+    at a random shop."""
+    display_name = "Shopsanity"
+    default = False
 
 
 class PrizeShuffle(Toggle):
@@ -299,11 +299,11 @@ class ALttPROptions(PerGameCommonOptions):
     small_key_shuffle: SmallKeyShuffle
     big_key_shuffle: BigKeyShuffle
     key_drop_shuffle: KeyDropShuffle
-    shopsanity: Shopsanity
     entrance_shuffle: EntranceShuffle
     zelgawoods: Zelgawoods
     enemy_shuffle: EnemyShuffle
     boss_shuffle: BossShuffle
+    shopsanity: Shopsanity
     prize_shuffle: PrizeShuffle
     flute_shuffle: FluteShuffle
     pre_activated_flute: PreActivatedFlute
