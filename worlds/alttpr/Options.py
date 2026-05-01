@@ -122,16 +122,6 @@ class Shopsanity(Toggle):
     default = False
 
 
-class ShopsanityPrices(TextChoice):
-    """How expensive AP items are to purchase with Shopsanity enabled."""
-    # The number values is a multiplier applied to the price of each item.
-    display_name = "Shopsanity Prices"
-    option_standard = 1
-    option_cheap = 0.5
-    option_expensive = 1.5
-    default = 1
-
-
 class EntranceShuffle(TextChoice):
     """Randomize where each building, cave, and dungeon entrance leads to."""
     display_name = "Entrance Shuffle"
@@ -310,7 +300,6 @@ class ALttPROptions(PerGameCommonOptions):
     big_key_shuffle: BigKeyShuffle
     key_drop_shuffle: KeyDropShuffle
     shopsanity: Shopsanity
-    shopsanity_prices: ShopsanityPrices
     entrance_shuffle: EntranceShuffle
     zelgawoods: Zelgawoods
     enemy_shuffle: EnemyShuffle

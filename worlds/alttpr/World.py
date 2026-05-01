@@ -219,8 +219,16 @@ class ALttPRWorld(World):
         generate_itempool(self.door_rando_world, 1)
         set_rules(self.door_rando_world, 1)
         dungeon_tracking(self.door_rando_world)
+
         if self.options.shopsanity.value:
             sell_potions(self.door_rando_world, 1)
+            # Red Potions and Bees make sense as an item to purchase, but not as a random item to receive.
+            # Usually they turn into rupees upon receiving them from another player, which is confusing.
+            for item in self.door_rando_world.get_items():
+                if item.name == "Bee" or (item.name == "Red Potion" and not item.priority):
+                    self.door_rando_world.itempool.remove(item)
+                    self.door_rando_world.itempool.append(ItemFactory("Rupees (20)", 1))
+
         massage_item_pool(self.door_rando_world)
         fill_prizes(self.door_rando_world)
         shuffled_locations = self.door_rando_world.get_unfilled_locations()
@@ -279,13 +287,13 @@ class ALttPRWorld(World):
                 # TODO: Edit the base ROM to add AP items and matching sprites
                 if location.item.classification & ItemClassification.progression:
                     dr_item = ItemFactory("Green Clock", 1)
-                    dr_item.price = 100 * self.options.shopsanity_prices.value
+                    dr_item.price = 100
                 elif location.item.classification & ItemClassification.useful:
                     dr_item = ItemFactory("Blue Clock", 1)
-                    dr_item.price = 50 * self.options.shopsanity_prices.value
+                    dr_item.price = 50
                 else:
                     dr_item = ItemFactory("Red Clock", 1)
-                    dr_item.price = 20 * self.options.shopsanity_prices.value
+                    dr_item.price = 20
 
                 self.set_hint_and_credits_text(dr_item, location.item)
 

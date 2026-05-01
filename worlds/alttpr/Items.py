@@ -5,6 +5,7 @@ from typing import List, TYPE_CHECKING
 
 from BaseClasses import Item, ItemClassification
 
+from .ALttPDoorRandomizer.BaseClasses import LocationType
 from .ALttPDoorRandomizer.Items import ItemFactory, item_table
 from .Regions import get_event_locations
 
@@ -184,10 +185,13 @@ progressive_items = [
 useful_items = [
     "Arrow Upgrade (+5)",
     "Blue Boomerang",
+    "Blue Potion",
     "Bomb Upgrade (+5)",
     "Boss Heart Container",
+    "Green Potion",
     "Progressive Mail",
     "Red Boomerang",
+    "Red Potion",
     "Rupees (300)",
     "Sanctuary Heart Container",
     "Blue Clock",  # Placeholder for useful AP items
@@ -196,7 +200,6 @@ useful_items = [
 filler_items = [
     "Arrows (10)",
     "Bee",
-    "Blue Potion",
     "Blue Shield",
     "Bombs (3)",
     "Bombs (10)",
@@ -212,7 +215,6 @@ filler_items = [
     "Compass (Misery Mire)",
     "Compass (Turtle Rock)",
     "Compass (Ganons Tower)",
-    "Green Potion",
     "Map (Escape)",
     "Map (Eastern Palace)",
     "Map (Desert Palace)",
@@ -227,7 +229,6 @@ filler_items = [
     "Map (Ganons Tower)",
     "Piece of Heart",
     "Red Clock",  # Placeholder for filler AP items
-    "Red Potion",
     "Red Shield",
     "Rupee (1)",
     "Rupees (5)",
@@ -287,11 +288,18 @@ def create_all_items(world: ALttPRWorld) -> None:
             if len(escape_keys) > 0:
                 dr_itempool.remove(escape_keys[0])
 
+    # Remove bomb and arrow capacity upgrades from the item pool for shopsanity. They will be added
+    # to a random shop in the pre_fill() stage of generation.
+    if world.options.shopsanity.value:
+        for upgrade in [item for item in dr_itempool if "Arrow Upgrade" in item.name or "Bomb Upgrade" in item.name]:
+            dr_itempool.remove(upgrade)
+
     # Itempool will not include dungeon items unless keysanity is enabled.
     # Key drop keys are also not in the item pool unless key drop in enabled.
     itempool = []
     for item in dr_itempool:
         ap_item_name = item.name if item.name not in dr_ap_different_names else dr_ap_different_names[item.name]
+        code = item.code
 
         if ap_item_name in progressive_items:
             classification = ItemClassification.progression
@@ -299,14 +307,19 @@ def create_all_items(world: ALttPRWorld) -> None:
             classification = ItemClassification.useful
         elif ap_item_name in filler_items:
             classification = ItemClassification.filler
-        elif "Potion" in ap_item_name:
-            # Red/Green/Blue potions in Shopsanity are not a randomized item
-            continue
         else:
             logger.error(f"Item {item.name} not found in any item list, cannot determine classification.")
             raise Exception()
 
-        ap_item = ALttPRItem(ap_item_name, classification, item.code, world.player)
+        if world.options.shopsanity.value and (ap_item_name == "Bee" or (ap_item_name == "Red Potion" and not item.priority)):
+            # Having bees and potions as randomized items is kinda wonky. Usually when you receive them they
+            # show up as rupees, and these items (currently) only appear in Shopsanity, so let's just turn them into rupees.
+            # One red potion should always be available for purchase in shops, and it will have True priority.
+            ap_item_name = "Rupees (50)"
+            classification = ItemClassification.filler
+            code = ItemFactory(ap_item_name, 1).code
+
+        ap_item = ALttPRItem(ap_item_name, classification, code, world.player)
         itempool.append(ap_item)
 
     world.multiworld.itempool += itempool
@@ -393,10 +406,22 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
 
     # If Shopsanity is enabled, there should be one each of Red/Green/Blue Potions that can be repeatedly purchased
     if world.options.shopsanity.value:
-        for potion_name in ["Red Potion", "Green Potion", "Blue Potion"]:
-            location = world.door_rando_world.find_items(potion_name, 1)[0]
-            potion = ALttPRItem(potion_name, ItemClassification.filler, ItemFactory(potion_name, 1).code, world.player)
+        shop_locations = [location for location in world.door_rando_world.get_locations() if location.type == LocationType.Shop]
+        for shop_item in ["Red Potion", "Green Potion", "Blue Potion"]:
+            location = world.door_rando_world.find_items(shop_item, 1)[0]
+            potion = ALttPRItem(shop_item, ItemClassification.useful, ItemFactory(shop_item, 1).code, world.player)
             world.multiworld.get_location(location.name, world.player).place_locked_item(potion)
+            shop_locations.remove(location)
+
+        # Set the arrow and bomb capacity upgrades to be in a shop.
+        # The randomizer does this by moving items around after placing everything, which isn't an option for us.
+        world.random.shuffle(shop_locations)
+        upgrades = [item for item in world.door_rando_world.itempool if item.name == "Arrow Upgrade (+5)" or item.name == "Bomb Upgrade (+5)"]
+        for upgrade in upgrades:
+            location = shop_locations.pop()
+            if not location.item:  # Should always be true
+                new_item = ALttPRItem(upgrade.name, ItemClassification.useful, ItemFactory(upgrade.name, 1).code, world.player)
+                world.multiworld.get_location(location.name, world.player).place_locked_item(new_item)
 
 
 def place_escape_key(possible_locations: List[str], world: ALttPRWorld, key_size: str) -> str:

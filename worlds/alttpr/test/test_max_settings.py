@@ -16,6 +16,7 @@ class TestMaxSettings(ALttPRTestBase):
         "small_key_shuffle": "true",
         "big_key_shuffle": "true",
         "key_drop_shuffle": "true",
+        "shopsanity": "true",
         "enemy_shuffle": "logical",
         "boss_shuffle": "chaos",
         "prize_shuffle": "true",
