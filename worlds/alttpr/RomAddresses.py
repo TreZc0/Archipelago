@@ -259,6 +259,17 @@ location_table_uw = {"Blind's Hideout - Top": (0x11d, 0x10),
                      'Ganons Tower - Pre-Moldorm Chest': (0x3d, 0x40),
                      'Ganons Tower - Validation Chest': (0x4d, 0x10)}
 
+location_table_boss = {'Eastern Palace - Prize': 0x2000,
+                       'Desert Palace - Prize': 0x1000,
+                       'Tower of Hera - Prize': 0x0020,
+                       'Palace of Darkness - Prize': 0x0200,
+                       'Thieves\' Town - Prize': 0x0010,
+                       'Skull Woods - Prize': 0x0080,
+                       'Swamp Palace - Prize': 0x0400,
+                       'Ice Palace - Prize': 0x0040,
+                       'Misery Mire - Prize': 0x0100,
+                       'Turtle Rock - Prize': 0x0008}
+
 location_table_npc = {'Mushroom': 0x1000,
                       'King Zora': 0x2,
                       'Sahasrahla': 0x10,

@@ -187,6 +187,14 @@ class ALttPRSNIClient(SNIClient):
                         ow_data[screenid - ow_begin] |= 0x40
                     snes_buffered_write(ctx, RomAddresses.SAVEDATA_START + 0x280 + ow_begin, bytes(ow_data))
 
+        if not all([location in ctx.locations_checked for location in RomAddresses.location_table_boss.keys()]):
+            boss_data = await snes_read(ctx, RomAddresses.SAVEDATA_START + 0x472, 2)
+            if boss_data is not None:
+                boss_value = boss_data[0] | (boss_data[1] << 8)
+                for location, mask in RomAddresses.location_table_boss.items():
+                    if boss_value & mask != 0 and location not in ctx.locations_checked:
+                        new_check(Regions.lookup_name_to_id[location])
+
         if not ctx.locations_checked.issuperset(RomAddresses.location_table_npc):
             npc_data = await snes_read(ctx, RomAddresses.SAVEDATA_START + 0x410, 2)
             if npc_data is not None:
