@@ -1,12 +1,15 @@
 # Run the Archipelago commands Generate and Launch.
 # Assumes this folder is in Archipelago\worlds\alttpr, and Python 3.13 is installed.
 # WARNING: this will wipe the Archipelago\output folder
-# TODO: Don't wipe the output folder
+import argparse
 import os
 import shutil
 import subprocess
 import zipfile
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-s", "--seed")
+seed = parser.parse_args().seed
 
 if not os.path.basename(os.getcwd()) == "alttpr":
     print("This script must be run from within the 'alttpr' folder.")
@@ -16,7 +19,10 @@ if os.path.exists("output"):
     shutil.rmtree("output")
 os.mkdir("output")
 
-subprocess.run(["py", "-3.13", "Generate.py"])
+generate_command = ["py", "-3.13", "Generate.py"]
+if seed:
+    generate_command.extend(["--seed", seed])
+subprocess.run(generate_command)
 output_zip_filename = os.listdir("output")[0]
 output_zip = zipfile.ZipFile(os.path.join("output", output_zip_filename))
 output_zip.extractall("output")

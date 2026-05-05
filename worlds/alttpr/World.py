@@ -33,6 +33,7 @@ from .ALttPDoorRandomizer.ItemList import create_farm_locations, customize_shops
 from .ALttPDoorRandomizer.Items import ItemFactory
 from .ALttPDoorRandomizer.OverworldShuffle import link_overworld
 from .ALttPDoorRandomizer.OWEdges import create_owedges
+from .ALttPDoorRandomizer.RaceRandom import init_race_random
 from .ALttPDoorRandomizer.Regions import adjust_locations, create_regions, create_dungeon_regions, create_shops, lookup_name_to_id, mark_light_dark_world_regions
 from .ALttPDoorRandomizer.Rom import apply_rom_settings, hud_format_text, patch_rom
 from .ALttPDoorRandomizer.RoomData import create_rooms
@@ -108,6 +109,7 @@ class ALttPRWorld(World):
 
     def generate_early(self) -> None:
         self.seed_hash = self.random.randbytes(4)
+        init_race_random(self.random)
         self.validate_options()
 
         # Have the Door Randomizer generate a world with all the locations, entrances, items, etc.
@@ -173,17 +175,14 @@ class ALttPRWorld(World):
         self.finished_generating = threading.Event()
         self.door_rando_world.difficulty_requirements = {1: difficulties[self.door_rando_world.difficulty[1]]}
 
+        logger.info(f"Start inventory: {self.options.start_inventory.value}")
         for item_name, item_count in self.options.start_inventory.value.items():
-            classification = ItemClassification.filler
-            if item_name in Items.progressive_items:
-                classification = ItemClassification.progression
-            elif item_name in Items.useful_items:
-                classification = ItemClassification.useful
-
             for i in range(0, item_count):
                 door_rando_item = ItemFactory(item_name, 1)
                 self.door_rando_world.push_precollected(door_rando_item)
-                self.multiworld.push_precollected(Items.create_item(self, item_name, classification))
+                if not getattr(self.multiworld, "generation_is_fake", False):  # UT shouldn't be pushing items to the Multiworld
+                    self.multiworld.push_precollected(Items.create_item(self, item_name, Items.get_classification(item_name)))
+        logger.info(f"Precollected items: {self.multiworld.precollected_items[self.player]}")
 
         create_regions(self.door_rando_world, 1)
         create_dungeon_regions(self.door_rando_world, 1)
@@ -232,7 +231,7 @@ class ALttPRWorld(World):
         massage_item_pool(self.door_rando_world)
         fill_prizes(self.door_rando_world)
         shuffled_locations = self.door_rando_world.get_unfilled_locations()
-        self.random.shuffle(shuffled_locations)  # Make sure we use AP's random() features so that it generates consistently. TODO: the random() calls inside DR don't do that.
+        self.random.shuffle(shuffled_locations)  # Make sure we use AP's random() features so that it generates consistently.
         fill_dungeons_restrictive(self.door_rando_world, shuffled_locations)
 
 
@@ -248,12 +247,18 @@ class ALttPRWorld(World):
         Items.create_all_items(self)
 
 
-    def pre_fill(self) -> None:
+    def generate_basic(self):
+        # This should be done in pre_fill, but Universal Tracker doesn't run pre_fill and needs to see the event items
         Items.place_pre_fill_items(self)
 
 
     # Our world class must also have a create_item function that can create any one of our items by name at any time.
     def create_item(self, name: str, classification: ItemClassification = ItemClassification.filler) -> Items.ALttPRItem:
+        try:
+            classification = Items.get_classification(name)
+        except Exception:
+            # Unknown item, should never reach here, but also shouldn't crash if we do
+            pass
         return Items.create_item(self, name, classification)
 
 

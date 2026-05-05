@@ -83,6 +83,7 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
 def get_event_locations(world: ALttPRWorld):
     # TODO: I feel like most of these aren't needed until door randomizer is added, and some of them still seem unnecessary (e.g. Skull Star Tile).
     # It's fine if it doesn't affect anything for players, but if it shows up in the player log or Poptracker than that could be an annoyance.
+    # TODO: Maybe get these directly from OWR?
     event_locations = {
         "Ganon": "Triforce",
         "Agahnim 1": "Beat Agahnim 1",
@@ -146,8 +147,17 @@ def init_lookups():
     global lookup_id_to_name
     global lookup_name_to_id
 
+    # TODO: Bonk shuffle
+    # TODO: Shopsanity
     lookup_id_to_name = {x: y for x, y in DoorRandomizerRegions.lookup_id_to_name.items()}
+    # lookup_id_to_name.update(DoorRandomizerRegions.bonk_table_by_location_id)
+    # lookup_id_to_name.update(DoorRandomizerRegions.shop_table_by_location_id)
     lookup_name_to_id = {x: y for x, y in DoorRandomizerRegions.lookup_name_to_id.items()}
+    # lookup_name_to_id.update(DoorRandomizerRegions.bonk_table_by_location)
+    # lookup_name_to_id.update(DoorRandomizerRegions.shop_table_by_location)
+
+    for event in DoorRandomizerRegions.location_events:
+        lookup_name_to_id[event] = None
 
     for super_tile, pot_list in PotShuffle.vanilla_pots.items():
         for pot_index, pot in enumerate(pot_list):

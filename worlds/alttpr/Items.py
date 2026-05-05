@@ -267,6 +267,20 @@ def get_random_filler_item_name(world: ALttPRWorld) -> str:
     raise NotImplementedError("get_random_filler_item_name is not implemented yet")
 
 
+def get_classification(name: str) -> ItemClassification:
+    if name in progressive_items:
+        classification = ItemClassification.progression
+    elif name in useful_items:
+        classification = ItemClassification.useful
+    elif name in filler_items:
+        classification = ItemClassification.filler
+    else:
+        logger.error(f"Item {name} not found in any item list, cannot determine classification.")
+        raise Exception()
+
+    return classification
+
+
 def create_item(world: ALttPRWorld, name: str, classification: ItemClassification) -> ALttPRItem:
     door_rando_item = ItemFactory(name, 1)
     item_name_to_id[name] = door_rando_item.code
@@ -300,16 +314,7 @@ def create_all_items(world: ALttPRWorld) -> None:
     for item in dr_itempool:
         ap_item_name = item.name if item.name not in dr_ap_different_names else dr_ap_different_names[item.name]
         code = item.code
-
-        if ap_item_name in progressive_items:
-            classification = ItemClassification.progression
-        elif ap_item_name in useful_items:
-            classification = ItemClassification.useful
-        elif ap_item_name in filler_items:
-            classification = ItemClassification.filler
-        else:
-            logger.error(f"Item {item.name} not found in any item list, cannot determine classification.")
-            raise Exception()
+        classification = get_classification(ap_item_name)
 
         if world.options.shopsanity.value and (ap_item_name == "Bee" or (ap_item_name == "Red Potion" and not item.priority)):
             # Having bees and potions as randomized items is kinda wonky. Usually when you receive them they
