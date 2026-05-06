@@ -88,23 +88,15 @@ class ALttPRWorld(World):
     finished_generating: threading.Event
 
 
-    def validate_options(self) -> None:
-        start_inventory = self.options.start_inventory.value.keys()
-        always_invalid_starting_items = ["Triforce Piece", "Green Clock", "Blue Clock", "Red Clock"]
-        always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
-        invalid_items = []
-        for item in start_inventory:
-            if item in always_invalid_starting_items or item not in self.item_name_to_id:
-                invalid_items.append(item)
-        if len(invalid_items) > 0:
-            raise OptionError("The following items are not allowed in the starting inventory: " + ", ".join(invalid_items))
-
-        if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
-            raise OptionError("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
-
-        sprite = self.options.sprite.value.lower()
-        if sprite != "link" and sprite not in Sprites.sprites:
-            raise OptionError(f"{self.options.sprite.value} is not a valid sprite.")
+    ###############################################################################
+    # Generation functions.
+    # All functions below are called in order from top to bottom while generating.
+    ###############################################################################
+    def interpret_slot_data(self, slot_data: dict[str, typing.Any]) -> None:
+        # This is only called by clients such as Universal Tracker.
+        # We need to pass in anything that is randomized during generation, such as
+        # pendants/crystals, entrances in entrance shuffle, enemies in enemizer, etc.
+        return slot_data
 
 
     def generate_early(self) -> None:
@@ -175,14 +167,28 @@ class ALttPRWorld(World):
         self.finished_generating = threading.Event()
         self.door_rando_world.difficulty_requirements = {1: difficulties[self.door_rando_world.difficulty[1]]}
 
-        logger.info(f"Start inventory: {self.options.start_inventory.value}")
         for item_name, item_count in self.options.start_inventory.value.items():
             for i in range(0, item_count):
                 door_rando_item = ItemFactory(item_name, 1)
                 self.door_rando_world.push_precollected(door_rando_item)
                 if not getattr(self.multiworld, "generation_is_fake", False):  # UT shouldn't be pushing items to the Multiworld
                     self.multiworld.push_precollected(Items.create_item(self, item_name, Items.get_classification(item_name)))
-        logger.info(f"Precollected items: {self.multiworld.precollected_items[self.player]}")
+
+        # This will let us export information needed by Universal Tracker, such as randomized entrances, doors, medallions, etc.
+        class WorldSettings:
+            race = False
+            notes = ""
+        if hasattr(self.multiworld, "re_gen_passthrough") and self.game in self.multiworld.re_gen_passthrough:
+            slot_data = self.multiworld.re_gen_passthrough[self.game]
+            # All the 1's (representing the player) get converted to "1"'s when it's sent as slot data
+            for key in slot_data.keys():
+                if "1" in slot_data[key]:
+                    slot_data[key][1] = slot_data[key]["1"]
+                    del slot_data[key]["1"]
+            self.door_rando_world.customizer = CustomSettings()
+            self.door_rando_world.customizer.file_source = slot_data
+        self.door_rando_world.settings = CustomSettings()
+        self.door_rando_world.settings.create_from_world(self.door_rando_world, WorldSettings())
 
         create_regions(self.door_rando_world, 1)
         create_dungeon_regions(self.door_rando_world, 1)
@@ -349,8 +355,21 @@ class ALttPRWorld(World):
         self.finished_generating.set()
 
 
-    # Set the text for hints and end credits for AP items
+    def fill_slot_data(self) -> dict[str, typing.Any]:
+        world = self.door_rando_world
+        world.settings.record_info(world)  # Bosses, medallions, and random seed (not being set)
+        # world.settings.record_overworld(world)  TODO: Overworld shuffle
+        if self.options.entrance_shuffle.value != "vanilla":
+            world.settings.record_entrances(world)
+        # world.settings.record_doors(world) TODO: Doors
+        return world.settings.world_rep
+
+
+    #########################################
+    # Helper Functions
+    #########################################
     def set_hint_and_credits_text(self, dr_item, ap_item):
+        # Set the text for hints and end credits for AP items.
         # Setting a maximum length for each text. If the total text is too long, we'll get an exception while patching,
         # although we have ~14 KB of room for more text before that happens.
         # The bigger restriction is that the credits can only display 32 characters at a time
@@ -428,3 +447,22 @@ class ALttPRWorld(World):
 
     def is_excluded_key_drop_location(self, location):
         return not self.options.key_drop_shuffle.value and ("Key Drop" in location.name or "Pot Key" in location.name)
+
+
+    def validate_options(self) -> None:
+        start_inventory = self.options.start_inventory.value.keys()
+        always_invalid_starting_items = ["Triforce Piece", "Green Clock", "Blue Clock", "Red Clock"]
+        always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
+        invalid_items = []
+        for item in start_inventory:
+            if item in always_invalid_starting_items or item not in self.item_name_to_id:
+                invalid_items.append(item)
+        if len(invalid_items) > 0:
+            raise OptionError("The following items are not allowed in the starting inventory: " + ", ".join(invalid_items))
+
+        if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
+            raise OptionError("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
+
+        sprite = self.options.sprite.value.lower()
+        if sprite != "link" and sprite not in Sprites.sprites:
+            raise OptionError(f"{self.options.sprite.value} is not a valid sprite.")
