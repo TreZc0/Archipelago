@@ -210,15 +210,6 @@ class ALttPRWorld(World):
         create_item_pool_config(self.door_rando_world)
         link_doors(self.door_rando_world, 1)
         mark_light_dark_world_regions(self.door_rando_world, 1)  # This is run twice in OWR Main.py, not sure why but for now I'll do the same.
-
-        # There appears to be a glitch in DR where standard/crosskeys seeds with a HC entrance in the dark world,
-        # will mark HC as requiring the Moon Pearl. At least that's what appears to be happening.
-        # TODO: Fix this in DR/OWR if it is a bug there.
-        for region in self.door_rando_world.get_regions():
-            if region.name.startswith("Hyrule") or region.name.startswith("Sewers") or region.name == "Sanctuary":
-                region.is_light_world = True
-                region.is_dark_world = False
-
         set_prize_drops(self.door_rando_world, 1)
         create_farm_locations(self.door_rando_world, 1)
         generate_itempool(self.door_rando_world, 1)
