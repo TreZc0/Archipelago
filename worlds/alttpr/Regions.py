@@ -78,6 +78,8 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
             ap_entrance.connect(ap_regions[exit.connected_region.name])
 
     world.multiworld.regions += list(ap_regions.values())
+    # sanc = world.multiworld.get_location("Sanctuary", world.player)
+    # sanc.access_rule(world.multiworld.state)
 
 
 def get_event_locations(world: ALttPRWorld):

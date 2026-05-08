@@ -2,7 +2,7 @@ import logging
 from typing import Any, Callable, Optional
 
 from BaseClasses import CollectionState
-from .ALttPDoorRandomizer.BaseClasses import World as DoorRandoWorld
+from .ALttPDoorRandomizer.BaseClasses import Door, Entrance, Location, World as DoorRandoWorld
 
 
 logger = logging.getLogger("alttpr")
@@ -33,8 +33,17 @@ class StateAdapter:
     # multiworld logic. We ignore the argument and use AP's player value to check AP's state.
 
     # Core generic item checking methods
-    def can_reach(self, location_name: str, location_type: Optional[str]=None, player=None) -> bool:
-        return self.state.can_reach(location_name, location_type, self.player)
+    def can_reach(self, location_name, location_type: Optional[str]=None, player=None) -> bool:
+        print(f"Running StateAdapter.can_reach() on location_name: {location_name}, location_type: {location_type}, is str: {isinstance(location_name, str)}")
+        if isinstance(location_name, str):
+            name = location_name
+        else:
+            name = location_name.name
+        if isinstance(location_name, Door) or isinstance(location_name, Entrance):
+            location_type = "Entrance"
+        elif isinstance(location_name, Location):
+            location_type = "Location"
+        return self.state.can_reach(name, location_type, self.player)
 
 
     def has(self, item: str, player: int, count: int = 1) -> bool:
@@ -274,6 +283,7 @@ def adapt_door_rando_rule(rule_func: Callable[[StateAdapter], bool], world: Door
     # Convert a DoorRandomizer rule function to work with Archipelago's CollectionState.
     def adapted_rule(state: CollectionState) -> bool:
         try:
+            #import pdb; pdb.set_trace()
             return rule_func(StateAdapter(state, world, player))
         except Exception as e:
             logger.warning(f"Error evaluating adapted DoorRandomizer rule for player {player}: {e}")
