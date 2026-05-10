@@ -33,16 +33,14 @@ class StateAdapter:
     # multiworld logic. We ignore the argument and use AP's player value to check AP's state.
 
     # Core generic item checking methods
-    def can_reach(self, location_name, location_type: Optional[str]=None, player=None) -> bool:
-        print(f"Running StateAdapter.can_reach() on location_name: {location_name}, location_type: {location_type}, is str: {isinstance(location_name, str)}")
-        if isinstance(location_name, str):
-            name = location_name
-        else:
-            name = location_name.name
-        if isinstance(location_name, Door) or isinstance(location_name, Entrance):
+    def can_reach(self, location, location_type: Optional[str]=None, player=None) -> bool:
+        name = location if isinstance(location, str) else location.name
+
+        if isinstance(location, Door) or isinstance(location, Entrance):
             location_type = "Entrance"
-        elif isinstance(location_name, Location):
+        elif isinstance(location, Location):
             location_type = "Location"
+
         return self.state.can_reach(name, location_type, self.player)
 
 
@@ -276,7 +274,8 @@ class StateAdapter:
     def is_not_bunny(self, region, player) -> bool:
         if self.has_item('Moon Pearl'):
             return True
-        return region.is_light_world if self.world.mode != 'inverted' else region.is_dark_world
+        return not region.can_cause_bunny(1)
+        #return region.is_light_world if self.world.mode != 'inverted' else region.is_dark_world
 
 
 def adapt_door_rando_rule(rule_func: Callable[[StateAdapter], bool], world: DoorRandoWorld, player: int) -> Callable[[CollectionState], bool]:

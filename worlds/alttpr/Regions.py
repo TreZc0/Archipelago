@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from BaseClasses import Entrance, Location, Region
 
-from .ALttPDoorRandomizer.BaseClasses import PotItem, PotFlags
+from .ALttPDoorRandomizer.BaseClasses import PotItem, PotFlags, RegionType
 from .ALttPDoorRandomizer.source.dungeon import EnemyList
 from .ALttPDoorRandomizer import PotShuffle
 from .ALttPDoorRandomizer import Regions as DoorRandomizerRegions
@@ -72,8 +72,12 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
         for exit in region.exits:
             if exit.connected_region is None:
                 continue
+
+            # Need to check for always impassible doors, other door logic like keys is handled in access_rule
+            blocked = False if not exit.door else exit.door.blocked
+
             ap_entrance = Entrance(world.player, exit.name, parent=ap_region)
-            ap_entrance.access_rule = adapt_door_rando_rule(exit.access_rule, world.door_rando_world, world.player)
+            ap_entrance.access_rule = adapt_door_rando_rule(exit.access_rule if not blocked else lambda state: False, world.door_rando_world, world.player)
             ap_region.exits.append(ap_entrance)
             ap_entrance.connect(ap_regions[exit.connected_region.name])
 

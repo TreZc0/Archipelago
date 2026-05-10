@@ -157,6 +157,7 @@ class ALttPRWorld(World):
         self.door_rando_world.shufflelinks = {1: False}
         self.door_rando_world.shuffletavern = {1: False}
         self.door_rando_world.skullwoods = {1: "followlinked" if self.options.zelgawoods.value else "original"}  # How to handle Skull Woods in entrance shuffle.
+        self.door_rando_world.trap_door_mode = {1: "vanilla"}
         self.door_rando_world.treasure_hunt_count = {1: self.options.triforce_hunt_goal.value}
         self.door_rando_world.treasure_hunt_total = {1: self.options.triforce_hunt_total.value}
 
@@ -211,12 +212,12 @@ class ALttPRWorld(World):
         create_item_pool_config(self.door_rando_world)
         link_doors(self.door_rando_world, 1)
         mark_light_dark_world_regions(self.door_rando_world, 1)  # This is run twice in OWR Main.py, not sure why but for now I'll do the same.
+        self.door_rando_world.get_region("Menu", 1).is_light_world = self.options.world_mode != "inverted"  # Never start as a bunny
+        self.door_rando_world.get_region("Menu", 1).is_dark_world = self.options.world_mode == "inverted"
         set_prize_drops(self.door_rando_world, 1)
         create_farm_locations(self.door_rando_world, 1)
         generate_itempool(self.door_rando_world, 1)
-        print(f"1. Can access Sanctuary: {self.door_rando_world.get_location("Sanctuary", 1).can_reach(self.door_rando_world.state)}, with items {self.door_rando_world.state.prog_items}")
         set_rules(self.door_rando_world, 1)
-        print(f"2. Can access Sanctuary: {self.door_rando_world.get_location("Sanctuary", 1).can_reach(self.door_rando_world.state)}, with items {self.door_rando_world.state.prog_items}")
         dungeon_tracking(self.door_rando_world)
 
         if self.options.shopsanity.value:
@@ -250,8 +251,6 @@ class ALttPRWorld(World):
     def generate_basic(self):
         # This should be done in pre_fill, but Universal Tracker doesn't run pre_fill and needs to see the event items
         Items.place_pre_fill_items(self)
-        print(f"3. Can access Sanctuary: {self.door_rando_world.get_location("Sanctuary", 1).can_reach(self.door_rando_world.state)}, with items {self.door_rando_world.state.prog_items}")
-        #print(f"Can access multiworld Sanctuary: {self.multiworld.get_location("Sanctuary", self.player).can_reach(self.multiworld.state)}, with items {self.multiworld.state.prog_items}")
 
 
     # Our world class must also have a create_item function that can create any one of our items by name at any time.
@@ -349,7 +348,6 @@ class ALttPRWorld(World):
         rom.write(os.path.join(output_directory, f"{self.multiworld.get_out_file_name_base(self.player)}.apalttpr"))
         self.rom_name = rom.name
         self.finished_generating.set()
-        print(f"4. Can access Sanctuary: {self.door_rando_world.get_location("Sanctuary", 1).can_reach(self.door_rando_world.state)}, with items {self.door_rando_world.state.prog_items}")
 
 
     def fill_slot_data(self) -> dict[str, typing.Any]:
