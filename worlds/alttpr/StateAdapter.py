@@ -170,8 +170,17 @@ class StateAdapter:
 
 
     def can_reach_blue(self, region, player) -> bool:
-        # TODO: Door rando
-        return True
+        # TODO: Door rando will require a more complex and slow pathing algorithm.
+        # This will be the simple version for non-door rando. In general, if you can reach
+        # blue blocks you can also reach a crystal switch.
+        # TODO: Bomb bag also breaks this assumption for back of Mire
+        extra_condition = True
+        if region.name.startswith("Mire") and region.name != "Mire Crystal Mid":  # If not in the back of Mire
+            extra_condition = self.has_item("Small Key (Misery Mire)", 3)
+        elif region.name in ["Ice Backwards Room", "Ice Crystal Left", "Ice Crystal Right"]:
+            extra_condition = self.has_item("Small Key (Ice Palace)", 6)
+
+        return self.can_hit_crystal(player) and extra_condition
 
 
     def can_reach_orange(self, region, player) -> bool:
