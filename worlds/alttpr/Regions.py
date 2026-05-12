@@ -62,6 +62,7 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
                     world.player, location.name, id, ap_region
                 )
                 ap_location.access_rule = adapt_door_rando_rule(location.access_rule, world.door_rando_world, world.player)
+                ap_location.item_rule = adapt_door_rando_rule(location.item_rule, world.door_rando_world, world.player)
                 ap_region.locations.append(ap_location)
 
         ap_regions[region.name] = ap_region
@@ -82,8 +83,6 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
             ap_entrance.connect(ap_regions[exit.connected_region.name])
 
     world.multiworld.regions += list(ap_regions.values())
-    # sanc = world.multiworld.get_location("Sanctuary", world.player)
-    # sanc.access_rule(world.multiworld.state)
 
 
 def get_event_locations(world: ALttPRWorld):
