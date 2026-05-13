@@ -26,6 +26,7 @@ from .ALttPDoorRandomizer.Doors import create_doors
 from .ALttPDoorRandomizer.DoorShuffle import link_doors, link_doors_prep
 from .ALttPDoorRandomizer.Dungeons import create_dungeons
 from .ALttPDoorRandomizer.source.enemizer.Enemizer import randomize_enemies
+from .ALttPDoorRandomizer.source.dungeon.EnemyList import enemy_names
 from .ALttPDoorRandomizer.source.overworld.EntranceShuffle2 import link_entrances_new
 from .ALttPDoorRandomizer.Fill import dungeon_tracking, fill_dungeons_restrictive, promote_dungeon_items, sell_potions, set_prize_drops
 from .ALttPDoorRandomizer.source.item.FillUtil import create_item_pool_config, massage_item_pool
@@ -96,6 +97,18 @@ class ALttPRWorld(World):
         # This is only called by clients such as Universal Tracker.
         # We need to pass in anything that is randomized during generation, such as
         # pendants/crystals, entrances in entrance shuffle, enemies in enemizer, etc.
+
+        # Convert the enemy IDs to names. IDs are used in slot data to save space.
+        overworld_enemies = slot_data["enemies"]["1"]["Overworld"]
+        for location_id in overworld_enemies:
+            for i in overworld_enemies[location_id]:
+                enemy_kind = overworld_enemies[location_id][i]
+                overworld_enemies[location_id][i] = enemy_names[enemy_kind]
+        underworld_enemies = slot_data["enemies"]["1"]["Underworld"]
+        for location_id in underworld_enemies:
+            for i in underworld_enemies[location_id]:
+                enemy_kind = underworld_enemies[location_id][i]
+                underworld_enemies[location_id][i] = enemy_names[enemy_kind]
         return slot_data
 
 
