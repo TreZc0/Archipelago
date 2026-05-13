@@ -242,6 +242,9 @@ class ALttPRWorld(World):
 
     def set_rules(self) -> None:
         Rules.set_all_rules(self)
+        if self.options.world_mode.value == "standard":
+            self.options.local_items.value.add("Small Key (Escape)")
+            self.options.local_items.value.add("Big Key (Escape)")
 
 
     def create_items(self) -> None:
