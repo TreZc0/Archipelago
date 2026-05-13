@@ -99,16 +99,18 @@ class ALttPRWorld(World):
         # pendants/crystals, entrances in entrance shuffle, enemies in enemizer, etc.
 
         # Convert the enemy IDs to names. IDs are used in slot data to save space.
-        overworld_enemies = slot_data["enemies"]["1"]["Overworld"]
-        for location_id in overworld_enemies:
-            for i in overworld_enemies[location_id]:
-                enemy_kind = overworld_enemies[location_id][i]
-                overworld_enemies[location_id][i] = enemy_names[enemy_kind]
-        underworld_enemies = slot_data["enemies"]["1"]["Underworld"]
-        for location_id in underworld_enemies:
-            for i in underworld_enemies[location_id]:
-                enemy_kind = underworld_enemies[location_id][i]
-                underworld_enemies[location_id][i] = enemy_names[enemy_kind]
+        if self.options.enemy_shuffle.value != "vanilla" and "enemies" in slot_data and "1" in slot_data["enemies"]:
+            overworld_enemies = slot_data["enemies"]["1"]["Overworld"]
+            for location_id in overworld_enemies:
+                for i in overworld_enemies[location_id]:
+                    enemy_kind = overworld_enemies[location_id][i]
+                    overworld_enemies[location_id][i] = enemy_names[enemy_kind]
+            underworld_enemies = slot_data["enemies"]["1"]["Underworld"]
+            for location_id in underworld_enemies:
+                for i in underworld_enemies[location_id]:
+                    enemy_kind = underworld_enemies[location_id][i]
+                    underworld_enemies[location_id][i] = enemy_names[enemy_kind]
+
         return slot_data
 
 
