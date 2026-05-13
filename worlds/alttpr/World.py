@@ -136,6 +136,7 @@ class ALttPRWorld(World):
         self.door_rando_world.intensity = {1: 0}  # No door shuffle
         self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
         self.door_rando_world.linked_drops = {1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
+        self.door_rando_world.lock_aga_door_in_escape = True
         self.door_rando_world.mapshuffle = {1: "wild" if self.options.map_shuffle.value else "none"}
         self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
         self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
@@ -242,9 +243,6 @@ class ALttPRWorld(World):
 
     def set_rules(self) -> None:
         Rules.set_all_rules(self)
-        if self.options.world_mode.value == "standard":
-            self.options.local_items.value.add("Small Key (Escape)")
-            self.options.local_items.value.add("Big Key (Escape)")
 
 
     def create_items(self) -> None:
@@ -362,7 +360,6 @@ class ALttPRWorld(World):
         # world.settings.record_doors(world) TODO: Doors
         if self.options.enemy_shuffle.value != "none":
             world.settings.record_enemies(world)
-        print(f"Slot data: {world.settings.world_rep}")
         return world.settings.world_rep
 
 

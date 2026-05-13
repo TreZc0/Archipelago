@@ -292,15 +292,15 @@ def create_all_items(world: ALttPRWorld) -> None:
     # If we're playing Standard mode with keysanity, we need to manually place the escape keys to prevent
     # getting BK'd in the escape sequence. This key is placed later in the pre_fill() stage of generation.
     dr_itempool = world.door_rando_world.itempool.copy()
-    # if world.options.world_mode.value == "standard":
-    #     if world.options.small_key_shuffle.value:
-    #         escape_keys = [item for item in dr_itempool if item.name == "Small Key (Escape)"]
-    #         for key in escape_keys:
-    #             dr_itempool.remove(key)
-    #     if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
-    #         escape_keys = [item for item in dr_itempool if item.name == "Big Key (Escape)"]
-    #         if len(escape_keys) > 0:
-    #             dr_itempool.remove(escape_keys[0])
+    if world.options.world_mode.value == "standard":
+        if world.options.small_key_shuffle.value:
+            escape_keys = [item for item in dr_itempool if item.name == "Small Key (Escape)"]
+            for key in escape_keys:
+                dr_itempool.remove(key)
+        if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
+            escape_keys = [item for item in dr_itempool if item.name == "Big Key (Escape)"]
+            if len(escape_keys) > 0:
+                dr_itempool.remove(escape_keys[0])
 
     # Remove bomb and arrow capacity upgrades from the item pool for shopsanity. They will be added
     # to a random shop in the pre_fill() stage of generation.
@@ -383,31 +383,31 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
 
         # If keysanity is enabled, the keys for the escape sequence should still be sphere 0,
         # to prevent the player from being near-instantly BK'd.
-        # if world.options.small_key_shuffle.value:
-        #     if world.options.key_drop_shuffle.value:
-        #         key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop"]
-        #         key_location = place_escape_key(key_locations, world, "Small")
-        #         key_locations.remove(key_location)
+        if world.options.small_key_shuffle.value:
+            if world.options.key_drop_shuffle.value:
+                key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop"]
+                key_location = place_escape_key(key_locations, world, "Small")
+                key_locations.remove(key_location)
 
-        #         key_locations.extend(["Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop"])
-        #         key_location = place_escape_key(key_locations, world, "Small")
-        #         key_locations.remove(key_location)
+                key_locations.extend(["Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop"])
+                key_location = place_escape_key(key_locations, world, "Small")
+                key_locations.remove(key_location)
 
-        #         key_locations.extend(["Hyrule Castle - Big Key Drop", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"])
-        #         key_location = place_escape_key(key_locations, world, "Small")
-        #         key_locations.remove(key_location)
+                key_locations.extend(["Hyrule Castle - Big Key Drop", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"])
+                key_location = place_escape_key(key_locations, world, "Small")
+                key_locations.remove(key_location)
 
-        #         key_locations.append("Hyrule Castle - Key Rat Key Drop")
-        #         place_escape_key(key_locations, world, "Small")
-        #     else:
-        #         small_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest",
-        #                             "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
-        #         place_escape_key(small_key_locations, world, "Small")
+                key_locations.append("Hyrule Castle - Key Rat Key Drop")
+                place_escape_key(key_locations, world, "Small")
+            else:
+                small_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest",
+                                    "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
+                place_escape_key(small_key_locations, world, "Small")
 
-        # if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
-        #     big_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop",
-        #                          "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop", "Hyrule Castle - Big Key Drop"]
-        #     place_escape_key(big_key_locations, world, "Big")
+        if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
+            big_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop",
+                                 "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop", "Hyrule Castle - Big Key Drop"]
+            place_escape_key(big_key_locations, world, "Big")
 
     # If Shopsanity is enabled, there should be one each of Red/Green/Blue Potions that can be repeatedly purchased
     if world.options.shopsanity.value:
