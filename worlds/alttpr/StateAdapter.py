@@ -284,14 +284,12 @@ class StateAdapter:
         if self.has_item('Moon Pearl'):
             return True
         return not region.can_cause_bunny(1)
-        #return region.is_light_world if self.world.mode != 'inverted' else region.is_dark_world
 
 
 def adapt_door_rando_rule(rule_func: Callable[[StateAdapter], bool], world: DoorRandoWorld, player: int) -> Callable[[CollectionState], bool]:
     # Convert a DoorRandomizer rule function to work with Archipelago's CollectionState.
     def adapted_rule(state: CollectionState) -> bool:
         try:
-            #import pdb; pdb.set_trace()
             return rule_func(StateAdapter(state, world, player))
         except Exception as e:
             logger.warning(f"Error evaluating adapted DoorRandomizer rule for player {player}: {e}")

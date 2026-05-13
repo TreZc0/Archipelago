@@ -152,14 +152,8 @@ def init_lookups():
     global lookup_id_to_name
     global lookup_name_to_id
 
-    # TODO: Bonk shuffle
-    # TODO: Shopsanity
     lookup_id_to_name = {x: y for x, y in DoorRandomizerRegions.lookup_id_to_name.items()}
-    # lookup_id_to_name.update(DoorRandomizerRegions.bonk_table_by_location_id)
-    # lookup_id_to_name.update(DoorRandomizerRegions.shop_table_by_location_id)
     lookup_name_to_id = {x: y for x, y in DoorRandomizerRegions.lookup_name_to_id.items()}
-    # lookup_name_to_id.update(DoorRandomizerRegions.bonk_table_by_location)
-    # lookup_name_to_id.update(DoorRandomizerRegions.shop_table_by_location)
 
     for event in DoorRandomizerRegions.location_events:
         lookup_name_to_id[event] = None

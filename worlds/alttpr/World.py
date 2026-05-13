@@ -187,8 +187,6 @@ class ALttPRWorld(World):
             for i in range(0, item_count):
                 door_rando_item = ItemFactory(item_name, 1)
                 self.door_rando_world.push_precollected(door_rando_item)
-                # if not getattr(self.multiworld, "generation_is_fake", False):  # UT shouldn't be pushing items to the Multiworld
-                #     self.multiworld.push_precollected(Items.create_item(self, item_name, Items.get_classification(item_name)))
 
         # This will let us export information needed by Universal Tracker, such as randomized entrances, doors, medallions, etc.
         class WorldSettings:
