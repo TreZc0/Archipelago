@@ -20,7 +20,7 @@ class TestMaxSettings(ALttPRTestBase):
         "enemy_shuffle": "logical",
         "boss_shuffle": "chaos",
         "prize_shuffle": "true",
-        "flute_shuffle": "true",
+        "flute_shuffle": "chaos",
         "pseudoboots": "true",
         "mirror_scroll": "true",
         "zelgawoods": "true",

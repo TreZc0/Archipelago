@@ -465,6 +465,29 @@ class ALttPRWorld(World):
 
 
     def validate_options(self) -> None:
+        errors = []
+        self.check_option("world_mode", ["standard", "open", "inverted"], errors)
+        self.check_option("goal", ["crystals", "ganon", "dungeons",
+                                   "pedestal", "triforcehunt", "ganonhunt",
+                                   "trinity", "completionist"], errors)
+        self.check_option("open_pyramid", ["auto", "yes", "no"], errors)
+
+        if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
+            errors.append("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
+
+        self.check_option("entrance_shuffle", ["vanilla", "crossed"], errors)
+        self.check_option("zelgawoods", [0, 1, "true", "false"], errors)
+        self.check_option("enemy_shuffle", ["none", "random", "logical"], errors)
+        self.check_option("boss_shuffle", ["none", "simple", "full", "random"], errors)
+        self.check_option("flute_shuffle", ["vanilla", "balanced", "random"], errors)
+        self.check_option("heart_beep_rate", ["normal", "half", "quarter", "double", "off"], errors)
+        self.check_option("heart_color", ["red", "blue", "green", "yellow"], errors)
+        self.check_option("fast_menu", ["normal", "instant", "double", "triple", "quadruple", "half"], errors)
+
+        sprite = self.options.sprite.value.lower()
+        if sprite != "link" and sprite not in Sprites.sprites:
+            errors.append(f"{self.options.sprite.value} is not a valid sprite.")
+
         start_inventory = self.options.start_inventory.value.keys()
         always_invalid_starting_items = ["Triforce Piece", "Green Clock", "Blue Clock", "Red Clock"]
         always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
@@ -473,11 +496,12 @@ class ALttPRWorld(World):
             if item in always_invalid_starting_items or item not in self.item_name_to_id:
                 invalid_items.append(item)
         if len(invalid_items) > 0:
-            raise OptionError("The following items are not allowed in the starting inventory: " + ", ".join(invalid_items))
+            errors.append("The following items are not allowed in the starting inventory: " + ", ".join(invalid_items))
 
-        if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
-            raise OptionError("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
+        if len(errors) > 0:
+            raise OptionError("\n".join(errors))
 
-        sprite = self.options.sprite.value.lower()
-        if sprite != "link" and sprite not in Sprites.sprites:
-            raise OptionError(f"{self.options.sprite.value} is not a valid sprite.")
+
+    def check_option(self, option_name: str, valid_values: list[str | int], errors: list[str]) -> None:
+        if not getattr(self.options, option_name).value in valid_values:
+            errors.append(f"Invalid value for option {option_name}: {getattr(self.options, option_name).value}")
