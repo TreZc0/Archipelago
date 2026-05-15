@@ -62,7 +62,6 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
                     world.player, location.name, id, ap_region
                 )
                 ap_location.access_rule = adapt_door_rando_rule(location.access_rule, world.door_rando_world, world.player)
-                ap_location.item_rule = adapt_door_rando_rule(location.item_rule, world.door_rando_world, world.player)
                 ap_region.locations.append(ap_location)
 
         ap_regions[region.name] = ap_region

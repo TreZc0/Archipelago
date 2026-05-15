@@ -189,6 +189,10 @@ class ALttPRWorld(World):
             for i in range(0, item_count):
                 door_rando_item = ItemFactory(item_name, 1)
                 self.door_rando_world.push_precollected(door_rando_item)
+            precollected_count = len([item for item in self.multiworld.precollected_items[self.player] if item.name == item_name])
+            while precollected_count < item_count:
+                self.multiworld.push_precollected(self.create_item(item_name))
+                precollected_count += 1
 
         # This will let us export information needed by Universal Tracker, such as randomized entrances, doors, medallions, etc.
         class WorldSettings:
