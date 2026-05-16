@@ -175,10 +175,12 @@ class StateAdapter:
         # blue blocks you can also reach a crystal switch.
         # TODO: Bomb bag also breaks this assumption for back of Mire
         extra_condition = True
-        if region.name.startswith("Mire") and region.name != "Mire Crystal Mid":  # If not in the back of Mire
-            extra_condition = self.has_item("Small Key (Misery Mire)", 3)
+        if region.name.startswith("Swamp "):
+            extra_condition = self.has_item("Small Key (Swamp Palace)", 6)
         elif region.name in ["Ice Backwards Room", "Ice Crystal Left", "Ice Crystal Right"]:
             extra_condition = self.has_item("Small Key (Ice Palace)", 6)
+        elif region.name.startswith("Mire") and region.name != "Mire Crystal Mid":  # If not in the back of Mire
+            extra_condition = self.has_item("Small Key (Misery Mire)", 3)
 
         return self.can_hit_crystal(player) and extra_condition
 

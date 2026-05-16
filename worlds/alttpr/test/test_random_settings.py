@@ -2,6 +2,9 @@ from .bases import ALttPRTestBase
 
 
 class TestRandomSettings(ALttPRTestBase):
+    # Just making sure that every setting can be randomized.
+    # Several settings have a value which gets converted to the string
+    # "random", so I'm a bit paranoid.
     options = {
         "world_mode": "random",
         "goal": "random",
