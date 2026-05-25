@@ -8,7 +8,7 @@ import typing
 from urllib.request import urlopen
 
 # Imports of base Archipelago modules must be absolute.
-from BaseClasses import ItemClassification
+from BaseClasses import Entrance, ItemClassification, Region
 from Options import OptionError
 import settings
 from worlds.AutoWorld import World
@@ -16,7 +16,7 @@ from worlds.Files import APProcedurePatch
 from worlds.alttpr import Sprites
 
 # Imports of your world's files must be relative.
-from .ALttPDoorRandomizer.BaseClasses import FillError, World as DoorRandoWorld  # Avoid naming conflict with AP's World class
+from .ALttPDoorRandomizer.BaseClasses import CrystalBarrier, FillError, World as DoorRandoWorld  # Avoid naming conflict with AP's World class
 from .ALttPDoorRandomizer.Bosses import place_bosses
 from .ALttPDoorRandomizer.source.classes.CustomSettings import CustomSettings
 from .ALttPDoorRandomizer.source.enemizer.DamageTables import DamageTable
@@ -89,6 +89,11 @@ class ALttPRWorld(World):
     # We need to modify the multiworld to recognize the ALttPR ROM hash, but only after that ROM has finished generating
     finished_generating: threading.Event
 
+    # To handle crystal switch logic, we need all possible paths to each entrance in a dungeon
+    # that requires orange/blue blocks in a certain configuration.
+    # This is a dict of regions to ALttPRCrystalPath, defined in Regions.py, not used here because of circular imports.
+    crystal_paths = {}
+
 
     ###############################################################################
     # Generation functions.
@@ -138,9 +143,10 @@ class ALttPRWorld(World):
                 # The world can create a multiworld with many players each with different options, but we only need to
                 # generate for one player, hence all the "1"s everywhere.
                 self.door_rando_world = DoorRandoWorld(
-                    1, {1: "vanilla"}, {1: False}, {1: "none"}, {1: False}, {1: self.options.entrance_shuffle.value}, {1: "vanilla"}, {1: "noglitches"},
-                    {1: self.options.world_mode.value}, {1: "random"}, {1: "normal"}, {1: None}, "none", "on", {1: self.options.goal.value},
-                    "balanced", {1: "locations"}, {1: True}, False, Items.default_items_dict, {1: False}, "none"
+                    1, {1: "vanilla"}, {1: False}, {1: "none"}, {1: False}, {1: self.options.entrance_shuffle.value},
+                    {1: self.options.door_shuffle.value}, {1: "noglitches"}, {1: self.options.world_mode.value}, {1: "random"}, {1: "normal"},
+                    {1: None}, "none", "on", {1: self.options.goal.value}, "balanced", {1: "locations"},
+                    {1: True}, False, Items.default_items_dict, {1: False}, "none"
                 )
 
                 # There are sooo many fields that aren't set in the
@@ -155,12 +161,13 @@ class ALttPRWorld(World):
                 self.door_rando_world.crystals_needed_for_gt = {1: self.options.crystals_needed_for_ganons_tower.value}
                 self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
                 self.door_rando_world.customizer = None
+                self.door_rando_world.door_type_mode = {1: "original" if not self.options.door_type_shuffle.value else "chaos"}
                 self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
                 self.door_rando_world.dungeon_counters = {1: "off"}  # TODO: What to do with this, the code for this is in DoorRandomizer Rom.py, line 1207
                 self.door_rando_world.enemy_shuffle = {1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
                 self.door_rando_world.experimental = {1: False}  # This makes you a bunny if your spawn point is in the dark world
                 self.door_rando_world.flute_mode = {1: "active" if self.options.pre_activated_flute.value else "normal"}
-                self.door_rando_world.intensity = {1: 0}  # No door shuffle
+                self.door_rando_world.intensity = {1: 2 if not self.options.lobby_shuffle.value else 3}  # No door shuffle
                 self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
                 self.door_rando_world.linked_drops = {1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
                 self.door_rando_world.lock_aga_door_in_escape = True
@@ -511,6 +518,7 @@ class ALttPRWorld(World):
         self.check_option("shuffle_links_house", [0, 1, "true", "false"], errors)
         self.check_option("shuffle_tavern", [0, 1, "true", "false"], errors)
         self.check_option("zelgawoods", [0, 1, "true", "false"], errors)
+        self.check_option("door_shuffle", ["vanilla", "basic", "partitioned", "crossed"], errors)
         self.check_option("enemy_shuffle", ["none", "random", "logical"], errors)
         self.check_option("boss_shuffle", ["none", "simple", "full", "random"], errors)
         self.check_option("flute_shuffle", ["vanilla", "balanced", "random"], errors)
