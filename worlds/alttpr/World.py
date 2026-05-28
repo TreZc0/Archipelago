@@ -380,6 +380,19 @@ class ALttPRWorld(World):
         return world.settings.world_rep
 
 
+    def extend_hint_information(self, hint_data: dict[int, dict[int, str]]):
+        if self.options.entrance_shuffle.value == "vanilla":
+            return
+
+        hint_data[self.player] = {}
+        for region in self.get_regions():
+            if region.locations and any([location.address for location in region.locations]):
+                outdoor_entrances = region.get_connecting_entrances([])
+                for location in region.locations:
+                    if location.address and outdoor_entrances:  # Skip events
+                        hint_data[self.player][location.address] = ", ".join(outdoor_entrances)
+
+
     #########################################
     # Helper Functions
     #########################################

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 
 from BaseClasses import Entrance, Location, Region
 
@@ -23,6 +23,25 @@ lookup_name_to_id = {}
 logger = logging.getLogger("alttpr")
 
 
+class ALttPRRegion(Region):
+    game = "The Legend of Zelda: A Link to the Past"
+    type = RegionType.Menu
+
+    def get_connecting_entrances(self, checked_regions: list[str]) -> Entrance:
+        if self.name in checked_regions:
+            return []
+
+        checked_regions.append(self.name)
+        outdoor_entrances = []
+        for entrance in self.entrances:
+            if entrance.parent_region.type == RegionType.LightWorld or entrance.parent_region.type == RegionType.DarkWorld:
+                outdoor_entrances.append(entrance.name)
+            else:
+                outdoor_entrances.extend(entrance.parent_region.get_connecting_entrances(checked_regions))
+
+        return outdoor_entrances
+
+
 class ALttPRLocation(Location):
     game = "The Legend of Zelda: A Link to the Past"
 
@@ -34,7 +53,8 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
     event_locations = get_event_locations(world)
 
     for region in world.door_rando_world.regions:
-        ap_region = Region(region.name, world.player, world.multiworld)
+        ap_region = ALttPRRegion(region.name, world.player, world.multiworld)
+        ap_region.type = region.type
         for location in region.locations:
             # Skip all locations that aren't randomized with the user's options
             if ("Shop - " in location.name or "Upgrade - " in location.name) and not world.options.shopsanity:
