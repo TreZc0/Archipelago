@@ -119,6 +119,8 @@ class EntranceShuffle(TextChoice):
     """Randomize where each building, cave, and dungeon entrance leads to."""
     display_name = "Entrance Shuffle"
     option_vanilla = "vanilla"
+    option_dungeonssimple = "dungeonssimple"
+    option_dungeonsfull = "dungeonsfull"
     option_crossed = "crossed"
     default = "vanilla"
     # TODO: Entrance shuffles other than vanilla and crossed

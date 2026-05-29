@@ -488,7 +488,7 @@ class ALttPRWorld(World):
         if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
             errors.append("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
 
-        self.check_option("entrance_shuffle", ["vanilla", "crossed"], errors)
+        self.check_option("entrance_shuffle", ["vanilla", "dungeonssimple", "dungeonsfull", "crossed"], errors)
         self.check_option("zelgawoods", [0, 1, "true", "false"], errors)
         self.check_option("enemy_shuffle", ["none", "random", "logical"], errors)
         self.check_option("boss_shuffle", ["none", "simple", "full", "random"], errors)
