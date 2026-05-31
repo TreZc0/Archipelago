@@ -389,7 +389,8 @@ class ALttPRWorld(World):
             if region.locations and any([location.address for location in region.locations]):
                 outdoor_entrances = region.get_connecting_entrances([])
                 for location in region.locations:
-                    if location.address and outdoor_entrances:  # Skip events
+                    if location.address and outdoor_entrances and \
+                       not (len(outdoor_entrances) == 1 and self.door_rando_world.get_entrance(outdoor_entrances[0], 1).vanilla):
                         hint_data[self.player][location.address] = ", ".join(outdoor_entrances)
 
 
