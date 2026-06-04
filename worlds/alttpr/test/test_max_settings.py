@@ -11,6 +11,8 @@ class TestMaxSettings(ALttPRTestBase):
         "triforce_hunt_goal": 50,
         "triforce_hunt_total": 50,
         "entrance_shuffle": "crossed",
+        "shuffle_links_house": "true",
+        "shuffle_tavern": "true",
         "map_shuffle": "true",
         "compass_shuffle": "true",
         "small_key_shuffle": "true",

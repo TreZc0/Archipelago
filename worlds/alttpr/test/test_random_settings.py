@@ -19,6 +19,8 @@ class TestRandomSettings(ALttPRTestBase):
         "big_key_shuffle": "random",
         "key_drop_shuffle": "random",
         "entrance_shuffle": "random",
+        "shuffle_links_house": "random",
+        "shuffle_tavern": "random",
         "zelgawoods": "random",
         "enemy_shuffle": "random",
         "boss_shuffle": "random",

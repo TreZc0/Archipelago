@@ -126,6 +126,18 @@ class EntranceShuffle(TextChoice):
     # TODO: Entrance shuffles other than vanilla and crossed
 
 
+class ShuffleLinksHouse(Toggle):
+    """Adds Link's House to the entrance pool for crossed entrance shuffle."""
+    display_name = "Shuffle Links House"
+    default = False
+
+
+class ShuffleTavern(Toggle):
+    """Adds the back of Kakariko Tavern to the entrance pool for crossed entrance shuffle."""
+    display_name = "Shuffle Tavern"
+    default = False
+
+
 class Zelgawoods(Toggle):
     """If entrance shuffle is enabled, add Skull Woods entrances and dropdowns to the entrance shuffle. The main Skull Woods entrance/big chest
     dropdown and the second Skull Woods entrance/the dropdown in the back are both added to the dropdown pool. The other two dropdowns in the
@@ -302,6 +314,8 @@ class ALttPROptions(PerGameCommonOptions):
     big_key_shuffle: BigKeyShuffle
     key_drop_shuffle: KeyDropShuffle
     entrance_shuffle: EntranceShuffle
+    shuffle_links_house: ShuffleLinksHouse
+    shuffle_tavern: ShuffleTavern
     zelgawoods: Zelgawoods
     enemy_shuffle: EnemyShuffle
     boss_shuffle: BossShuffle

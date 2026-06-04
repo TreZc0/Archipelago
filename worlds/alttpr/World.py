@@ -16,7 +16,7 @@ from worlds.Files import APProcedurePatch
 from worlds.alttpr import Sprites
 
 # Imports of your world's files must be relative.
-from .ALttPDoorRandomizer.BaseClasses import World as DoorRandoWorld  # Avoid naming conflict with AP's World class
+from .ALttPDoorRandomizer.BaseClasses import FillError, World as DoorRandoWorld  # Avoid naming conflict with AP's World class
 from .ALttPDoorRandomizer.Bosses import place_bosses
 from .ALttPDoorRandomizer.source.classes.CustomSettings import CustomSettings
 from .ALttPDoorRandomizer.source.enemizer.DamageTables import DamageTable
@@ -25,6 +25,7 @@ from .ALttPDoorRandomizer.source.item.District import init_districts
 from .ALttPDoorRandomizer.Doors import create_doors
 from .ALttPDoorRandomizer.DoorShuffle import link_doors, link_doors_prep
 from .ALttPDoorRandomizer.Dungeons import create_dungeons
+from .ALttPDoorRandomizer.source.dungeon.DungeonStitcher import GenerationException
 from .ALttPDoorRandomizer.source.enemizer.Enemizer import randomize_enemies
 from .ALttPDoorRandomizer.source.dungeon.EnemyList import enemy_names
 from .ALttPDoorRandomizer.source.overworld.EntranceShuffle2 import link_entrances_new
@@ -126,7 +127,7 @@ class ALttPRWorld(World):
         # can be made over time.
         last_error = None
         successful_generation = False
-        for i in range(0, 2):
+        for i in range(0, 20):
             if successful_generation:
                 break
             try:
@@ -181,8 +182,8 @@ class ALttPRWorld(World):
                 self.door_rando_world.shopsanity = {1: self.options.shopsanity.value}
                 self.door_rando_world.shuffle_bonk_drops = {1: False}
                 self.door_rando_world.shuffle_followers = {1: False}
-                self.door_rando_world.shufflelinks = {1: False}
-                self.door_rando_world.shuffletavern = {1: False}
+                self.door_rando_world.shufflelinks = {1: self.options.shuffle_links_house.value}
+                self.door_rando_world.shuffletavern = {1: self.options.shuffle_tavern.value}
                 self.door_rando_world.skullwoods = {1: "followlinked" if self.options.zelgawoods.value else "original"}  # How to handle Skull Woods in entrance shuffle.
                 self.door_rando_world.trap_door_mode = {1: "vanilla"}
                 self.door_rando_world.treasure_hunt_count = {1: self.options.triforce_hunt_goal.value}
@@ -264,7 +265,7 @@ class ALttPRWorld(World):
                 self.random.shuffle(shuffled_locations)  # Make sure we use AP's random() features so that it generates consistently.
                 fill_dungeons_restrictive(self.door_rando_world, shuffled_locations)
                 successful_generation = True
-            except (Exception, RuntimeError) as e:
+            except (Exception, FillError, GenerationException, RuntimeError) as e:
                 last_error = e
 
         if not successful_generation and last_error:
@@ -507,6 +508,8 @@ class ALttPRWorld(World):
             errors.append("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
 
         self.check_option("entrance_shuffle", ["vanilla", "dungeonssimple", "dungeonsfull", "crossed"], errors)
+        self.check_option("shuffle_links_house", [0, 1, "true", "false"], errors)
+        self.check_option("shuffle_tavern", [0, 1, "true", "false"], errors)
         self.check_option("zelgawoods", [0, 1, "true", "false"], errors)
         self.check_option("enemy_shuffle", ["none", "random", "logical"], errors)
         self.check_option("boss_shuffle", ["none", "simple", "full", "random"], errors)
