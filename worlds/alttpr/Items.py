@@ -261,8 +261,8 @@ def get_dungeon_items(world: ALttPRWorld) -> List[str]:
     if not world.options.big_key_shuffle.value:
         dungeon_items.extend([item for item in progressive_items if item.startswith("Big Key")])
     elif not world.options.key_drop_shuffle.value:
-        # Big keys are shuffled, except for the HC BK
-        dungeon_items.append("Big Key (Escape)")
+        # Big keys are shuffled, except for the HC BK, or the BK for the dungeon Zelda's cell is in, if door rando
+        dungeon_items.append(world.door_rando_world.get_location("Hyrule Castle - Big Key Drop", 1).item.name)
 
     return dungeon_items
 
@@ -358,12 +358,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
         # small keys dropped by pots/enemies will already be placed, but other small keys won't.
         item_locations = world.door_rando_world.find_items(dr_item_name, 1)
         if not item_locations:
-            if world.options.small_key_shuffle.value and dr_item_name.startswith("Small Key"):
                 continue
-            else:
-                continue
-                logger.error(f"Could not find dungeon item {dungeon_item} in door rando item list.")
-                raise Exception()
 
         for location in item_locations:
             dr_dungeon_item = location.item
@@ -373,7 +368,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
                 classification = ItemClassification.filler
             code = dr_dungeon_item.code if not world.is_excluded_key_drop_location(location) else None
             ap_item = ALttPRItem(dungeon_item, classification, code, world.player)
-            target_location = world.multiworld.get_location(dr_dungeon_item.location.name, world.player)
+            target_location = world.multiworld.get_location(location.name, world.player)
             target_location.place_locked_item(ap_item)
 
     # Standard mode requires a weapon and enough keys to be available early
