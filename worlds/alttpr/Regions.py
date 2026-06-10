@@ -50,6 +50,7 @@ class ALttPRLocation(Location):
 
 class ALttPREntrance(Entrance):
     game = "The Legend of Zelda: A Link to the Past"
+    blocked = False
     crystal = CrystalBarrier.Null
 
 
@@ -139,6 +140,7 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
             ap_entrance = ALttPREntrance(world.player, exit.name, parent=ap_region)
             ap_entrance.access_rule = adapt_door_rando_rule(exit.access_rule if not blocked else lambda state: False, world.door_rando_world, world.player, world.crystal_paths)
             if exit.door:
+                ap_entrance.blocked = blocked
                 ap_entrance.crystal = exit.door.crystal
             ap_region.exits.append(ap_entrance)
             ap_entrance.connect(ap_regions[exit.connected_region.name])
@@ -177,6 +179,9 @@ def find_crystal_switch_path(world: ALttPRWorld, start_region: ALttPRRegion, cur
 
     past_regions.add(current_region)
     for exit in current_region.exits:
+        if exit.blocked:
+            continue
+
         if not exit.crystal or exit.crystal == CrystalBarrier.Either:
             find_crystal_switch_path(world, start_region, exit.connected_region, past_regions.copy(), path + [exit], color)
             continue
