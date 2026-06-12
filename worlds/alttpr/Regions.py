@@ -63,20 +63,20 @@ class ALttPRCrystalPath:
         # reference to the multiworld, which gets manually cleaned up after generation, causing a memory leak
 
 
-dungeon_vanilla_entrance_regions = {
-    "Hyrule Castle": ["Hyrule Castle Lobby", "Hyrule Castle West Lobby", "Hyrule Castle East Lobby", "Sanctuary"],
-    "Eastern Palace": ["Eastern Lobby"],
-    "Desert Palace": ["Desert Main Lobby", "Desert West Lobby", "Desert East Lobby", "Desert Back Lobby"],
-    "Tower of Hera": ["Hera Lobby"],
-    "Agahnims Tower": ["Tower Lobby"],
-    "Palace of Darkness": ["PoD Lobby"],
-    "Swamp Palace": ["Swamp Lobby"],
-    "Skull Woods": ["Skull 1 Lobby", "Skull 2 West Lobby", "Skull 2 East Lobby", "Skull 3 Lobby"],
-    "Thieves Town": ["Thieves Lobby"],
-    "Ice Palace": ["Ice Lobby"],
-    "Misery Mire": ["Mire Lobby"],
-    "Turtle Rock": ["TR Main Lobby", "TR Lazy Eyes", "TR Big Chest Entrance", "TR Eye Bridge"],
-    "Ganons Tower": ["GT Lobby"],
+dungeon_portals = {
+    "Hyrule Castle": ["Hyrule Castle South Portal", "Hyrule Castle West Portal", "Hyrule Castle East Portal", "Sanctuary Portal"],
+    "Eastern Palace": ["Eastern Portal"],
+    "Desert Palace": ["Desert South Portal", "Desert East Portal", "Desert West Portal", "Desert Back Portal"],
+    "Tower of Hera": ["Hera Portal"],
+    "Agahnims Tower": ["Agahnims Tower Portal"],
+    "Palace of Darkness": ["Palace of Darkness Portal"],
+    "Swamp Palace": ["Swamp Portal"],
+    "Skull Woods": ["Skull 1 Portal", "Skull 2 West Portal", "Skull 2 East Portal", "Skull 3 Portal"],
+    "Thieves Town": ["Thieves Town Portal"],
+    "Ice Palace": ["Ice Portal"],
+    "Misery Mire": ["Mire Portal"],
+    "Turtle Rock": ["Turtle Rock Main Portal", "Turtle Rock Lazy Eyes Portal", "Turtle Rock Chest Portal", "Turtle Rock Eye Bridge Portal"],
+    "Ganons Tower": ["Ganons Tower Portal"],
 }
 
 
@@ -153,9 +153,9 @@ def find_crystal_switch_paths(world: ALttPRWorld, dungeon_crystal_info):
     # For each entrance in a dungeon that has crystal logic (orange/blue blocks), find
     # all possible paths to that entrance with the blocks in the correct position.
     for dungeon, crystal_switches in dungeon_crystal_info.items():
-        entrance_regions = dungeon.entrance_regions if dungeon.entrance_regions else [world.get_region(region_name) for region_name in dungeon_vanilla_entrance_regions[dungeon.name]]
-        for entrance_region in entrance_regions:
-            find_crystal_switch_path(world, entrance_region, entrance_region, set(), [], CrystalBarrier.Orange)
+        for portal in dungeon_portals[dungeon.name]:  # Dungeon portals are the entrance to a dungeon that works regardless of lobby shuffle
+            portal_region = world.get_region(portal)
+            find_crystal_switch_path(world, portal_region, portal_region, set(), [], CrystalBarrier.Orange)
         for crystal_switch in crystal_switches:
             find_crystal_switch_path(world, crystal_switch, crystal_switch, set(), [], CrystalBarrier.Either)
 
