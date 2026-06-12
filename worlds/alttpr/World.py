@@ -33,6 +33,7 @@ from .ALttPDoorRandomizer.Fill import dungeon_tracking, fill_dungeons_restrictiv
 from .ALttPDoorRandomizer.source.item.FillUtil import create_item_pool_config, massage_item_pool
 from .ALttPDoorRandomizer.ItemList import create_farm_locations, customize_shops, difficulties, fill_prizes, generate_itempool
 from .ALttPDoorRandomizer.Items import ItemFactory
+from .ALttPDoorRandomizer.KeyDoorShuffle import validate_key_placement
 from .ALttPDoorRandomizer.OverworldShuffle import link_overworld
 from .ALttPDoorRandomizer.OWEdges import create_owedges
 from .ALttPDoorRandomizer.RaceRandom import init_race_random
@@ -136,6 +137,8 @@ class ALttPRWorld(World):
             if successful_generation:
                 break
             try:
+                self.crystal_paths = {}
+
                 # Have the Door Randomizer generate a world with all the locations, entrances, items, etc.
                 # Items should not be placed except for not-fully-randomized stuff like dungeon items without keysanity,
                 # or dungeon prizes. Otherwise let AP place all the items later.
@@ -161,7 +164,7 @@ class ALttPRWorld(World):
                 self.door_rando_world.crystals_needed_for_gt = {1: self.options.crystals_needed_for_ganons_tower.value}
                 self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
                 self.door_rando_world.customizer = None
-                self.door_rando_world.door_type_mode = {1: "original" if not self.options.door_type_shuffle.value else "chaos"}
+                self.door_rando_world.door_type_mode = {1: "original" if not self.options.door_type_shuffle.value else "big"}
                 self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
                 self.door_rando_world.dungeon_counters = {1: "off"}  # TODO: What to do with this, the code for this is in DoorRandomizer Rom.py, line 1207
                 self.door_rando_world.enemy_shuffle = {1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
@@ -271,12 +274,20 @@ class ALttPRWorld(World):
                 shuffled_locations = self.door_rando_world.get_unfilled_locations()
                 self.random.shuffle(shuffled_locations)  # Make sure we use AP's random() features so that it generates consistently.
                 fill_dungeons_restrictive(self.door_rando_world, shuffled_locations)
+
+                for key_layout in self.door_rando_world.key_layout[1].values():
+                    if not validate_key_placement(key_layout, self.door_rando_world, 1):
+                        raise RuntimeError("Key placements are invalid.")
+
                 successful_generation = True
             except (Exception, FillError, GenerationException, RuntimeError) as e:
                 last_error = e
 
         if not successful_generation and last_error:
             raise last_error
+
+        self.door_rando_world.settings.record_doors(self.door_rando_world)
+        pass
 
 
     def create_regions(self) -> None:
@@ -399,7 +410,8 @@ class ALttPRWorld(World):
         # world.settings.record_overworld(world)  TODO: Overworld shuffle
         if self.options.entrance_shuffle.value != "vanilla":
             world.settings.record_entrances(world)
-        # world.settings.record_doors(world) TODO: Doors
+        if self.options.door_shuffle.value != "vanilla":
+            world.settings.record_doors(world)
         if self.options.enemy_shuffle.value != "none":
             world.settings.record_enemies(world)
         return world.settings.world_rep

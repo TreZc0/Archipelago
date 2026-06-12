@@ -372,6 +372,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             target_location.place_locked_item(ap_item)
 
     # Standard mode requires a weapon and enough keys to be available early
+     # TODO: Doors
     if world.options.world_mode.value == "standard":
         # In Standard mode, Link's Uncle will always have a weapon which was not added to the multiworld itempool,
         # unless the player starts with a sword or hammer.

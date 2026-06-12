@@ -209,7 +209,7 @@ class StateAdapter:
         can_reach = False
         if region.name in self.crystal_paths:
             for path_info in self.crystal_paths[region.name]:
-                if ((path_info.color == color or path_info.color == CrystalBarrier.Either)) and \
+                if (path_info.color == color or path_info.color == CrystalBarrier.Either) and \
                      self.can_reach(path_info.crystal_switch_region) and \
                      all(self.state.multiworld.get_entrance(entrance, self.player).access_rule(self) for entrance in path_info.path):
                     can_reach = True
