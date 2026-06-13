@@ -134,6 +134,10 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
             if exit.connected_region is None:
                 continue
 
+            if exit.name.startswith("Ice Cross") and "Push Block" in exit.name:
+                # Not worth dealing with
+                continue
+
             # Need to check for always impassible doors, other door logic like keys is handled in access_rule
             blocked = False if not exit.door else exit.door.blocked
 
@@ -146,7 +150,37 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
             ap_entrance.connect(ap_regions[exit.connected_region.name])
 
     world.multiworld.regions += list(ap_regions.values())
+    handle_ice_cross(world)
     find_crystal_switch_paths(world, crystal_switches)
+
+
+def handle_ice_cross(world: ALttPRWorld) -> None:
+    # The "Ice Cross" room in Ice Palace, north of Pengator room, is a confusing pain logic-wise with door rando.
+    # Let's just make our own entrances to help AP find the right path...
+    def make_ice_cross_entrance(entrance_name: str, parent_region: ALttPRRegion, exit: ALttPREntrance):
+        new_entrance = ALttPREntrance(world.player, entrance_name, parent=parent_region)
+        new_entrance.access_rule = exit.access_rule
+        new_entrance.blocked = exit.blocked
+        new_entrance.crystal = exit.crystal
+        parent_region.exits.append(new_entrance)
+        new_entrance.connect(exit.connected_region)
+
+    ice_cross_left_region = world.get_region("Ice Cross Left")
+    ice_cross_right_region = world.get_region("Ice Cross Right")
+    ice_cross_top_region = world.get_region("Ice Cross Top")
+    ice_cross_bottom_region = world.get_region("Ice Cross Bottom")
+    ice_cross_left_exit = world.get_entrance("Ice Cross Left WS")
+    ice_cross_right_exit = world.get_entrance("Ice Cross Right ES")
+    ice_cross_top_exit = world.get_entrance("Ice Cross Top NE")
+    ice_cross_bottom_exit = world.get_entrance("Ice Cross Bottom SE")
+
+    make_ice_cross_entrance("Ice Cross Left to Bottom", ice_cross_left_region, ice_cross_bottom_exit)
+    make_ice_cross_entrance("Ice Cross Bottom to Left", ice_cross_bottom_region, ice_cross_left_exit)
+    make_ice_cross_entrance("Ice Cross Bottom to Right", ice_cross_bottom_region, ice_cross_right_exit)
+    make_ice_cross_entrance("Ice Cross Right to Bottom", ice_cross_right_region, ice_cross_bottom_exit)
+    make_ice_cross_entrance("Ice Cross Right to Top", ice_cross_right_region, ice_cross_top_exit)
+    make_ice_cross_entrance("Ice Cross Top to Left", ice_cross_top_region, ice_cross_left_exit)
+    make_ice_cross_entrance("Ice Cross Top to Right", ice_cross_top_region, ice_cross_right_exit)
 
 
 def find_crystal_switch_paths(world: ALttPRWorld, dungeon_crystal_info):
