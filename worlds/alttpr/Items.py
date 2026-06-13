@@ -372,7 +372,6 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             target_location.place_locked_item(ap_item)
 
     # Standard mode requires a weapon and enough keys to be available early
-     # TODO: Doors
     if world.options.world_mode.value == "standard":
         # In Standard mode, Link's Uncle will always have a weapon which was not added to the multiworld itempool,
         # unless the player starts with a sword or hammer.
@@ -385,7 +384,9 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
         # If keysanity is enabled, the keys for the escape sequence should still be sphere 0,
         # to prevent the player from being near-instantly BK'd.
         if world.options.small_key_shuffle.value:
-            if world.options.key_drop_shuffle.value:
+            if world.options.door_shuffle.value or world.options.door_type_shuffle.value:
+                world.options.local_items.value.add("Small Key (Escape)")
+            elif world.options.key_drop_shuffle.value:
                 key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop"]
                 key_location = place_escape_key(key_locations, world, "Small")
                 key_locations.remove(key_location)
@@ -406,9 +407,12 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
                 place_escape_key(small_key_locations, world, "Small")
 
         if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
-            big_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop",
-                                 "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop", "Hyrule Castle - Big Key Drop"]
-            place_escape_key(big_key_locations, world, "Big")
+            if world.options.door_shuffle.value or world.options.door_type_shuffle.value:
+                world.options.local_items.value.add("Big Key (Escape)")
+            else:
+                big_key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop",
+                                     "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Boomerang Guard Key Drop", "Hyrule Castle - Big Key Drop"]
+                place_escape_key(big_key_locations, world, "Big")
 
     # If Shopsanity is enabled, there should be one each of Red/Green/Blue Potions that can be repeatedly purchased
     if world.options.shopsanity.value:
