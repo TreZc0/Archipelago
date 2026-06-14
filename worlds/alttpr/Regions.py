@@ -64,14 +64,15 @@ class ALttPRCrystalPath:
 
 
 dungeon_portals = {
-    "Hyrule Castle": ["Hyrule Castle South Portal", "Hyrule Castle West Portal", "Hyrule Castle East Portal", "Sanctuary Portal"],
+    "Hyrule Castle": ["Hyrule Castle South Portal", "Hyrule Castle West Portal", "Hyrule Castle East Portal", "Sanctuary Portal", "Sewer Drop"],
     "Eastern Palace": ["Eastern Portal"],
     "Desert Palace": ["Desert South Portal", "Desert East Portal", "Desert West Portal", "Desert Back Portal"],
     "Tower of Hera": ["Hera Portal"],
     "Agahnims Tower": ["Agahnims Tower Portal"],
     "Palace of Darkness": ["Palace of Darkness Portal"],
     "Swamp Palace": ["Swamp Portal"],
-    "Skull Woods": ["Skull 1 Portal", "Skull 2 West Portal", "Skull 2 East Portal", "Skull 3 Portal"],
+    "Skull Woods": ["Skull 1 Portal", "Skull 2 West Portal", "Skull 2 East Portal", "Skull 3 Portal", "Skull Pinball",
+                    "Skull Pot Circle", "Skull Left Drop", "Skull Back Drop"],
     "Thieves Town": ["Thieves Town Portal"],
     "Ice Palace": ["Ice Portal"],
     "Misery Mire": ["Mire Portal"],
@@ -132,10 +133,6 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
         ap_region = ap_regions[region.name]
         for exit in region.exits:
             if exit.connected_region is None:
-                continue
-
-            if exit.name.startswith("Ice Cross") and "Push Block" in exit.name:
-                # Not worth dealing with
                 continue
 
             # Need to check for always impassible doors, other door logic like keys is handled in access_rule
