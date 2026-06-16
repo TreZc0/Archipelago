@@ -8,10 +8,10 @@ import typing
 from urllib.request import urlopen
 
 # Imports of base Archipelago modules must be absolute.
-from BaseClasses import Entrance, ItemClassification, Region
+from BaseClasses import CollectionState, Entrance, Item, ItemClassification, Region, MultiWorld
 from Options import OptionError
 import settings
-from worlds.AutoWorld import World
+from worlds.AutoWorld import World, LogicMixin
 from worlds.Files import APProcedurePatch
 from worlds.alttpr import Sprites
 
@@ -48,6 +48,16 @@ from .Rom import ALttPRRom, JAP10HASH
 
 
 logger = logging.getLogger("alttpr")
+
+class ALttPRCollectionState(LogicMixin):
+    can_reach_region_cache = {}
+    can_reach_region_color_cache = {}
+    entrance_access_rule_cache = {}
+
+    def init_mixin(self, multiworld: MultiWorld):
+        self.can_reach_region_color_cache = {}
+        self.entrance_access_rule_cache = {}
+
 
 class ALttPRSettings(settings.Group):
     class ALttPRRomFile(settings.SNESRomPath):
@@ -287,11 +297,11 @@ class ALttPRWorld(World):
             raise last_error
 
         self.door_rando_world.settings.record_doors(self.door_rando_world)
-        pass
 
 
     def create_regions(self) -> None:
         Regions.create_and_connect_regions(self)
+        self.multiworld.register_indirect_condition(self.get_region("Swamp Trench 2 Pots"), self.get_entrance("Swamp Crystal Switch SE"))
 
 
     def set_rules(self) -> None:
@@ -429,6 +439,23 @@ class ALttPRWorld(World):
                     if location.address and outdoor_entrances and \
                        not (len(outdoor_entrances) == 1 and self.door_rando_world.get_entrance(outdoor_entrances[0], 1).vanilla):
                         hint_data[self.player][location.address] = ", ".join(outdoor_entrances)
+
+
+    #########################################
+    # Overridden Methods
+    #########################################
+    def collect(self, state: CollectionState, item: Item) -> bool:
+        state.can_reach_region_cache = {}
+        state.can_reach_region_color_cache = {}
+        state.entrance_access_rule_cache = {}
+        return super().collect(state, item)
+
+
+    def remove(self, state: ALttPRCollectionState, item: Item) -> bool:
+        state.can_reach_region_cache = {}
+        state.can_reach_region_color_cache = {}
+        state.entrance_access_rule_cache = {}
+        return super().remove(state, item)
 
 
     #########################################

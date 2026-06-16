@@ -21,6 +21,7 @@ class StateAdapter:
     def checked_crystal_regions(self):
         return type(self)._checked_crystal_regions
 
+
     def __init__(self, state: CollectionState, world: DoorRandoWorld, player: int, crystal_paths):
         self.crystal_paths = crystal_paths
         self.state = state
@@ -175,11 +176,10 @@ class StateAdapter:
 
 
     def can_reach_blue(self, region, player) -> bool:
-        # TODO: Door rando will require a more complex and slow pathing algorithm.
-        # This will be the simple version for non-door rando. In general, if you can reach
-        # blue blocks you can also reach a crystal switch.
-        # TODO: Bomb bag also breaks this assumption for back of Mire
-        if False:
+        if self.world.doorShuffle[1] == "vanilla":
+            # This will be the simple version for non-door rando. In general, if you can reach
+            # blue blocks you can also reach a crystal switch.
+            # TODO: Bomb bag also breaks this assumption for back of Mire
             extra_condition = True
             if region.name.startswith("Swamp "):
                 extra_condition = self.has_item("Small Key (Swamp Palace)", 6)
@@ -194,7 +194,7 @@ class StateAdapter:
 
 
     def can_reach_orange(self, region, player) -> bool:
-        if False:
+        if self.world.doorShuffle[1] == "vanilla":
             return True
         else:
             return self.can_reach_crystal_barrier(region, CrystalBarrier.Orange)
@@ -205,15 +205,36 @@ class StateAdapter:
             # No infinite loops please
             return False
 
+        if region.name in self.can_reach_region_color_cache and color in self.can_reach_region_color_cache[region.name]:
+            return self.can_reach_region_color_cache[region.name][color]
+
         self.checked_crystal_regions.add(region.name)
         can_reach = False
         if region.name in self.crystal_paths:
             for path_info in self.crystal_paths[region.name]:
-                if (path_info.color == color or path_info.color == CrystalBarrier.Either) and \
-                     self.can_reach(path_info.crystal_switch_region) and \
-                     all(self.state.multiworld.get_entrance(entrance, self.player).access_rule(self) for entrance in path_info.path):
-                    can_reach = True
-                    break
+                if path_info.color == color or path_info.color == CrystalBarrier.Either:
+                    # The goal is to check if any path from a crystal switch to "region" is accessible. This requires region
+                    # to be reachable, and a series of entrances from the crystal switch to this region to all be accessible.
+                    # The results of checking each region and entrance are being cached for performance.
+                    if path_info.crystal_switch_region in self.can_reach_region_cache:
+                        can_reach_region = self.can_reach_region_cache[path_info.crystal_switch_region]
+                    else:
+                        can_reach_region = self.can_reach(path_info.crystal_switch_region)
+                        self.can_reach_region_cache[path_info.crystal_switch_region] = can_reach_region
+
+                    if can_reach_region:
+                        can_reach = True
+                        for entrance in path_info.path:
+                            if entrance in self.entrance_access_rule_cache:
+                                can_reach = can_reach and self.entrance_access_rule_cache[entrance]
+                            else:
+                                can_access = self.state.multiworld.get_entrance(entrance, self.player).access_rule(self)
+                                can_reach = can_reach and can_access
+                                self.entrance_access_rule_cache[entrance] = can_access
+
+                        if can_reach:
+                            break
+
         self.checked_crystal_regions.remove(region.name)
         return can_reach
 
