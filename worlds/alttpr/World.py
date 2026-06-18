@@ -23,7 +23,7 @@ from .ALttPDoorRandomizer.source.enemizer.DamageTables import DamageTable
 from .ALttPDoorRandomizer.source.rom.DataTables import init_data_tables
 from .ALttPDoorRandomizer.source.item.District import init_districts
 from .ALttPDoorRandomizer.Doors import create_doors
-from .ALttPDoorRandomizer.DoorShuffle import link_doors, link_doors_prep
+from .ALttPDoorRandomizer.DoorShuffle import connect_custom, link_doors, link_doors_prep
 from .ALttPDoorRandomizer.Dungeons import create_dungeons
 from .ALttPDoorRandomizer.source.dungeon.DungeonStitcher import GenerationException
 from .ALttPDoorRandomizer.source.enemizer.Enemizer import randomize_enemies
@@ -295,8 +295,6 @@ class ALttPRWorld(World):
 
         if not successful_generation and last_error:
             raise last_error
-
-        self.door_rando_world.settings.record_doors(self.door_rando_world)
 
 
     def create_regions(self) -> None:
