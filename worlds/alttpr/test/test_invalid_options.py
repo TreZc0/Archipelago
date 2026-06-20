@@ -19,6 +19,7 @@ class TestInvalidOptions(ALttPRTestBase):
             "enemy_shuffle": "invalid",
             "boss_shuffle": "invalid",
             "flute_shuffle": "invalid",
+            "dungeon_counters": "invalid",
             "sprite": "invalid",
             "heart_beep_rate": "invalid",
             "heart_color": "invalid",

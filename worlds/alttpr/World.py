@@ -176,7 +176,7 @@ class ALttPRWorld(World):
                 self.door_rando_world.customizer = None
                 self.door_rando_world.door_type_mode = {1: "original" if not self.options.door_type_shuffle.value else "big"}
                 self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
-                self.door_rando_world.dungeon_counters = {1: "off"}  # TODO: What to do with this, the code for this is in DoorRandomizer Rom.py, line 1207
+                self.door_rando_world.dungeon_counters = {1: self.options.dungeon_counters.value if self.options.door_shuffle.value == "vanilla" else "on"}
                 self.door_rando_world.enemy_shuffle = {1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
                 self.door_rando_world.experimental = {1: False}  # This makes you a bunny if your spawn point is in the dark world
                 self.door_rando_world.flute_mode = {1: "active" if self.options.pre_activated_flute.value else "normal"}
@@ -318,7 +318,7 @@ class ALttPRWorld(World):
     # Our world class must also have a create_item function that can create any one of our items by name at any time.
     def create_item(self, name: str, classification: ItemClassification = ItemClassification.filler) -> Items.ALttPRItem:
         try:
-            classification = Items.get_classification(name)
+            classification = Items.get_classification(name, self.options.door_shuffle.value != "vanilla")
         except Exception:
             # Unknown item, should never reach here, but also shouldn't crash if we do
             pass
@@ -559,6 +559,7 @@ class ALttPRWorld(World):
         self.check_option("enemy_shuffle", ["none", "random", "logical"], errors)
         self.check_option("boss_shuffle", ["none", "simple", "full", "random"], errors)
         self.check_option("flute_shuffle", ["vanilla", "balanced", "random"], errors)
+        self.check_option("dungeon_counters", ["on", "pickup", "off"], errors)
         self.check_option("heart_beep_rate", ["normal", "half", "quarter", "double", "off"], errors)
         self.check_option("heart_color", ["red", "blue", "green", "yellow"], errors)
         self.check_option("fast_menu", ["normal", "instant", "double", "triple", "quadruple", "half"], errors)

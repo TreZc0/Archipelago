@@ -248,6 +248,17 @@ class PreActivatedFlute(Toggle):
     default = False
 
 
+class DungeonCounters(TextChoice):
+    """Displays two counters in each dungeon showing the collected/total number of checks and number of small keys.
+    If pickup is selected, the counters will be displayed after finding that dungeons map and compass. The counters
+    are always displayed if door shuffle is enabled."""
+    display_name = "Dungeon Counters"
+    option_on = "on"
+    option_pickup = "pickup"
+    option_off = "off"
+    default = "pickup"
+
+
 class Sprite(FreeText):
     """A custom sprite to use for Link. Must be 'Link' or the exact name of a sprite listed at https://alttpr.com/en/sprite_preview.
     If an error occurs when loading the sprite, the default Link sprite will be used."""
@@ -365,6 +376,7 @@ class ALttPROptions(PerGameCommonOptions):
     pre_activated_flute: PreActivatedFlute
     pseudoboots: Pseudoboots
     mirror_scroll: MirrorScroll
+    dungeon_counters: DungeonCounters
     sprite: Sprite
     heart_beep_rate: HeartBeepRate
     heart_color: HeartColor
