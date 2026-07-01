@@ -11,7 +11,7 @@ from urllib.request import urlopen
 from BaseClasses import CollectionState, Entrance, Item, ItemClassification, Region, MultiWorld
 from Options import OptionError
 import settings
-from worlds.AutoWorld import World, LogicMixin
+from worlds.AutoWorld import LogicMixin, WebWorld, World
 from worlds.Files import APProcedurePatch
 from worlds.alttpr import Sprites
 
@@ -69,6 +69,10 @@ class ALttPRSettings(settings.Group):
     rom_file: ALttPRRomFile = ALttPRRomFile(ALttPRRomFile.copy_to)
 
 
+class ALttPRWebWorld(WebWorld):
+    option_groups = alttpr_options.alttpr_option_groups
+
+
 class ALttPRWorld(World):
     """
     The Legend of Zelda: A Link to the Past is a good game.
@@ -81,6 +85,7 @@ class ALttPRWorld(World):
     game = "The Legend of Zelda: A Link to the Past"
     rom_name = None
     seed_hash = None  # This is the 5-item hash that appears on the file select screen.
+    web = ALttPRWebWorld()
 
     options_dataclass = alttpr_options.ALttPROptions
     options: alttpr_options.ALttPROptions
@@ -415,7 +420,7 @@ class ALttPRWorld(World):
     def fill_slot_data(self) -> dict[str, typing.Any]:
         world = self.door_rando_world
         world.settings.record_info(world)  # Bosses, medallions, and random seed (not being set)
-        # world.settings.record_overworld(world)  TODO: Overworld shuffle
+        world.settings.record_overworld(world)
         if self.options.entrance_shuffle.value != "vanilla":
             world.settings.record_entrances(world)
         if self.options.door_shuffle.value != "vanilla":

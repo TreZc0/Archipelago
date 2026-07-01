@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from Options import FreeText, PerGameCommonOptions, Range, TextChoice, Toggle
+from Options import FreeText, OptionGroup, PerGameCommonOptions, Range, TextChoice, Toggle
 
 
 class WorldMode(TextChoice):
@@ -388,3 +388,71 @@ class ALttPROptions(PerGameCommonOptions):
     # shuffle_sfxinstruments: ShuffleSFXInstruments
     # shuffle_songinstruments: ShuffleSongInstruments
     msu_resume: MSUResume
+
+
+alttpr_option_groups: list[OptionGroup] = [
+    OptionGroup(
+        "Victory Conditions",
+        [
+            Goal,
+            OpenPyramid,
+            CrystalsNeededForGanon,
+            CrystalsNeededForGanonsTower,
+            TriforceHuntGoal,
+            TriforceHuntTotal,
+        ],
+    ),
+    OptionGroup(
+        "Item Pool",
+        [
+            MapShuffle,
+            CompassShuffle,
+            SmallKeyShuffle,
+            BigKeyShuffle,
+            KeyDropShuffle,
+            Shopsanity,
+            PrizeShuffle,
+        ],
+    ),
+    OptionGroup(
+        "World Settings",
+        [
+            WorldMode,
+            FluteShuffle,
+            EnemyShuffle,
+            BossShuffle,
+        ],
+    ),
+    OptionGroup(
+      "Entrance Shuffle",
+      [
+          EntranceShuffle,
+          Zelgawoods,
+          ShuffleLinksHouse,
+          ShuffleTavern,
+      ]
+    ),
+    OptionGroup(
+        "Door Shuffle",
+        [
+            DoorShuffle,
+            DoorTypeShuffle,
+            LobbyShuffle,
+        ],
+    ),
+    OptionGroup(
+        "Quality of Life",
+        [
+            Pseudoboots,
+            MirrorScroll,
+            PreActivatedFlute,
+            DungeonCounters,
+            Sprite,
+            HeartBeepRate,
+            HeartColor,
+            FastMenu,
+            DisableMusic,
+            MSUResume,
+        ],
+    ),
+]
