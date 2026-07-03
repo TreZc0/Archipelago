@@ -8,13 +8,13 @@ class WorldMode(TextChoice):
     """Open: Start from Link's House or Sanctuary, without needing to save Zelda in Hyrule Castle
     Standard: Start at Link's House and save Zelda in Hyrule Castle before accessing the rest of the world
     Inverted: The Light World and Dark World have been flipped.
-        - Link starts at their house (swapped with the Bomb Shop) or Dark Sanctuary
+        - Link spawns at the Bomb Shop and Dark Sanctuary
         - All Dark World portals now take you to the Light World
         - Link is a bunny in the Light World unless you have the Moon Pearl
         - Agahnim's Tower and Ganon's Tower have swapped places. Agahnim's Tower now requires crystals to enter
         - Ganon is hiding in a new hole on top of Hyrule Castle
         - The Magic Mirror takes you from the Light World to the Dark World
-        - The Flute must be activated in Kakariko Village, but will then take you to locations across the Dark World
+        - The Flute is always pre-activated and will take you to locations across the Dark World, including the top of Death Mountain
         - Light World terrain has been modified so that mirror-locked locations can be reached without the mirror
         - The top of Turtle Rock can be accessed by jumping from its tail"""
     display_name = "World Mode"

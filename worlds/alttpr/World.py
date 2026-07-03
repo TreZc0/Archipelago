@@ -55,6 +55,7 @@ class ALttPRCollectionState(LogicMixin):
     entrance_access_rule_cache = {}
 
     def init_mixin(self, multiworld: MultiWorld):
+        self.can_reach_region_cache = {}
         self.can_reach_region_color_cache = {}
         self.entrance_access_rule_cache = {}
 
