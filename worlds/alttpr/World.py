@@ -50,11 +50,13 @@ from .Rom import ALttPRRom, JAP10HASH
 logger = logging.getLogger("alttpr")
 
 class ALttPRCollectionState(LogicMixin):
+    can_reach_entrance_cache = {}
     can_reach_region_cache = {}
     can_reach_region_color_cache = {}
     entrance_access_rule_cache = {}
 
     def init_mixin(self, multiworld: MultiWorld):
+        self.can_reach_entrance_cache = {}
         self.can_reach_region_cache = {}
         self.can_reach_region_color_cache = {}
         self.entrance_access_rule_cache = {}
@@ -449,16 +451,30 @@ class ALttPRWorld(World):
     # Overridden Methods
     #########################################
     def collect(self, state: CollectionState, item: Item) -> bool:
-        state.can_reach_region_cache = {}
-        state.can_reach_region_color_cache = {}
-        state.entrance_access_rule_cache = {}
+        if item.advancement == ItemClassification.progression:
+            for cache in [state.can_reach_entrance_cache, state.can_reach_region_cache, state.can_reach_region_color_cache, state.entrance_access_rule_cache]:
+                items_to_remove = []
+                for key, value in cache.items():
+                    # Reset any cached values that are false. If something was already reachable with our
+                    # previous items, we can still reach it.
+                    if not value:
+                        items_to_remove.append(key)
+                for key in items_to_remove:
+                    del cache[key]
         return super().collect(state, item)
 
 
     def remove(self, state: ALttPRCollectionState, item: Item) -> bool:
-        state.can_reach_region_cache = {}
-        state.can_reach_region_color_cache = {}
-        state.entrance_access_rule_cache = {}
+        if item.advancement == ItemClassification.progression:
+            for cache in [state.can_reach_entrance_cache, state.can_reach_region_cache, state.can_reach_region_color_cache, state.entrance_access_rule_cache]:
+                items_to_remove = []
+                for key, value in cache.items():
+                    # Reset any cached values that are true. If something was unreachable with our
+                    # previous items, we still can't reach it.
+                    if value:
+                        items_to_remove.append(key)
+                for key in items_to_remove:
+                    del cache[key]
         return super().remove(state, item)
 
 

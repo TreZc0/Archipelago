@@ -44,10 +44,14 @@ class StateAdapter:
 
         if isinstance(location, Door) or isinstance(location, Entrance):
             location_type = "Entrance"
+            if name in self.can_reach_entrance_cache:
+                return self.can_reach_entrance_cache[name]
         elif isinstance(location, Location):
             location_type = "Location"
 
-        return self.state.can_reach(name, location_type, self.player)
+        result = self.state.can_reach(name, location_type, self.player)
+        self.can_reach_entrance_cache[name] = result
+        return result
 
 
     def has(self, item: str, player: int, count: int = 1) -> bool:

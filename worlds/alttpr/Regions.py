@@ -63,6 +63,15 @@ class ALttPRCrystalPath:
         # reference to the multiworld, which gets manually cleaned up after generation, causing a memory leak
 
 
+    def __eq__(self, other):
+        if not isinstance(other, ALttPRCrystalPath):
+            return False
+
+        return self.crystal_switch_region == other.crystal_switch_region and \
+               self.path == other.path and \
+               (self.color == other.color or self.color == CrystalBarrier.Either or other.color == CrystalBarrier.Either)
+
+
 dungeon_portals = {
     "Hyrule Castle": ["Hyrule Castle South Portal", "Hyrule Castle West Portal", "Hyrule Castle East Portal", "Sanctuary Portal", "Sewer Drop"],
     "Eastern Palace": ["Eastern Portal"],
@@ -224,7 +233,10 @@ def find_crystal_switch_path(world: ALttPRWorld, start_region: ALttPRRegion, cur
 
         if not current_region.name in world.crystal_paths:
             world.crystal_paths[current_region.name] = []
-        world.crystal_paths[current_region.name].append(ALttPRCrystalPath(color, start_region, path))
+        new_path_info = ALttPRCrystalPath(color, start_region, path)
+        if new_path_info not in world.crystal_paths[current_region.name]:
+            world.crystal_paths[current_region.name].append(new_path_info)
+
         world.multiworld.register_indirect_condition(start_region, exit)
         find_crystal_switch_path(world, start_region, exit.connected_region, past_regions.copy(), path + [exit], exit.crystal)
 
