@@ -1,5 +1,5 @@
 import base64
-from collections.abc import Mapping
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import logging
 import os
 import shutil
@@ -154,152 +154,17 @@ class ALttPRWorld(World):
         for i in range(0, 20):
             if successful_generation:
                 break
-            try:
-                self.crystal_paths = {}
 
-                # Have the Door Randomizer generate a world with all the locations, entrances, items, etc.
-                # Items should not be placed except for not-fully-randomized stuff like dungeon items without keysanity,
-                # or dungeon prizes. Otherwise let AP place all the items later.
-                #
-                # The world can create a multiworld with many players each with different options, but we only need to
-                # generate for one player, hence all the "1"s everywhere.
-                self.door_rando_world = DoorRandoWorld(
-                    1, {1: "vanilla"}, {1: False}, {1: "none"}, {1: False}, {1: self.options.entrance_shuffle.value},
-                    {1: self.options.door_shuffle.value}, {1: "noglitches"}, {1: self.options.world_mode.value}, {1: "random"}, {1: "normal"},
-                    {1: None}, "none", "on", {1: self.options.goal.value}, "balanced", {1: "locations"},
-                    {1: True}, False, Items.default_items_dict, {1: False}, "none"
-                )
-
-                # There are sooo many fields that aren't set in the
-                # door rando's world constructor :(
-                self.door_rando_world.any_enemy_logic = {1: "none" if self.options.enemy_shuffle.value != "logical" else "allow_all"}
-                self.door_rando_world.bigkeyshuffle = {1: "wild" if self.options.big_key_shuffle.value else "none"}
-                self.door_rando_world.bombbag = {1: False}
-                self.door_rando_world.boots_hint = {1: False}
-                self.door_rando_world.boss_shuffle = {1: self.options.boss_shuffle.value}
-                self.door_rando_world.bow_mode = {1: "progressive"}
-                self.door_rando_world.compassshuffle = {1: "wild" if self.options.compass_shuffle.value else "none"}
-                self.door_rando_world.crystals_needed_for_gt = {1: self.options.crystals_needed_for_ganons_tower.value}
-                self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
-                self.door_rando_world.customizer = None
-                self.door_rando_world.door_type_mode = {1: "original" if not self.options.door_type_shuffle.value else "big"}
-                self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
-                self.door_rando_world.dungeon_counters = {1: self.options.dungeon_counters.value if self.options.door_shuffle.value == "vanilla" else "on"}
-                self.door_rando_world.enemy_shuffle = {1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
-                self.door_rando_world.experimental = {1: False}  # This makes you a bunny if your spawn point is in the dark world
-                self.door_rando_world.flute_mode = {1: "active" if self.options.pre_activated_flute.value else "normal"}
-                self.door_rando_world.intensity = {1: 2 if not self.options.lobby_shuffle.value else 3}  # No door shuffle
-                self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
-                self.door_rando_world.linked_drops = {1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
-                self.door_rando_world.lock_aga_door_in_escape = True
-                self.door_rando_world.mapshuffle = {1: "wild" if self.options.map_shuffle.value else "none"}
-                self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
-                self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
-                self.door_rando_world.override_bomb_check = True  # TODO: Bomb bag
-                self.door_rando_world.overworld_map = {1: "default"}
-                self.door_rando_world.owFluteShuffle = {1: self.options.flute_shuffle.value}
-                self.door_rando_world.owFog = {1: False}
-                self.door_rando_world.owKeepSimilar = {1: False}
-                self.door_rando_world.owTerrain = {1: False}
-                self.door_rando_world.owWhirlpoolShuffle = {1: False}
-                self.door_rando_world.pottery = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
-                self.door_rando_world.prizeshuffle = {1: "none" if not self.options.prize_shuffle.value else "wild"}
-                self.door_rando_world.pseudoboots = {1: self.options.pseudoboots.value}
-                self.door_rando_world.rom_seeds = {1: self.random.randint(0, 999999999)}
-                self.door_rando_world.settings = CustomSettings()
-                self.door_rando_world.shopsanity = {1: self.options.shopsanity.value}
-                self.door_rando_world.shuffle_bonk_drops = {1: False}
-                self.door_rando_world.shuffle_followers = {1: False}
-                self.door_rando_world.shufflelinks = {1: self.options.shuffle_links_house.value}
-                self.door_rando_world.shuffletavern = {1: self.options.shuffle_tavern.value}
-                self.door_rando_world.skullwoods = {1: "followlinked" if self.options.zelgawoods.value else "original"}  # How to handle Skull Woods in entrance shuffle.
-                self.door_rando_world.trap_door_mode = {1: "vanilla"}
-                self.door_rando_world.treasure_hunt_count = {1: self.options.triforce_hunt_goal.value}
-                self.door_rando_world.treasure_hunt_total = {1: self.options.triforce_hunt_total.value}
-
-                self.door_rando_world.player_names = {}
-                for player_id, player_name in self.multiworld.player_name.items():
-                    self.door_rando_world.player_names[player_id] = {1: player_name}
-
-                self.door_rando_world.finish_init()
-                self.finished_generating = threading.Event()
-                self.door_rando_world.difficulty_requirements = {1: difficulties[self.door_rando_world.difficulty[1]]}
-
-                for item_name, item_count in self.options.start_inventory.value.items():
-                    for i in range(0, item_count):
-                        door_rando_item = ItemFactory(item_name, 1)
-                        self.door_rando_world.push_precollected(door_rando_item)
-                    precollected_count = len([item for item in self.multiworld.precollected_items[self.player] if item.name == item_name])
-                    while precollected_count < item_count:
-                        self.multiworld.push_precollected(self.create_item(item_name))
-                        precollected_count += 1
-
-                # This will let us export information needed by Universal Tracker, such as randomized entrances, doors, medallions, etc.
-                class WorldSettings:
-                    race = False
-                    notes = ""
-                if hasattr(self.multiworld, "re_gen_passthrough") and self.game in self.multiworld.re_gen_passthrough:
-                    slot_data = self.multiworld.re_gen_passthrough[self.game]
-                    # All the 1's (representing the player) get converted to "1"'s when it's sent as slot data
-                    for key in slot_data.keys():
-                        if "1" in slot_data[key]:
-                            slot_data[key][1] = slot_data[key]["1"]
-                            del slot_data[key]["1"]
-                    self.door_rando_world.customizer = CustomSettings()
-                    self.door_rando_world.customizer.file_source = slot_data
-                self.door_rando_world.settings = CustomSettings()
-                self.door_rando_world.settings.create_from_world(self.door_rando_world, WorldSettings())
-
-                create_regions(self.door_rando_world, 1)
-                create_dungeon_regions(self.door_rando_world, 1)
-                create_owedges(self.door_rando_world, 1)
-                create_shops(self.door_rando_world, 1)
-                create_doors(self.door_rando_world, 1)
-                create_rooms(self.door_rando_world, 1)  # Not sure if this is needed or what it does?
-                create_dungeons(self.door_rando_world, 1)
-                self.door_rando_world.damage_table[1] = DamageTable()
-                self.door_rando_world.data_tables[1] = init_data_tables(self.door_rando_world, 1)
-                place_bosses(self.door_rando_world, 1)
-                randomize_enemies(self.door_rando_world, 1)
-                adjust_locations(self.door_rando_world, 1)
-                link_overworld(self.door_rando_world, 1)
-                mark_light_dark_world_regions(self.door_rando_world, 1)
-                init_districts(self.door_rando_world)
-                link_entrances_new(self.door_rando_world, 1)
-                link_doors_prep(self.door_rando_world, 1)
-                create_item_pool_config(self.door_rando_world)
-                link_doors(self.door_rando_world, 1)
-                mark_light_dark_world_regions(self.door_rando_world, 1)  # This is run twice in OWR Main.py, not sure why but for now I'll do the same.
-                self.door_rando_world.get_region("Menu", 1).is_light_world = self.options.world_mode != "inverted"  # Never start as a bunny
-                self.door_rando_world.get_region("Menu", 1).is_dark_world = self.options.world_mode == "inverted"
-                set_prize_drops(self.door_rando_world, 1)
-                create_farm_locations(self.door_rando_world, 1)
-                generate_itempool(self.door_rando_world, 1)
-                set_rules(self.door_rando_world, 1)
-                dungeon_tracking(self.door_rando_world)
-
-                if self.options.shopsanity.value:
-                    sell_potions(self.door_rando_world, 1)
-                    # Red Potions and Bees make sense as an item to purchase, but not as a random item to receive.
-                    # Usually they turn into rupees upon receiving them from another player, which is confusing.
-                    for item in self.door_rando_world.get_items():
-                        if item.name == "Bee" or (item.name == "Red Potion" and not item.priority):
-                            self.door_rando_world.itempool.remove(item)
-                            self.door_rando_world.itempool.append(ItemFactory("Rupees (20)", 1))
-
-                massage_item_pool(self.door_rando_world)
-                fill_prizes(self.door_rando_world)
-                shuffled_locations = self.door_rando_world.get_unfilled_locations()
-                self.random.shuffle(shuffled_locations)  # Make sure we use AP's random() features so that it generates consistently.
-                fill_dungeons_restrictive(self.door_rando_world, shuffled_locations)
-
-                for key_layout in self.door_rando_world.key_layout[1].values():
-                    if not validate_key_placement(key_layout, self.door_rando_world, 1):
-                        raise RuntimeError("Key placements are invalid.")
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(self.setup_randomizer)
+                try:
+                    _ = future.result(timeout=15)
+                except (Exception, FillError, GenerationException, RuntimeError, TimeoutError) as e:
+                    future.cancel()
+                    last_error = e
+                    continue
 
                 successful_generation = True
-            except (Exception, FillError, GenerationException, RuntimeError) as e:
-                last_error = e
 
         if not successful_generation and last_error:
             raise last_error
@@ -481,6 +346,162 @@ class ALttPRWorld(World):
     #########################################
     # Helper Functions
     #########################################
+    def setup_randomizer(self):
+        self.crystal_paths = {}
+
+        # Have the Door Randomizer generate a world with all the locations, entrances, items, etc.
+        # Items should not be placed except for not-fully-randomized stuff like dungeon items without keysanity,
+        # or dungeon prizes. Otherwise let AP place all the items later.
+        #
+        # The world can create a multiworld with many players each with different options, but we only need to
+        # generate for one player, hence all the "1"s everywhere.
+        self.door_rando_world = DoorRandoWorld(
+            1, {1: "vanilla"}, {1: False}, {1: "none"}, {1: False}, {1: self.options.entrance_shuffle.value},
+            {1: self.options.door_shuffle.value}, {1: "noglitches"}, {1: self.options.world_mode.value}, {1: "random"},
+            {1: "normal"},
+            {1: None}, "none", "on", {1: self.options.goal.value}, "balanced", {1: "locations"},
+            {1: True}, False, Items.default_items_dict, {1: False}, "none"
+        )
+
+        # There are sooo many fields that aren't set in the
+        # door rando's world constructor :(
+        self.door_rando_world.any_enemy_logic = {
+            1: "none" if self.options.enemy_shuffle.value != "logical" else "allow_all"}
+        self.door_rando_world.bigkeyshuffle = {1: "wild" if self.options.big_key_shuffle.value else "none"}
+        self.door_rando_world.bombbag = {1: False}
+        self.door_rando_world.boots_hint = {1: False}
+        self.door_rando_world.boss_shuffle = {1: self.options.boss_shuffle.value}
+        self.door_rando_world.bow_mode = {1: "progressive"}
+        self.door_rando_world.compassshuffle = {1: "wild" if self.options.compass_shuffle.value else "none"}
+        self.door_rando_world.crystals_needed_for_gt = {1: self.options.crystals_needed_for_ganons_tower.value}
+        self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
+        self.door_rando_world.customizer = None
+        self.door_rando_world.door_type_mode = {1: "original" if not self.options.door_type_shuffle.value else "big"}
+        self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
+        self.door_rando_world.dungeon_counters = {
+            1: self.options.dungeon_counters.value if self.options.door_shuffle.value == "vanilla" else "on"}
+        self.door_rando_world.enemy_shuffle = {
+            1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
+        self.door_rando_world.experimental = {
+            1: False}  # This makes you a bunny if your spawn point is in the dark world
+        self.door_rando_world.flute_mode = {1: "active" if self.options.pre_activated_flute.value else "normal"}
+        self.door_rando_world.intensity = {1: 2 if not self.options.lobby_shuffle.value else 3}  # No door shuffle
+        self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
+        self.door_rando_world.linked_drops = {
+            1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
+        self.door_rando_world.lock_aga_door_in_escape = True
+        self.door_rando_world.mapshuffle = {1: "wild" if self.options.map_shuffle.value else "none"}
+        self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
+        self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
+        self.door_rando_world.override_bomb_check = True  # TODO: Bomb bag
+        self.door_rando_world.overworld_map = {1: "default"}
+        self.door_rando_world.owFluteShuffle = {1: self.options.flute_shuffle.value}
+        self.door_rando_world.owFog = {1: False}
+        self.door_rando_world.owKeepSimilar = {1: False}
+        self.door_rando_world.owTerrain = {1: False}
+        self.door_rando_world.owWhirlpoolShuffle = {1: False}
+        self.door_rando_world.pottery = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
+        self.door_rando_world.prizeshuffle = {1: "none" if not self.options.prize_shuffle.value else "wild"}
+        self.door_rando_world.pseudoboots = {1: self.options.pseudoboots.value}
+        self.door_rando_world.rom_seeds = {1: self.random.randint(0, 999999999)}
+        self.door_rando_world.settings = CustomSettings()
+        self.door_rando_world.shopsanity = {1: self.options.shopsanity.value}
+        self.door_rando_world.shuffle_bonk_drops = {1: False}
+        self.door_rando_world.shuffle_followers = {1: False}
+        self.door_rando_world.shufflelinks = {1: self.options.shuffle_links_house.value}
+        self.door_rando_world.shuffletavern = {1: self.options.shuffle_tavern.value}
+        self.door_rando_world.skullwoods = {
+            1: "followlinked" if self.options.zelgawoods.value else "original"}  # How to handle Skull Woods in entrance shuffle.
+        self.door_rando_world.trap_door_mode = {1: "vanilla"}
+        self.door_rando_world.treasure_hunt_count = {1: self.options.triforce_hunt_goal.value}
+        self.door_rando_world.treasure_hunt_total = {1: self.options.triforce_hunt_total.value}
+
+        self.door_rando_world.player_names = {}
+        for player_id, player_name in self.multiworld.player_name.items():
+            self.door_rando_world.player_names[player_id] = {1: player_name}
+
+        self.door_rando_world.finish_init()
+        self.finished_generating = threading.Event()
+        self.door_rando_world.difficulty_requirements = {1: difficulties[self.door_rando_world.difficulty[1]]}
+
+        for item_name, item_count in self.options.start_inventory.value.items():
+            for i in range(0, item_count):
+                door_rando_item = ItemFactory(item_name, 1)
+                self.door_rando_world.push_precollected(door_rando_item)
+            precollected_count = len(
+                [item for item in self.multiworld.precollected_items[self.player] if item.name == item_name])
+            while precollected_count < item_count:
+                self.multiworld.push_precollected(self.create_item(item_name))
+                precollected_count += 1
+
+        # This will let us export information needed by Universal Tracker, such as randomized entrances, doors, medallions, etc.
+        class WorldSettings:
+            race = False
+            notes = ""
+
+        if hasattr(self.multiworld, "re_gen_passthrough") and self.game in self.multiworld.re_gen_passthrough:
+            slot_data = self.multiworld.re_gen_passthrough[self.game]
+            # All the 1's (representing the player) get converted to "1"'s when it's sent as slot data
+            for key in slot_data.keys():
+                if "1" in slot_data[key]:
+                    slot_data[key][1] = slot_data[key]["1"]
+                    del slot_data[key]["1"]
+            self.door_rando_world.customizer = CustomSettings()
+            self.door_rando_world.customizer.file_source = slot_data
+        self.door_rando_world.settings = CustomSettings()
+        self.door_rando_world.settings.create_from_world(self.door_rando_world, WorldSettings())
+
+        create_regions(self.door_rando_world, 1)
+        create_dungeon_regions(self.door_rando_world, 1)
+        create_owedges(self.door_rando_world, 1)
+        create_shops(self.door_rando_world, 1)
+        create_doors(self.door_rando_world, 1)
+        create_rooms(self.door_rando_world, 1)  # Not sure if this is needed or what it does?
+        create_dungeons(self.door_rando_world, 1)
+        self.door_rando_world.damage_table[1] = DamageTable()
+        self.door_rando_world.data_tables[1] = init_data_tables(self.door_rando_world, 1)
+        place_bosses(self.door_rando_world, 1)
+        randomize_enemies(self.door_rando_world, 1)
+        adjust_locations(self.door_rando_world, 1)
+        link_overworld(self.door_rando_world, 1)
+        mark_light_dark_world_regions(self.door_rando_world, 1)
+        init_districts(self.door_rando_world)
+        link_entrances_new(self.door_rando_world, 1)
+        link_doors_prep(self.door_rando_world, 1)
+        create_item_pool_config(self.door_rando_world)
+        link_doors(self.door_rando_world, 1)
+        mark_light_dark_world_regions(self.door_rando_world,
+                                      1)  # This is run twice in OWR Main.py, not sure why but for now I'll do the same.
+        self.door_rando_world.get_region("Menu",
+                                         1).is_light_world = self.options.world_mode != "inverted"  # Never start as a bunny
+        self.door_rando_world.get_region("Menu", 1).is_dark_world = self.options.world_mode == "inverted"
+        set_prize_drops(self.door_rando_world, 1)
+        create_farm_locations(self.door_rando_world, 1)
+        generate_itempool(self.door_rando_world, 1)
+        set_rules(self.door_rando_world, 1)
+        dungeon_tracking(self.door_rando_world)
+
+        if self.options.shopsanity.value:
+            sell_potions(self.door_rando_world, 1)
+            # Red Potions and Bees make sense as an item to purchase, but not as a random item to receive.
+            # Usually they turn into rupees upon receiving them from another player, which is confusing.
+            for item in self.door_rando_world.get_items():
+                if item.name == "Bee" or (item.name == "Red Potion" and not item.priority):
+                    self.door_rando_world.itempool.remove(item)
+                    self.door_rando_world.itempool.append(ItemFactory("Rupees (20)", 1))
+
+        massage_item_pool(self.door_rando_world)
+        fill_prizes(self.door_rando_world)
+        shuffled_locations = self.door_rando_world.get_unfilled_locations()
+        self.random.shuffle(
+            shuffled_locations)  # Make sure we use AP's random() features so that it generates consistently.
+        fill_dungeons_restrictive(self.door_rando_world, shuffled_locations)
+
+        for key_layout in self.door_rando_world.key_layout[1].values():
+            if not validate_key_placement(key_layout, self.door_rando_world, 1):
+                raise RuntimeError("Key placements are invalid.")
+
+
     def set_hint_and_credits_text(self, dr_item, ap_item):
         # Set the text for hints and end credits for AP items.
         # Setting a maximum length for each text. If the total text is too long, we'll get an exception while patching,

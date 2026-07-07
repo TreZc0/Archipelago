@@ -220,7 +220,7 @@ class StateAdapter:
                     # The goal is to check if any path from a crystal switch to "region" is accessible. This requires region
                     # to be reachable, and a series of entrances from the crystal switch to this region to all be accessible.
                     # The results of checking each region and entrance are being cached for performance.
-                    if path_info.crystal_switch_region in self.can_reach_region_cache:
+                    if False:#path_info.crystal_switch_region in self.can_reach_region_cache:
                         can_reach_region = self.can_reach_region_cache[path_info.crystal_switch_region]
                     else:
                         can_reach_region = self.can_reach(path_info.crystal_switch_region)

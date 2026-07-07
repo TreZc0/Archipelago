@@ -63,13 +63,20 @@ class ALttPRCrystalPath:
         # reference to the multiworld, which gets manually cleaned up after generation, causing a memory leak
 
 
-    def __eq__(self, other):
+    def similar_path(self, other) -> bool:
         if not isinstance(other, ALttPRCrystalPath):
             return False
 
         return self.crystal_switch_region == other.crystal_switch_region and \
-               self.path == other.path and \
-               (self.color == other.color or self.color == CrystalBarrier.Either or other.color == CrystalBarrier.Either)
+               self.color == other.color and \
+               (set(self.path).issubset(other.path) or set(other.path).issubset(self.path))
+
+
+    def issubset(self, other) -> bool:
+        if not isinstance(other, ALttPRCrystalPath) or not self.similar_path(other):
+            return False
+
+        return set(self.path).issubset(set(other.path))
 
 
 dungeon_portals = {
@@ -195,15 +202,15 @@ def find_crystal_switch_paths(world: ALttPRWorld, dungeon_crystal_info):
     for dungeon, crystal_switches in dungeon_crystal_info.items():
         for portal in dungeon_portals[dungeon.name]:  # Dungeon portals are the entrance to a dungeon that works regardless of lobby shuffle
             portal_region = world.get_region(portal)
-            find_crystal_switch_path(world, portal_region, portal_region, set(), [], CrystalBarrier.Orange)
+            find_crystal_switch_path(world, portal_region, portal_region, [], [], CrystalBarrier.Orange)
         for crystal_switch in crystal_switches:
-            find_crystal_switch_path(world, crystal_switch, crystal_switch, set(), [], CrystalBarrier.Either)
+            find_crystal_switch_path(world, crystal_switch, crystal_switch, [], [], CrystalBarrier.Either)
 
 
-def find_crystal_switch_path(world: ALttPRWorld, start_region: ALttPRRegion, current_region: ALttPRRegion, past_regions: set[ALttPRRegion], path: list[ALttPREntrance], color: CrystalBarrier) -> None:
+def find_crystal_switch_path(world: ALttPRWorld, start_region: ALttPRRegion, current_region: ALttPRRegion, past_regions: list[str], path: list[ALttPREntrance], color: CrystalBarrier) -> None:
     # Recursive helper function for finding paths through a dungeon from a crystal switch in start_region, to make sure
     # the crystal block logic is handled correctly.
-    if current_region in past_regions or not current_region.is_in_dungeon:
+    if current_region.name in past_regions or not current_region.is_in_dungeon:
         # Only follow new paths through the dungeon
         return
 
@@ -217,7 +224,7 @@ def find_crystal_switch_path(world: ALttPRWorld, start_region: ALttPRRegion, cur
             world.crystal_paths[current_region.name] = []
         world.crystal_paths[current_region.name].append(ALttPRCrystalPath(color, start_region, path))
 
-    past_regions.add(current_region)
+    past_regions.append(current_region.name)
     for exit in current_region.exits:
         if exit.blocked:
             continue
@@ -234,7 +241,14 @@ def find_crystal_switch_path(world: ALttPRWorld, start_region: ALttPRRegion, cur
         if not current_region.name in world.crystal_paths:
             world.crystal_paths[current_region.name] = []
         new_path_info = ALttPRCrystalPath(color, start_region, path)
-        if new_path_info not in world.crystal_paths[current_region.name]:
+
+        # Check if the new and any existing paths overlap, and if so, use the shortest path
+        if not any([new_path_info.issubset(old_path_info) for old_path_info in world.crystal_paths[current_region.name]]):
+            world.crystal_paths[current_region.name].append(new_path_info)
+        else:
+            old_path_infos = [path_info for path_info in world.crystal_paths[current_region.name] if new_path_info.issubset(path_info)]
+            for path_info in old_path_infos:
+                world.crystal_paths[current_region.name].remove(path_info)
             world.crystal_paths[current_region.name].append(new_path_info)
 
         world.multiworld.register_indirect_condition(start_region, exit)
