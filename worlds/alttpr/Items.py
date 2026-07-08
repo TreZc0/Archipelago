@@ -255,12 +255,12 @@ def get_dungeon_items(world: ALttPRWorld) -> List[str]:
     if not world.options.compass_shuffle.value:
         dungeon_items.extend([item for item in filler_items if item.startswith("Compass")])
 
-    if not (world.options.small_key_shuffle.value and world.options.key_drop_shuffle.value):
+    if not (world.door_rando_world.keyshuffle == "wild" and world.door_rando_world.dropshuffle[1] != "none"):
         dungeon_items.extend([item for item in progressive_items if item.startswith("Small Key")])
 
     if not world.options.big_key_shuffle.value:
         dungeon_items.extend([item for item in progressive_items if item.startswith("Big Key")])
-    elif not world.options.key_drop_shuffle.value:
+    elif world.door_rando_world.dropshuffle[1] == "none":
         # Big keys are shuffled, except for the HC BK, or the BK for the dungeon Zelda's cell is in, if door rando
         dungeon_items.append(world.door_rando_world.get_location("Hyrule Castle - Big Key Drop", 1).item.name)
 
@@ -302,11 +302,11 @@ def create_all_items(world: ALttPRWorld) -> None:
     # getting BK'd in the escape sequence. This key is placed later in the pre_fill() stage of generation.
     dr_itempool = world.door_rando_world.itempool.copy()
     if world.options.world_mode.value == "standard" and world.options.door_shuffle.value == "vanilla":
-        if world.options.small_key_shuffle.value:
+        if world.door_rando_world.keyshuffle == "wild":
             escape_keys = [item for item in dr_itempool if item.name == "Small Key (Escape)"]
             for key in escape_keys:
                 dr_itempool.remove(key)
-        if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
+        if world.options.big_key_shuffle.value and world.door_rando_world.dropshuffle[1] != "none":
             escape_keys = [item for item in dr_itempool if item.name == "Big Key (Escape)"]
             if len(escape_keys) > 0:
                 dr_itempool.remove(escape_keys[0])
@@ -388,10 +388,10 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
 
         # If keysanity is enabled, the keys for the escape sequence should still be sphere 0,
         # to prevent the player from being near-instantly BK'd.
-        if world.options.small_key_shuffle.value:
+        if world.door_rando_world.keyshuffle == "wild":
             if world.options.door_shuffle.value != "vanilla":
                 world.options.local_items.value.add("Small Key (Escape)")
-            elif world.options.key_drop_shuffle.value:
+            elif world.door_rando_world.dropshuffle[1] != "none":
                 key_locations = ["Secret Passage", "Hyrule Castle - Map Chest", "Hyrule Castle - Map Guard Key Drop"]
                 key_location = place_escape_key(key_locations, world, "Small")
                 key_locations.remove(key_location)
@@ -411,7 +411,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
                                     "Hyrule Castle - Boomerang Chest", "Hyrule Castle - Zelda's Chest", "Sewers - Dark Cross"]
                 place_escape_key(small_key_locations, world, "Small")
 
-        if world.options.big_key_shuffle.value and world.options.key_drop_shuffle.value:
+        if world.options.big_key_shuffle.value and world.door_rando_world.dropshuffle[1] != "none":
             if world.options.door_shuffle.value != "vanilla":
                 # No clue what the valid locations would be, good luck AP
                 world.options.local_items.value.add("Big Key (Escape)")

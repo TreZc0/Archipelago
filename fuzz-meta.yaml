@@ -1,9 +1,9 @@
 "The Legend of Zelda: A Link to the Past":
   accessibility: full
-  world_mode: inverted
+  world_mode: open
   triforce_hunt_goal: random-range-1-25
   triforce_hunt_total: random-range-25-50
   key_drop_shuffle: 'true'
-  small_key_shuffle: 'true'
-  door_shuffle: crossed
+  small_key_shuffle: 'false'
+  door_shuffle: basic
   sprite: Link

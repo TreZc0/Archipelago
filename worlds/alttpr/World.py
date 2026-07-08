@@ -377,7 +377,7 @@ class ALttPRWorld(World):
         self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
         self.door_rando_world.customizer = None
         self.door_rando_world.door_type_mode = {1: "original" if not self.options.door_type_shuffle.value else "big"}
-        self.door_rando_world.dropshuffle = {1: "none" if not self.options.key_drop_shuffle.value else "keys"}
+        self.door_rando_world.dropshuffle = {1: "none" if not (self.options.key_drop_shuffle.value or self.options.door_shuffle.value != "vanilla") else "keys"}
         self.door_rando_world.dungeon_counters = {
             1: self.options.dungeon_counters.value if self.options.door_shuffle.value == "vanilla" else "on"}
         self.door_rando_world.enemy_shuffle = {
@@ -386,7 +386,7 @@ class ALttPRWorld(World):
             1: False}  # This makes you a bunny if your spawn point is in the dark world
         self.door_rando_world.flute_mode = {1: "active" if self.options.pre_activated_flute.value else "normal"}
         self.door_rando_world.intensity = {1: 2 if not self.options.lobby_shuffle.value else 3}  # No door shuffle
-        self.door_rando_world.keyshuffle = {1: "none" if not self.options.small_key_shuffle.value else "wild"}
+        self.door_rando_world.keyshuffle = {1: "none" if not (self.options.small_key_shuffle.value or self.options.door_shuffle.value in ["partitioned", "crossed"]) else "wild"}
         self.door_rando_world.linked_drops = {
             1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
         self.door_rando_world.lock_aga_door_in_escape = True
@@ -580,7 +580,7 @@ class ALttPRWorld(World):
 
 
     def is_excluded_key_drop_location(self, location):
-        return not self.options.key_drop_shuffle.value and ("Key Drop" in location.name or "Pot Key" in location.name)
+        return self.door_rando_world.dropshuffle[1] == "none" and ("Key Drop" in location.name or "Pot Key" in location.name)
 
 
     def validate_options(self) -> None:
@@ -620,6 +620,9 @@ class ALttPRWorld(World):
                 invalid_items.append(item)
         if len(invalid_items) > 0:
             errors.append("The following items are not allowed in the starting inventory: " + ", ".join(invalid_items))
+
+        if self.options.world_mode.value == "standard" and self.options.door_shuffle.value != "vanilla":
+            errors.append("Standard world mode is not allowed with door shuffle.")
 
         if len(errors) > 0:
             raise OptionError("\n".join(errors))
