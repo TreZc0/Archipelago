@@ -376,7 +376,7 @@ class ALttPRWorld(World):
         self.door_rando_world.crystals_needed_for_gt = {1: self.options.crystals_needed_for_ganons_tower.value}
         self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
         self.door_rando_world.customizer = None
-        self.door_rando_world.door_type_mode = {1: "original" if not self.options.door_type_shuffle.value else "big"}
+        self.door_rando_world.door_type_mode = {1: self.options.door_type_shuffle.value}
         self.door_rando_world.dropshuffle = {1: "none" if not (self.options.key_drop_shuffle.value or self.options.door_shuffle.value != "vanilla") else "keys"}
         self.door_rando_world.dungeon_counters = {
             1: self.options.dungeon_counters.value if self.options.door_shuffle.value == "vanilla" else "on"}
@@ -599,6 +599,7 @@ class ALttPRWorld(World):
         self.check_option("shuffle_tavern", [0, 1, "true", "false"], errors)
         self.check_option("zelgawoods", [0, 1, "true", "false"], errors)
         self.check_option("door_shuffle", ["vanilla", "basic", "partitioned", "crossed"], errors)
+        self.check_option("door_type_shuffle", ["original", "big"], errors)
         self.check_option("enemy_shuffle", ["none", "random", "logical"], errors)
         self.check_option("boss_shuffle", ["none", "simple", "full", "random"], errors)
         self.check_option("flute_shuffle", ["vanilla", "balanced", "random"], errors)

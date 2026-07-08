@@ -117,7 +117,11 @@ class KeyDropShuffle(Toggle):
 
 
 class EntranceShuffle(TextChoice):
-    """Randomize where each building, cave, and dungeon entrance leads to."""
+    """Randomize where each building, cave, and dungeon entrance leads to.
+    vanilla: No entrance shuffle.
+    dungeonssimple: Dungeon entrances are shuffled amongst each other. The four entrances of Hyrule Castle, Desert Palace, and Turtle Rock remain grouped together.
+    dungeonsfull: Dungeon entrances are shuffled amongst each other. Dungeons with multiple entrances can be split apart, but they will either all be in the light world or all in the dark world.
+    crossed: All buildings, caves, and dungeon entrances are randomized. Caves and dungeons with multiple entrances can connect the Light and Dark Worlds."""
     display_name = "Entrance Shuffle"
     option_vanilla = "vanilla"
     option_dungeonssimple = "dungeonssimple"
@@ -156,6 +160,7 @@ class DoorShuffle(TextChoice):
     * Killing Blind requires bombing the cracked floor in the attic, which may be in a different dungeon.
     * Bringing the Maiden to the Thieves Town boss room will tell you which dungeon has the attic.
     * Locations will have the name of their original dungeon, not the dungeon they appear in.
+    * Dungeon counters, mirror scroll, and key drop shuffle are enabled regardless of YAML settings. Small keys are shuffled if the door shuffle is partitioned or crossed.
 
     vanilla: Dungeons have their vanilla layout
     basic: Dungeon layouts are shuffled, but each room stays in its own dungeon
@@ -172,15 +177,19 @@ class DoorShuffle(TextChoice):
 
 
 class LobbyShuffle(Toggle):
-    """Whether the first room in each dungeon is randomized."""
+    """With door shuffle enabled, randomize the first room in each dungeon."""
     display_name = "Lobby Shuffle"
     default = False
 
 
-class DoorTypeShuffle(Toggle):
-    """Randomize the type of each door (small key, big key, bombable, trap, etc.)"""
+class DoorTypeShuffle(TextChoice):
+    """With door shuffle enabled, randomize the types of each door.
+    original: All dungeon doors which are open, bombable, bonkable, or small key locked become a random type of door.
+    big: Doors that are big key locked are also randomized."""
     display_name = "Door Type Shuffle"
-    default = False
+    option_original = "original"
+    option_big = "big"
+    default = "original"
 
 
 class EnemyShuffle(TextChoice):
@@ -209,8 +218,8 @@ class BossShuffle(TextChoice):
 
 
 class Shopsanity(Toggle):
-    """All shops contain randomized items, including Potion Shop and Capacity Upgrade Fairy. Adds 32 items to the item pool. Each type of potion can be purchased
-    at a random shop."""
+    """All shops contain randomized items, including Potion Shop and Capacity Upgrade Fairy. Adds 32 items to the item pool.
+    Each type of potion can be purchased at a random shop."""
     display_name = "Shopsanity"
     default = False
 
@@ -250,7 +259,7 @@ class PreActivatedFlute(Toggle):
 
 class DungeonCounters(TextChoice):
     """Displays two counters in each dungeon showing the collected/total number of checks and number of small keys.
-    If pickup is selected, the counters will be displayed after finding that dungeons map and compass. The counters
+    If pickup is selected, the counters will be displayed after finding that dungeon's map and compass. The counters
     are always displayed if door shuffle is enabled."""
     display_name = "Dungeon Counters"
     option_on = "on"
