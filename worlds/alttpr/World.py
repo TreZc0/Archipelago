@@ -391,7 +391,7 @@ class ALttPRWorld(World):
             1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
         self.door_rando_world.lock_aga_door_in_escape = True
         self.door_rando_world.mapshuffle = {1: "wild" if self.options.map_shuffle.value else "none"}
-        self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value}
+        self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value or self.options.door_shuffle.value != "vanilla"}
         self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
         self.door_rando_world.override_bomb_check = True  # TODO: Bomb bag
         self.door_rando_world.overworld_map = {1: "default"}
