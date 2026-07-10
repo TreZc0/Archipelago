@@ -1,8 +1,27 @@
+from collections import deque
 import logging
 from typing import Any, Callable, Optional
 
 from BaseClasses import CollectionState
 from .ALttPDoorRandomizer.BaseClasses import CrystalBarrier, Door, Entrance, Location, World as DoorRandoWorld
+
+
+dungeon_portals = {
+    "Hyrule Castle": ["Hyrule Castle South Portal", "Hyrule Castle West Portal", "Hyrule Castle East Portal", "Sanctuary Portal", "Sewer Drop"],
+    "Eastern Palace": ["Eastern Portal"],
+    "Desert Palace": ["Desert South Portal", "Desert East Portal", "Desert West Portal", "Desert Back Portal"],
+    "Tower of Hera": ["Hera Portal"],
+    "Agahnims Tower": ["Agahnims Tower Portal"],
+    "Palace of Darkness": ["Palace of Darkness Portal"],
+    "Swamp Palace": ["Swamp Portal"],
+    "Skull Woods": ["Skull 1 Portal", "Skull 2 West Portal", "Skull 2 East Portal", "Skull 3 Portal", "Skull Pinball",
+                    "Skull Pot Circle", "Skull Left Drop", "Skull Back Drop"],
+    "Thieves Town": ["Thieves Town Portal"],
+    "Ice Palace": ["Ice Portal"],
+    "Misery Mire": ["Mire Portal"],
+    "Turtle Rock": ["Turtle Rock Main Portal", "Turtle Rock Lazy Eyes Portal", "Turtle Rock Chest Portal", "Turtle Rock Eye Bridge Portal"],
+    "Ganons Tower": ["Ganons Tower Portal"],
+}
 
 
 logger = logging.getLogger("alttpr")
@@ -44,14 +63,10 @@ class StateAdapter:
 
         if isinstance(location, Door) or isinstance(location, Entrance):
             location_type = "Entrance"
-            if name in self.can_reach_entrance_cache:
-                return self.can_reach_entrance_cache[name]
         elif isinstance(location, Location):
             location_type = "Location"
 
-        result = self.state.can_reach(name, location_type, self.player)
-        self.can_reach_entrance_cache[name] = result
-        return result
+        return self.state.can_reach(name, location_type, self.player)
 
 
     def has(self, item: str, player: int, count: int = 1) -> bool:
@@ -194,6 +209,10 @@ class StateAdapter:
 
             return self.can_hit_crystal(player) and extra_condition
         else:
+            if self.alttpr_stale_crystal_regions:
+                print(f"Update reachable crystal regions to check can_reach_blue for {region.name}")
+                self.update_reachable_crystal_regions()
+            return region.name in self.state.alttpr_reachable_crystal_regions[self.player] and self.state.alttpr_reachable_crystal_regions[self.player][region.name] in [CrystalBarrier.Blue, CrystalBarrier.Either]
             return self.can_reach_crystal_barrier(region, CrystalBarrier.Blue)
 
 
@@ -201,6 +220,10 @@ class StateAdapter:
         if self.world.doorShuffle[1] == "vanilla":
             return True
         else:
+            if self.alttpr_stale_crystal_regions:
+                print(f"Update reachable crystal regions to check can_reach_orange for {region.name}")
+                self.update_reachable_crystal_regions()
+            return region.name in self.state.alttpr_reachable_crystal_regions[self.player] and self.state.alttpr_reachable_crystal_regions[self.player][region.name] in [CrystalBarrier.Orange, CrystalBarrier.Either]
             return self.can_reach_crystal_barrier(region, CrystalBarrier.Orange)
 
 
@@ -338,7 +361,70 @@ class StateAdapter:
     def is_not_bunny(self, region, player) -> bool:
         if self.has_item('Moon Pearl'):
             return True
-        return not region.can_cause_bunny(1)
+        return not region.can_cause_bunny(1) # Overwriting this function to also track what crystal state (orange/blue blocks down) each region can be reached in.
+
+
+    ########################################
+    # Support methods
+    ########################################
+    def update_reachable_crystal_regions(self):
+        # Mostly copy/pasted from CollectionState, but with some added code to track what the crystal state
+        # (orange/blue blocks) is when a region can be reached
+        self.state.alttpr_stale_crystal_regions[self.player] = False
+        world = self.multiworld.worlds[self.player]
+        blocked_crystal_connections = self.state.alttpr_blocked_crystal_connections[self.player]
+        reachable_crystal_regions = self.state.alttpr_reachable_crystal_regions[self.player]
+        queue = deque([(connector, reachable_crystal_regions[connector.parent_region.name]) for connector in blocked_crystal_connections])
+
+        # init on first call - this can't be done on construction since the regions don't exist yet
+        for portals in dungeon_portals.values():
+            for portal in portals:
+                if portal not in reachable_crystal_regions:
+                    reachable_crystal_regions[portal] = CrystalBarrier.Orange
+                    exits = world.get_region(portal).exits
+                    blocked_crystal_connections.extend(exits)
+                    queue.extend([(exit, CrystalBarrier.Orange) for exit in exits])
+
+        # run BFS on all connections, and keep track of those blocked by missing items
+        while queue:
+            connection, crystal_color = queue.popleft()
+            new_region = connection.connected_region
+            if not new_region.is_in_dungeon or (new_region.name in reachable_crystal_regions and
+                                                reachable_crystal_regions[new_region.name] != CrystalBarrier.Either and
+                                                reachable_crystal_regions[new_region.name] != crystal_color):
+                blocked_crystal_connections.remove(connection)
+                continue
+
+            print(f"Checking connection {connection.name}, crystal color {crystal_color}")
+            if connection.crystal in [CrystalBarrier.Blue, CrystalBarrier.Orange]:
+                # This connection is across orange or blue blocks
+                can_access = crystal_color == CrystalBarrier.Either or crystal_color == connection.crystal
+                crystal_color = connection.crystal
+            else:
+                print("Calling access_rule")
+                can_access = connection.access_rule(self.state)
+
+            if can_access:
+                if self.allow_partial_entrances and not new_region:
+                    continue
+                assert new_region, f"tried to search through an Entrance \"{connection}\" with no connected Region"
+                if new_region.name in reachable_crystal_regions and reachable_crystal_regions[new_region.name] != crystal_color:
+                    # Found different paths to get here with each color
+                    crystal_color = CrystalBarrier.Either
+                reachable_crystal_regions[new_region.name] = crystal_color
+                blocked_crystal_connections.remove(connection)
+                blocked_crystal_connections.extend(new_region.exits)
+
+                for exit in new_region.exits:
+                    if new_region.is_in_dungeon:
+                        if new_region.has_crystal_switch:
+                            queue.append((exit, CrystalBarrier.Either))
+                        elif connection.crystal:
+                            queue.append((exit, connection.crystal))
+                        else:
+                            queue.append((exit, crystal_color))
+                    else:
+                        queue.append((exit, CrystalBarrier.Orange))
 
 
 def adapt_door_rando_rule(rule_func: Callable[[StateAdapter], bool], world: DoorRandoWorld, player: int, crystal_paths) -> Callable[[CollectionState], bool]:

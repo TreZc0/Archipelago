@@ -1,4 +1,5 @@
 import base64
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import logging
 import os
@@ -50,16 +51,15 @@ from .Rom import ALttPRRom, JAP10HASH
 logger = logging.getLogger("alttpr")
 
 class ALttPRCollectionState(LogicMixin):
-    can_reach_entrance_cache = {}
-    can_reach_region_cache = {}
-    can_reach_region_color_cache = {}
-    entrance_access_rule_cache = {}
+    alttpr_blocked_crystal_connections: dict[int, list[Entrance]]
+    alttpr_reachable_crystal_regions: dict[int, dict[str, CrystalBarrier]]
+    alttpr_stale_crystal_regions: dict[int, bool]
 
     def init_mixin(self, multiworld: MultiWorld):
-        self.can_reach_entrance_cache = {}
-        self.can_reach_region_cache = {}
-        self.can_reach_region_color_cache = {}
-        self.entrance_access_rule_cache = {}
+        players = multiworld.get_game_players("The Legend of Zelda: A Link to the Past")
+        self.alttpr_blocked_crystal_connections = {player: [] for player in players}
+        self.alttpr_reachable_crystal_regions = {player: {} for player in players}
+        self.alttpr_stale_crystal_regions = {player: True for player in players}
 
 
 class ALttPRSettings(settings.Group):
@@ -317,29 +317,15 @@ class ALttPRWorld(World):
     #########################################
     def collect(self, state: CollectionState, item: Item) -> bool:
         if item.advancement == ItemClassification.progression:
-            for cache in [state.can_reach_entrance_cache, state.can_reach_region_cache, state.can_reach_region_color_cache, state.entrance_access_rule_cache]:
-                items_to_remove = []
-                for key, value in cache.items():
-                    # Reset any cached values that are false. If something was already reachable with our
-                    # previous items, we can still reach it.
-                    if not value:
-                        items_to_remove.append(key)
-                for key in items_to_remove:
-                    del cache[key]
+            state.alttpr_stale_crystal_regions[self.player] = True
         return super().collect(state, item)
 
 
     def remove(self, state: ALttPRCollectionState, item: Item) -> bool:
         if item.advancement == ItemClassification.progression:
-            for cache in [state.can_reach_entrance_cache, state.can_reach_region_cache, state.can_reach_region_color_cache, state.entrance_access_rule_cache]:
-                items_to_remove = []
-                for key, value in cache.items():
-                    # Reset any cached values that are true. If something was unreachable with our
-                    # previous items, we still can't reach it.
-                    if value:
-                        items_to_remove.append(key)
-                for key in items_to_remove:
-                    del cache[key]
+            state.alttpr_stale_crystal_regions[self.player] = True
+            state.alttpr_blocked_crystal_connections[self.player] = []
+            state.alttpr_reachable_crystal_regions[self.player] = {}
         return super().remove(state, item)
 
 

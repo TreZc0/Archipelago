@@ -97,7 +97,6 @@ dungeon_portals = {
 }
 
 
-
 def create_and_connect_regions(world: ALttPRWorld) -> None:
     # First define every region, then loop through a second time to connect them.
     # Otherwise we're trying to connect to regions that don't exist yet.
@@ -164,7 +163,7 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
 
     world.multiworld.regions += list(ap_regions.values())
     handle_ice_cross(world)
-    find_crystal_switch_paths(world, crystal_switches)
+    #find_crystal_switch_paths(world, crystal_switches)
 
 
 def handle_ice_cross(world: ALttPRWorld) -> None:
