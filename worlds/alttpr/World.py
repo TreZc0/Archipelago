@@ -1,5 +1,4 @@
 import base64
-from collections import deque
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import logging
 import os
@@ -155,16 +154,13 @@ class ALttPRWorld(World):
             if successful_generation:
                 break
 
-            with ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(self.setup_randomizer)
-                try:
-                    _ = future.result(timeout=15)
-                except (Exception, FillError, GenerationException, RuntimeError, TimeoutError) as e:
-                    future.cancel()
-                    last_error = e
-                    continue
+            try:
+                self.setup_randomizer()
+            except (Exception, FillError, GenerationException, RuntimeError, TimeoutError) as e:
+                last_error = e
+                continue
 
-                successful_generation = True
+            successful_generation = True
 
         if not successful_generation and last_error:
             raise last_error

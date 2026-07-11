@@ -209,61 +209,18 @@ class StateAdapter:
 
             return self.can_hit_crystal(player) and extra_condition
         else:
-            if self.alttpr_stale_crystal_regions:
-                print(f"Update reachable crystal regions to check can_reach_blue for {region.name}")
+            if self.alttpr_stale_crystal_regions[self.player]:
                 self.update_reachable_crystal_regions()
             return region.name in self.state.alttpr_reachable_crystal_regions[self.player] and self.state.alttpr_reachable_crystal_regions[self.player][region.name] in [CrystalBarrier.Blue, CrystalBarrier.Either]
-            return self.can_reach_crystal_barrier(region, CrystalBarrier.Blue)
 
 
     def can_reach_orange(self, region, player) -> bool:
         if self.world.doorShuffle[1] == "vanilla":
             return True
         else:
-            if self.alttpr_stale_crystal_regions:
-                print(f"Update reachable crystal regions to check can_reach_orange for {region.name}")
+            if self.alttpr_stale_crystal_regions[self.player]:
                 self.update_reachable_crystal_regions()
             return region.name in self.state.alttpr_reachable_crystal_regions[self.player] and self.state.alttpr_reachable_crystal_regions[self.player][region.name] in [CrystalBarrier.Orange, CrystalBarrier.Either]
-            return self.can_reach_crystal_barrier(region, CrystalBarrier.Orange)
-
-
-    def can_reach_crystal_barrier(self, region, color):
-        if region.name in self.checked_crystal_regions:
-            # No infinite loops please
-            return False
-
-        if region.name in self.can_reach_region_color_cache and color in self.can_reach_region_color_cache[region.name]:
-            return self.can_reach_region_color_cache[region.name][color]
-
-        self.checked_crystal_regions.add(region.name)
-        can_reach = False
-        if region.name in self.crystal_paths:
-            for path_info in self.crystal_paths[region.name]:
-                if path_info.color == color or path_info.color == CrystalBarrier.Either:
-                    # The goal is to check if any path from a crystal switch to "region" is accessible. This requires region
-                    # to be reachable, and a series of entrances from the crystal switch to this region to all be accessible.
-                    # The results of checking each region and entrance are being cached for performance.
-                    if False:#path_info.crystal_switch_region in self.can_reach_region_cache:
-                        can_reach_region = self.can_reach_region_cache[path_info.crystal_switch_region]
-                    else:
-                        can_reach_region = self.can_reach(path_info.crystal_switch_region)
-                        self.can_reach_region_cache[path_info.crystal_switch_region] = can_reach_region
-
-                    if can_reach_region:
-                        can_reach = True
-                        for entrance in path_info.path:
-                            if entrance in self.entrance_access_rule_cache:
-                                can_reach = can_reach and self.entrance_access_rule_cache[entrance]
-                            else:
-                                can_access = self.state.multiworld.get_entrance(entrance, self.player).access_rule(self)
-                                can_reach = can_reach and can_access
-                                self.entrance_access_rule_cache[entrance] = can_access
-
-                        if can_reach:
-                            break
-
-        self.checked_crystal_regions.remove(region.name)
-        return can_reach
 
 
     def can_shoot_arrows(self, player) -> bool:
@@ -390,26 +347,23 @@ class StateAdapter:
             connection, crystal_color = queue.popleft()
             new_region = connection.connected_region
             if not new_region.is_in_dungeon or (new_region.name in reachable_crystal_regions and
-                                                reachable_crystal_regions[new_region.name] != CrystalBarrier.Either and
-                                                reachable_crystal_regions[new_region.name] != crystal_color):
+                                                (reachable_crystal_regions[new_region.name] == CrystalBarrier.Either or
+                                                 reachable_crystal_regions[new_region.name] == crystal_color)):
                 blocked_crystal_connections.remove(connection)
                 continue
 
-            print(f"Checking connection {connection.name}, crystal color {crystal_color}")
             if connection.crystal in [CrystalBarrier.Blue, CrystalBarrier.Orange]:
                 # This connection is across orange or blue blocks
                 can_access = crystal_color == CrystalBarrier.Either or crystal_color == connection.crystal
                 crystal_color = connection.crystal
             else:
-                print("Calling access_rule")
                 can_access = connection.access_rule(self.state)
 
             if can_access:
                 if self.allow_partial_entrances and not new_region:
                     continue
                 assert new_region, f"tried to search through an Entrance \"{connection}\" with no connected Region"
-                if new_region.name in reachable_crystal_regions and reachable_crystal_regions[new_region.name] != crystal_color:
-                    # Found different paths to get here with each color
+                if new_region.has_crystal_switch or (new_region.name in reachable_crystal_regions and reachable_crystal_regions[new_region.name] != crystal_color):
                     crystal_color = CrystalBarrier.Either
                 reachable_crystal_regions[new_region.name] = crystal_color
                 blocked_crystal_connections.remove(connection)
