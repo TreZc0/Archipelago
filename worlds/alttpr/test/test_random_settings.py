@@ -1,4 +1,4 @@
-from .bases import ALttPRTestBase
+from .bases import ALttPRTestBase, ALttPRTestBaseNoDefaultTests
 
 
 class TestRandomSettings(ALttPRTestBase):
@@ -22,6 +22,9 @@ class TestRandomSettings(ALttPRTestBase):
         "shuffle_links_house": "random",
         "shuffle_tavern": "random",
         "zelgawoods": "random",
+        "door_shuffle": "random",
+        "door_type_shuffle": "random",
+        "lobby_shuffle": "random",
         "enemy_shuffle": "random",
         "boss_shuffle": "random",
         "shopsanity": "random",
@@ -36,3 +39,23 @@ class TestRandomSettings(ALttPRTestBase):
         "disable_music": "random",
         "msu_resume": "random",
     }
+
+
+class TestInvertedStartingFlute(ALttPRTestBaseNoDefaultTests):
+    options = {
+        "world_mode": "inverted",
+        "start_inventory": {"Ocarina": 1}
+    }
+
+    def test_inverted_flute_pre_activated_in_start_inventory(self):
+        assert(self.count("Ocarina (Activated)") == 1)
+
+
+class TestStartingFlute(ALttPRTestBaseNoDefaultTests):
+    options = {
+        "pre_activated_flute": "true",
+        "start_inventory": {"Ocarina": 1}
+    }
+
+    def test_flute_pre_activated_in_start_inventory(self):
+        assert(self.count("Ocarina (Activated)") == 1)

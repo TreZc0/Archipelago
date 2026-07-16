@@ -595,6 +595,9 @@ class ALttPRWorld(World):
             errors.append(f"{self.options.sprite.value} is not a valid sprite.")
 
         start_inventory = self.options.start_inventory.value.keys()
+        if "Ocarina" in start_inventory and (self.options.pre_activated_flute or self.options.world_mode == "inverted"):
+            self.options.start_inventory.value["Ocarina (Activated)"] = 1
+            del self.options.start_inventory.value["Ocarina"]
         always_invalid_starting_items = ["Triforce Piece", "Green Clock", "Blue Clock", "Red Clock"]
         always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
         invalid_items = []

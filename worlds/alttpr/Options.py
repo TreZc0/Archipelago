@@ -30,7 +30,7 @@ class Goal(TextChoice):
 
     crystals: Collect the required number of crystals and kill Ganon.
     ganon: Collect the required number of crystals, kill Agahnim on top of Ganon's Tower, then kill Ganon.
-    dungeons: Complete all 12 dungeons, including Agahnim's Tower and Ganon's Tower, then kill Ganon.
+    dungeons: Obtain all pendants and crystals, defeat both Agahnims, then kill Ganon.
     pedestal: Collect all 3 pendants and pull the Master Sword from its pedestal.
     triforcehunt: Collect the required number of pieces of the Triforce, then talk to Murahdahla outside Hyrule Castle.
     ganonhunt: Collect the required number of pieces of the Triforce, then kill Ganon.
