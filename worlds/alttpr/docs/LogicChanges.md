@@ -1,4 +1,4 @@
-This file documents the logic needed to write a tracker for this APWorld, particularly anything unintuitive or different than the core implementation. In general, the logic here is the same as the core implementation for the same settings, unless stated otherwise.
+This file documents the logic needed to write a tracker for this APWorld, particularly anything unintuitive or different than the core implementation. In general, the logic here is the same as the core implementation for the same settings, unless stated otherwise. This is written to the best of my knowledge and may not be 100% accurate, particularly with obscure key logic (I'm not sure anyone fully understands GT key logic).
 
 ## Goals
 

@@ -1,0 +1,136 @@
+This is the current slot data for the APWorld. Several fields use different names than the YAML because of how OWR represents settings internally. There are many fields omitted from this document because they represent options that the APWorld doesn't support, and are the same value every time. Newlines and comments have been added.
+
+{
+    'settings': {
+        1: {
+            /*
+             * Goal
+             * Values: 'crystals', 'ganon', 'dungeons', 'pedestal', 'triforcehunt', 'ganonhunt', 'trinity', 'completionist'
+             */
+            'goal': 'crystals'
+
+            /*
+             * Open Pyramid
+             * Values: 'yes', 'no', 'auto'. The former two are equal to the YAML's 'open' and 'closed'.
+             */
+            'openpyramid': 'auto'
+
+            /*
+             * Crystals for Ganons Tower
+             * Values: {}, always? TODO that's not good.
+             */
+            'crystals_gt': {}
+
+            /*
+             * Crystals for killing Ganon
+             * Values: {}, always? TODO that's not good.
+             */
+            'crystals_ganon': {}
+
+            /*
+             * Big Key Shuffle
+             * Values: 'none', 'wild'
+             */
+            'bigkeyshuffle': 'none'
+
+            /*
+             * Small Key Shuffle
+             * Values: 'none', 'wild'
+             */
+            'keyshuffle': 'wild'
+
+            /*
+             * Map Shuffle
+             * Values: 'none', 'wild'
+             */
+            'mapshuffle': 'wild'
+
+            /*
+             * Compass Shuffle
+             * Values: 'none', 'wild'
+             */
+            'compassshuffle': 'wild'
+
+            /*
+             * Enemy drops
+             * Values: 'keys' for key drop shuffle, 'none' for no key drop shuffle. When key drop is forced on because of door shuffle, this value will be 'keys'.
+             */
+            'dropshuffle': 'none'
+
+            /*
+             * Pot drops
+             * Values: 'keys' for key drop shuffle, 'none' for no key drop shuffle. When key drop is forced on because of door shuffle, this value will be 'keys'.
+             */
+            'pottery': 'none'
+
+            /*
+             * Shopsanity
+             * Values: 1 for shopsanity, 0 for no shopsanity. Not sure why it isn't True/False, I guess AP stores bools as 1 or 0 internally? Maybe?
+             */
+            'shopsanity': 0
+
+            /*
+             * Prizesanity
+             * Values: 'none', 'wild'
+             */
+            'prizeshuffle': 'none'
+
+            /*
+             * World Mode
+             * Values: 'open', 'standard', and 'inverted'
+             */
+            'mode': 'open'
+
+            /*
+             * Flute Shuffle
+             * Values: 'vanilla', 'balanced', and 'random' (Equivalent to 'chaos' in the AP YAML)
+             */
+            'ow_fluteshuffle': 'vanilla'
+
+            /*
+             * Enemy Shuffle
+             * Values: 'none', 'random' (Non-logical enemizer), 'shuffled' (Logical enemizer)
+             */
+            'enemy_shuffle': 'none'
+
+            /*
+             * Boss Shuffle
+             * Values: 'none', 'simple', 'full', 'random' (Equivalent to 'chaos' in the AP YAML)
+             */
+            'boss_shuffle': 'none'
+
+            /*
+             * Entrance Shuffle
+             * Values: 'vanilla', 'dungeonssimple', 'dungeonsfull', and 'crossed'
+             */
+            'shuffle': 'vanilla'
+
+            /*
+             * Door Shuffle
+             * Values: 'vanilla', 'basic', 'partitioned', and 'crossed'
+             */
+            'door_shuffle': 'vanilla'
+
+            /*
+             * Lobby Shuffle
+             * Values: 2 for no lobby shuffle, and 3 for yes lobby shuffle
+             */
+            'intensity': 2
+
+            /*
+             * Door Type Shuffle
+             * Values: 'original' and 'big'
+             */
+            'door_type_mode': 'original'
+
+            /*
+             * Pre-activated Flute
+             * Values: 'normal' if the Flute must be activated in Kakariko, 'active' for pre-activated Flute. In Inverted, the Flute is always pre-activated regardless of this slot data.
+             */
+            'flute_mode': 'normal'
+
+            /*
+             * Dungeon Counters
+             * Values: 'off', 'pickup', 'on'
+             */
+            'dungeon_counters': 'off'
