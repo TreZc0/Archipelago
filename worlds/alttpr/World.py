@@ -123,7 +123,7 @@ class ALttPRWorld(World):
         # pendants/crystals, entrances in entrance shuffle, enemies in enemizer, etc.
 
         # Convert the enemy IDs to names. IDs are used in slot data to save space.
-        if self.options.enemy_shuffle.value != "vanilla" and "enemies" in slot_data and "1" in slot_data["enemies"]:
+        if self.options.enemy_shuffle != "vanilla" and "enemies" in slot_data and "1" in slot_data["enemies"]:
             overworld_enemies = slot_data["enemies"]["1"]["Overworld"]
             for location_id in overworld_enemies:
                 for i in overworld_enemies[location_id]:
@@ -187,7 +187,7 @@ class ALttPRWorld(World):
     # Our world class must also have a create_item function that can create any one of our items by name at any time.
     def create_item(self, name: str, classification: ItemClassification = ItemClassification.filler) -> Items.ALttPRItem:
         try:
-            classification = Items.get_classification(name, self.options.door_shuffle != "vanilla" or self.options.boss_shuffle.value != "none")
+            classification = Items.get_classification(name, self.options.door_shuffle != "vanilla" or self.options.boss_shuffle != "vanilla")
         except Exception:
             # Unknown item, should never reach here, but also shouldn't crash if we do
             pass
@@ -289,10 +289,8 @@ class ALttPRWorld(World):
             world.settings.record_entrances(world)
         if self.options.door_shuffle != "vanilla":
             world.settings.record_doors(world)
-        if self.options.enemy_shuffle.value != "none":
+        if self.options.enemy_shuffle != "vanilla":
             world.settings.record_enemies(world)
-        print("Slot data:")
-        print(world.settings.world_rep)
         return world.settings.world_rep
 
 
@@ -351,21 +349,21 @@ class ALttPRWorld(World):
         # There are sooo many fields that aren't set in the
         # door rando's world constructor :(
         self.door_rando_world.any_enemy_logic = {
-            1: "none" if self.options.enemy_shuffle.value != "logical" else "allow_all"}
+            1: "none" if self.options.enemy_shuffle != "logical" else "allow_all"}
         self.door_rando_world.bigkeyshuffle = {1: "wild" if self.options.big_key_shuffle.value else "none"}
         self.door_rando_world.bombbag = {1: False}
         self.door_rando_world.boots_hint = {1: False}
-        self.door_rando_world.boss_shuffle = {1: self.options.boss_shuffle.value}
+        self.door_rando_world.boss_shuffle = {1: alttpr_options.boss_shuffle_string_from_option(self.options.boss_shuffle)}
         self.door_rando_world.bow_mode = {1: "progressive"}
         self.door_rando_world.compassshuffle = {1: "wild" if self.options.compass_shuffle.value else "none"}
         self.door_rando_world.crystals_needed_for_gt = {1: self.options.crystals_needed_for_ganons_tower.value}
         self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
         self.door_rando_world.customizer = None
-        self.door_rando_world.door_type_mode = {1: self.options.door_type_shuffle.value}
+        self.door_rando_world.door_type_mode = {1: self.options.door_type_shuffle.current_key}
         self.door_rando_world.dropshuffle = {1: "none" if not (self.options.key_drop_shuffle.value or shuffled_doors) else "keys"}
-        self.door_rando_world.dungeon_counters = {1: self.options.dungeon_counters.value if not shuffled_doors else "on"}
+        self.door_rando_world.dungeon_counters = {1: self.options.dungeon_counters.current_key if not shuffled_doors else "on"}
         self.door_rando_world.enemy_shuffle = {
-            1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
+            1: alttpr_options.enemy_shuffle_string_from_option(self.options.enemy_shuffle)}
         self.door_rando_world.experimental = {
             1: False}  # This makes you a bunny if your spawn point is in the dark world
         self.door_rando_world.flute_mode = {1: "active" if self.options.pre_activated_flute.value else "normal"}
@@ -379,7 +377,7 @@ class ALttPRWorld(World):
         self.door_rando_world.open_pyramid = {1: alttpr_options.open_pyramid_string_from_option(self.options.open_pyramid)}
         self.door_rando_world.override_bomb_check = True  # TODO: Bomb bag
         self.door_rando_world.overworld_map = {1: "default"}
-        self.door_rando_world.owFluteShuffle = {1: self.options.flute_shuffle.value}
+        self.door_rando_world.owFluteShuffle = {1: alttpr_options.flute_shuffle_string_from_option(self.options.flute_shuffle)}
         self.door_rando_world.owFog = {1: False}
         self.door_rando_world.owKeepSimilar = {1: False}
         self.door_rando_world.owTerrain = {1: False}
@@ -518,10 +516,11 @@ class ALttPRWorld(World):
         triforce_gfx = None
         uw_palettes = "default"
 
-        apply_rom_settings(rom, self.options.heart_beep_rate.value, self.options.heart_color.value, quickswap,
-                           self.options.fast_menu.value, self.options.disable_music.value, self.get_sprite_file(), triforce_gfx,
-                           ow_palettes, uw_palettes, reduce_flashing, shuffle_sfx,
-                           shuffle_sfxinstruments, shuffle_songinstruments, self.options.msu_resume.value)
+        apply_rom_settings(rom, alttpr_options.heart_beep_rate_string_from_option(self.options.heart_beep_rate),
+                           self.options.heart_color.current_key, quickswap, self.options.fast_menu.current_key,
+                           self.options.disable_music.value, self.get_sprite_file(), triforce_gfx, ow_palettes,
+                           uw_palettes, reduce_flashing, shuffle_sfx, shuffle_sfxinstruments,
+                           shuffle_songinstruments, self.options.msu_resume.value)
 
 
     def get_sprite_file(self) -> str | None:
@@ -572,18 +571,6 @@ class ALttPRWorld(World):
 
         if self.options.goal in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
             errors.append("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
-
-        self.check_option("shuffle_links_house", [0, 1, "true", "false"], errors)
-        self.check_option("shuffle_tavern", [0, 1, "true", "false"], errors)
-        self.check_option("zelgawoods", [0, 1, "true", "false"], errors)
-        self.check_option("door_type_shuffle", ["original", "big"], errors)
-        self.check_option("enemy_shuffle", ["none", "random", "logical"], errors)
-        self.check_option("boss_shuffle", ["none", "simple", "full", "random"], errors)
-        self.check_option("flute_shuffle", ["vanilla", "balanced", "random"], errors)
-        self.check_option("dungeon_counters", ["on", "pickup", "off"], errors)
-        self.check_option("heart_beep_rate", ["normal", "half", "quarter", "double", "off"], errors)
-        self.check_option("heart_color", ["red", "blue", "green", "yellow"], errors)
-        self.check_option("fast_menu", ["normal", "instant", "double", "triple", "quadruple", "half"], errors)
 
         sprite = self.options.sprite.value.lower()
         if sprite != "link" and sprite not in Sprites.sprites:

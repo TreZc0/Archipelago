@@ -30,5 +30,6 @@ class TestInvalidOptions(ALttPRTestBase):
             with self.subTest(option=option, value=value):
                 self.options = default_options.copy()
                 self.options[option] = value
-                self.assertRaises(OptionError, self.world_setup)
+                error = KeyError if option != "sprite" else OptionError
+                self.assertRaises(error, self.world_setup)
         self.options = default_options

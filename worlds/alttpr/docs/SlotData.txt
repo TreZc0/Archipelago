@@ -102,9 +102,15 @@ This is the current slot data for the APWorld. Several fields use different name
 
             /*
              * Enemy Shuffle
-             * Values: 'none', 'random' (Non-logical enemizer), 'shuffled' (Logical enemizer)
+             * Values: 'none', 'shuffled' (Logical enemizer)
              */
             'enemy_shuffle': 'none',
+
+            /*
+             * Logical Enemizer
+             * Values: 'none' for no logical enemy shuffle, 'allow_all' for logical enemy shuffle
+             */
+            'any_enemy_logic': 'none',
 
             /*
              * Boss Shuffle

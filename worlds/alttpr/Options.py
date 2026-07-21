@@ -192,27 +192,35 @@ class LobbyShuffle(Toggle):
     default = False
 
 
-class DoorTypeShuffle(TextChoice):
+class DoorTypeShuffle(Choice):
     """With door shuffle enabled, randomize the types of each door.
     original: All dungeon doors which are open, bombable, bonkable, or small key locked become a random type of door.
     big: Doors that are big key locked are also randomized."""
     display_name = "Door Type Shuffle"
-    option_original = "original"
-    option_big = "big"
+    option_original = 0
+    option_big = 1
     default = "original"
 
 
-class EnemyShuffle(TextChoice):
+class EnemyShuffle(Choice):
     """All enemies except bosses are randomized. Logical enemy shuffle might require defeating enemies that
     require specific items (Eyegore, Freezors, etc.) to progress in a dungeon."""
     display_name = "Enemy Shuffle"
-    option_vanilla = "none"
-    option_shuffled = "random"
-    option_logical = "logical"
-    default = "none"
+    option_vanilla = 0
+    option_shuffled = 1
+    option_logical = 2
+    default = "vanilla"
+
+def enemy_shuffle_string_from_option(option):
+    if option == "vanilla":
+        return "none"
+    elif option == "shuffled" or option == "logical":
+        return "shuffled"
+    else:
+        raise Exception(f"Invalid option {option} for enemy_shuffle")
 
 
-class BossShuffle(TextChoice):
+class BossShuffle(Choice):
     """Bosses are randomized. This includes the Armos/Lanmolas/Moldorm rematches in Ganon's Tower, but not Ganon or either Aganhim fight. Some bosses cannot appear in some locations.
 
     * Vanilla: Bosses are in their original locations.
@@ -220,11 +228,23 @@ class BossShuffle(TextChoice):
     * Full: Bosses are shuffled randomly, and three random bosses will be fought twice.
     * Chaos: Bosses are shuffled randomly, and any boss can be fought any number of times."""
     display_name = "Boss Shuffle"
-    option_vanilla = "none"
-    option_simple = "simple"
-    option_full = "full"
-    option_chaos = "random"
-    default = "none"
+    option_vanilla = 0
+    option_simple = 1
+    option_full = 2
+    option_chaos = 3
+    default = "vanilla"
+
+def boss_shuffle_string_from_option(option):
+    if option == "vanilla":
+        return "none"
+    elif option == "simple":
+        return "simple"
+    elif option == "full":
+        return "full"
+    elif option == "chaos":
+        return "random"
+    else:
+        raise Exception(f"Invalid option {option} for boss_shuffle")
 
 
 class Shopsanity(Toggle):
@@ -240,13 +260,23 @@ class PrizeShuffle(Toggle):
     default = False
 
 
-class FluteShuffle(TextChoice):
+class FluteShuffle(Choice):
     """Randomize the Flute spot destinations. Balanced will spread the Flute spots around the overworld, while Chaos will place them randomly."""
     display_name = "Flute Shuffle"
-    option_vanilla = "vanilla"
-    option_balanced = "balanced"
-    option_chaos = "random"
+    option_vanilla = 0
+    option_balanced = 1
+    option_chaos = 2
     default = "vanilla"
+
+def flute_shuffle_string_from_option(option):
+    if option == "vanilla":
+        return "vanilla"
+    elif option == "balanced":
+        return "balanced"
+    elif option == "chaos":
+        return "random"
+    else:
+        raise Exception(f"Invalid option {option} for flute_shuffle")
 
 
 class Pseudoboots(Toggle):
@@ -267,14 +297,14 @@ class PreActivatedFlute(Toggle):
     default = False
 
 
-class DungeonCounters(TextChoice):
+class DungeonCounters(Choice):
     """Displays two counters in each dungeon showing the collected/total number of checks and number of small keys.
     If pickup is selected, the counters will be displayed after finding that dungeon's map and compass. The counters
     are always displayed if door shuffle is enabled."""
     display_name = "Dungeon Counters"
-    option_on = "on"
-    option_pickup = "pickup"
-    option_off = "off"
+    option_on = 0
+    option_pickup = 1
+    option_off = 2
     default = "pickup"
 
 
@@ -285,36 +315,50 @@ class Sprite(FreeText):
     default = "Link"
 
 
-class HeartBeepRate(TextChoice):
+class HeartBeepRate(Choice):
     """The rate at which heart beeps are played when Link is at low health."""
     display_name = "Heart Beep Rate"
-    option_double = "double"
-    option_normal = "normal"
-    option_half = "half"
-    option_quarter = "quarter"
-    option_never = "off"
+    option_double = 0
+    option_normal = 1
+    option_half = 2
+    option_quarter = 3
+    option_never = 4
     default = "normal"
 
+def heart_beep_rate_string_from_option(option):
+    if option == "double":
+        return "double"
+    elif option == "normal":
+        return "normal"
+    elif option == "half":
+        return "half"
+    elif option == "quarter":
+        return "quarter"
+    elif option == "never":
+        return "off"
+    else:
+        raise Exception(f"Invalid option {option} for heart_beep_rate")
 
-class HeartColor(TextChoice):
+
+class HeartColor(Choice):
     """The color of Link's heart meter."""
     display_name = "Heart Color"
-    option_red = "red"
-    option_blue = "blue"
-    option_green = "green"
-    option_yellow = "yellow"
+    option_red = 0
+    option_blue = 1
+    option_green = 2
+    option_yellow = 3
     default = "red"
 
 
-class FastMenu(TextChoice):
+class FastMenu(Choice):
     """The rate at which the menu opens and closes."""
     display_name = "Fast Menu"
-    option_normal = "normal"
-    option_instant = "instant"
-    option_double = "double"
-    option_triple = "triple"
-    option_quadruple = "quadruple"
-    option_half = "half"
+    option_normal = 0
+    option_instant = 1
+    option_double = 2
+    option_triple = 3
+    option_quadruple = 4
+    option_half = 5
     default = "normal"
 
 

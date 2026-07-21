@@ -323,7 +323,7 @@ def create_all_items(world: ALttPRWorld) -> None:
     for item in dr_itempool:
         ap_item_name = item.name if item.name not in dr_ap_different_names else dr_ap_different_names[item.name]
         code = item.code
-        classification = get_classification(ap_item_name, world.options.door_shuffle != "vanilla" or world.options.boss_shuffle.value != "none")
+        classification = get_classification(ap_item_name, world.options.door_shuffle != "vanilla" or world.options.boss_shuffle != "vanilla")
 
         if world.options.shopsanity.value and (ap_item_name == "Bee" or (ap_item_name == "Red Potion" and not item.priority)):
             # Having bees and potions as randomized items is kinda wonky. Usually when you receive them they
