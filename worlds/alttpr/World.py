@@ -341,9 +341,9 @@ class ALttPRWorld(World):
         # generate for one player, hence all the "1"s everywhere.
         self.door_rando_world = DoorRandoWorld(
             1, {1: "vanilla"}, {1: False}, {1: "none"}, {1: False}, {1: self.options.entrance_shuffle.value},
-            {1: self.options.door_shuffle.value}, {1: "noglitches"}, {1: self.options.world_mode.value}, {1: "random"},
+            {1: self.options.door_shuffle.value}, {1: "noglitches"}, {1: self.options.world_mode.current_key}, {1: "random"},
             {1: "normal"},
-            {1: None}, "none", "on", {1: self.options.goal.value}, "balanced", {1: "locations"},
+            {1: None}, "none", "on", {1: self.options.goal.current_key}, "balanced", {1: "locations"},
             {1: True}, False, Items.default_items_dict, {1: False}, "none"
         )
 
@@ -575,7 +575,7 @@ class ALttPRWorld(World):
                                    "trinity", "completionist"], errors)
         self.check_option("open_pyramid", ["auto", "yes", "no"], errors)
 
-        if self.options.goal.value in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
+        if self.options.goal in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
             errors.append("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
 
         self.check_option("entrance_shuffle", ["vanilla", "dungeonssimple", "dungeonsfull", "crossed"], errors)
@@ -617,5 +617,5 @@ class ALttPRWorld(World):
 
 
     def check_option(self, option_name: str, valid_values: list[str | int], errors: list[str]) -> None:
-        if not getattr(self.options, option_name).value in valid_values:
-            errors.append(f"Invalid value for option {option_name}: {getattr(self.options, option_name).value}")
+        if not getattr(self.options, option_name) in valid_values:
+            errors.append(f"Invalid value for option {option_name}: {getattr(self.options, option_name)}")

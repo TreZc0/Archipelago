@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from Options import FreeText, OptionGroup, PerGameCommonOptions, Range, TextChoice, Toggle
+from Options import Choice, FreeText, OptionGroup, PerGameCommonOptions, Range, TextChoice, Toggle
 
 
-class WorldMode(TextChoice):
+class WorldMode(Choice):
     """Open: Start from Link's House or Sanctuary, without needing to save Zelda in Hyrule Castle
     Standard: Start at Link's House and save Zelda in Hyrule Castle before accessing the rest of the world
     Inverted: The Light World and Dark World have been flipped.
@@ -18,14 +18,14 @@ class WorldMode(TextChoice):
         - Light World terrain has been modified so that mirror-locked locations can be reached without the mirror
         - The top of Turtle Rock can be accessed by jumping from its tail"""
     display_name = "World Mode"
-    option_open = "open"
-    option_standard = "standard"
-    option_inverted = "inverted"
+    option_open = 0
+    option_standard = 1
+    option_inverted = 2
     # option_retro = "retro"
     default = "open"
 
 
-class Goal(TextChoice):
+class Goal(Choice):
     """Sets the goal for this seed.
 
     crystals: Collect the required number of crystals and kill Ganon.
@@ -37,14 +37,14 @@ class Goal(TextChoice):
     trinity: Either kill Ganon, pull the pedestal, or collect the required number of Triforce pieces and talk to Murahdahla outside Hyrule Castle.
     completionist: Collect every check in the game, then kill Ganon."""
     display_name = "Goal"
-    option_crystals = "crystals"
-    option_ganon = "ganon"
-    option_dungeons = "dungeons"
-    option_pedestal = "pedestal"
-    option_triforcehunt = "triforcehunt"
-    option_ganonhunt = "ganonhunt"
-    option_trinity = "trinity"
-    option_completionist = "completionist"
+    option_crystals = 0
+    option_ganon = 1
+    option_dungeons = 2
+    option_pedestal = 3
+    option_triforcehunt = 4
+    option_ganonhunt = 5
+    option_trinity = 6
+    option_completionist = 7
     default = "crystals"
 
 
