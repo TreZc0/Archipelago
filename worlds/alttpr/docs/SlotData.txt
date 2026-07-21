@@ -7,130 +7,234 @@ This is the current slot data for the APWorld. Several fields use different name
              * Goal
              * Values: 'crystals', 'ganon', 'dungeons', 'pedestal', 'triforcehunt', 'ganonhunt', 'trinity', 'completionist'
              */
-            'goal': 'crystals'
+            'goal': 'crystals',
 
             /*
              * Open Pyramid
              * Values: 'yes', 'no', 'auto'. The former two are equal to the YAML's 'open' and 'closed'.
              */
-            'openpyramid': 'auto'
+            'openpyramid': 'auto',
 
             /*
              * Crystals for Ganons Tower
              * Values: {}, always? TODO that's not good.
              */
-            'crystals_gt': {}
+            'crystals_gt': {},
 
             /*
              * Crystals for killing Ganon
              * Values: {}, always? TODO that's not good.
              */
-            'crystals_ganon': {}
+            'crystals_ganon': {},
+
+            /*
+             * Triforce Goal
+             * Values: An integer
+             */
+            'triforce_goal': 20,
+
+            /*
+             * Triforce Pieces
+             * The number of Triforce pieces in the itempool
+             * Values: An integer
+             */
+            'triforce_goal': 30,
 
             /*
              * Big Key Shuffle
              * Values: 'none', 'wild'
              */
-            'bigkeyshuffle': 'none'
+            'bigkeyshuffle': 'none',
 
             /*
              * Small Key Shuffle
              * Values: 'none', 'wild'
              */
-            'keyshuffle': 'wild'
+            'keyshuffle': 'wild',
 
             /*
              * Map Shuffle
              * Values: 'none', 'wild'
              */
-            'mapshuffle': 'wild'
+            'mapshuffle': 'wild',
 
             /*
              * Compass Shuffle
              * Values: 'none', 'wild'
              */
-            'compassshuffle': 'wild'
+            'compassshuffle': 'wild',
 
             /*
              * Enemy drops
              * Values: 'keys' for key drop shuffle, 'none' for no key drop shuffle. When key drop is forced on because of door shuffle, this value will be 'keys'.
              */
-            'dropshuffle': 'none'
+            'dropshuffle': 'none',
 
             /*
              * Pot drops
              * Values: 'keys' for key drop shuffle, 'none' for no key drop shuffle. When key drop is forced on because of door shuffle, this value will be 'keys'.
              */
-            'pottery': 'none'
+            'pottery': 'none',
 
             /*
              * Shopsanity
              * Values: 1 for shopsanity, 0 for no shopsanity. Not sure why it isn't True/False, I guess AP stores bools as 1 or 0 internally? Maybe?
              */
-            'shopsanity': 0
+            'shopsanity': 0,
 
             /*
              * Prizesanity
              * Values: 'none', 'wild'
              */
-            'prizeshuffle': 'none'
+            'prizeshuffle': 'none',
 
             /*
              * World Mode
              * Values: 'open', 'standard', and 'inverted'
              */
-            'mode': 'open'
+            'mode': 'open',
 
             /*
              * Flute Shuffle
              * Values: 'vanilla', 'balanced', and 'random' (Equivalent to 'chaos' in the AP YAML)
              */
-            'ow_fluteshuffle': 'vanilla'
+            'ow_fluteshuffle': 'vanilla',
 
             /*
              * Enemy Shuffle
              * Values: 'none', 'random' (Non-logical enemizer), 'shuffled' (Logical enemizer)
              */
-            'enemy_shuffle': 'none'
+            'enemy_shuffle': 'none',
 
             /*
              * Boss Shuffle
              * Values: 'none', 'simple', 'full', 'random' (Equivalent to 'chaos' in the AP YAML)
              */
-            'boss_shuffle': 'none'
+            'boss_shuffle': 'none',
 
             /*
              * Entrance Shuffle
              * Values: 'vanilla', 'dungeonssimple', 'dungeonsfull', and 'crossed'
              */
-            'shuffle': 'vanilla'
+            'shuffle': 'vanilla',
+
+            /*
+             * Shuffle Link's House
+             * Values: 1 to shuffle with crossed entrance shuffle, 0 to not shuffle
+             */
+            'shufflelinks': 0,
+
+            /*
+             * Shuffle back of Tavern
+             * Values: 1 to shuffle with crossed entrance shuffle, 0 to not shuffle
+             */
+            'shufflelinks': 0,
+
+            /*
+             * Zelgawoods
+             * Values: 'followlinked' to enable with crossed entrance shuffle, 'original' for no Zelgawoods
+             */
+            'skullwoods': 'original',
 
             /*
              * Door Shuffle
              * Values: 'vanilla', 'basic', 'partitioned', and 'crossed'
              */
-            'door_shuffle': 'vanilla'
+            'door_shuffle': 'vanilla',
 
             /*
              * Lobby Shuffle
              * Values: 2 for no lobby shuffle, and 3 for yes lobby shuffle
              */
-            'intensity': 2
+            'intensity': 2,
 
             /*
              * Door Type Shuffle
              * Values: 'original' and 'big'
              */
-            'door_type_mode': 'original'
+            'door_type_mode': 'original',
+
+            /*
+             * Pseudoboots
+             * Values: 1 for enabled, 0 for disabled
+             */
+            'pseudoboots': 0,
+
+            /*
+             * Mirror Scroll
+             * Values: True for enabled, False for disabled. Always enabled with door shuffle regardless of this setting.
+             * No idea why it's True/False when Pseudoboots are 1/0 ¯\_(ツ)_/¯
+             */
+            'mirrorscroll': False,
 
             /*
              * Pre-activated Flute
              * Values: 'normal' if the Flute must be activated in Kakariko, 'active' for pre-activated Flute. In Inverted, the Flute is always pre-activated regardless of this slot data.
              */
-            'flute_mode': 'normal'
+            'flute_mode': 'normal',
 
             /*
              * Dungeon Counters
              * Values: 'off', 'pickup', 'on'
              */
-            'dungeon_counters': 'off'
+            'dungeon_counters': 'off',
+        },
+    },
+    'start_inventory': {
+        /*
+         * A list of the starting items. If the count of an item is greater than one, the item is listed multiple times.
+         * This is an example starting with Mitts and Mearl.
+         */
+        1: ['Progressive Glove', 'Progressive Glove', 'Moon Pearl']
+    },
+    'bosses': {
+        1: {
+           /*
+            * Boss Shuffle
+            * If the Ganons Tower boss rooms are in different dungeons due to door shuffle,
+            * The name of their dungeon will replace 'Ganons Tower'.
+            * e.g. 'Skull Woods (bottom)': 'Armos Knights'
+            */
+           'Eastern Palace': 'Armos Knights',
+           'Desert Palace': 'Lanmolas',
+           'Tower of Hera': 'Moldorm',
+           'Palace of Darkness': 'Helmasaur King',
+           'Thieves Town': 'Blind',
+           'Skull Woods': 'Mothula',
+           'Swamp Palace': 'Arrghus',
+           'Ice Palace': 'Kholdstare',
+           'Misery Mire': 'Vitreous',
+           'Turtle Rock': 'Trinexx',
+           'Ganons Tower (bottom)': 'Armos Knights',
+           'Ganons Tower (middle)': 'Lanmolas',
+           'Ganons Tower (top)': 'Moldorm',
+        },
+    },
+    'medallions': {
+        1: {
+            'Misery Mire': 'Ether',
+            'Turtle Rock': 'Quake',
+        },
+    },
+    'ow-flutespots': {
+        1: {
+            /*
+             * Flute Shuffle spots
+             * The table of ID numbers to locations can be found at the bottom of
+             * worlds/alttpr/ALttPDoorRandomizer/source/overworld/FluteShuffle.py
+             */
+            'force': [3, 22, 24, 44, 47, 48, 59, 63],
+            'forbid': [],
+        }
+    }
+    'doors': {
+        1: {
+            'lobbies': {
+                TODO if needed
+            },
+            'doors': {
+                TODO if needed
+            },
+        },
+    },
+}

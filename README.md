@@ -9,6 +9,7 @@ The setup for this APWorld is largely identical to the [setup guide for the exis
 * The person generating the multiworld does not need a ROM file, only the players do
 * The resulting patch for each player will have the extension .apalttpr
 
+<<<<<<< HEAD
 ## Features
 * Goal options: Crystals, Ganon, All Dungeons, Pedestal, Triforce Hunt, Ganon Hunt, Trinity (complete any one of Ganon/Pedestal/Triforce Hunt goals), Completionist (collect every check and then kill Ganon),
 * Standard and Inverted game modes,
