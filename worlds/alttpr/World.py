@@ -187,7 +187,7 @@ class ALttPRWorld(World):
     # Our world class must also have a create_item function that can create any one of our items by name at any time.
     def create_item(self, name: str, classification: ItemClassification = ItemClassification.filler) -> Items.ALttPRItem:
         try:
-            classification = Items.get_classification(name, self.options.door_shuffle.value != "vanilla" or self.options.boss_shuffle.value != "none")
+            classification = Items.get_classification(name, self.options.door_shuffle != "vanilla" or self.options.boss_shuffle.value != "none")
         except Exception:
             # Unknown item, should never reach here, but also shouldn't crash if we do
             pass
@@ -285,9 +285,9 @@ class ALttPRWorld(World):
         world = self.door_rando_world
         world.settings.record_info(world)  # Bosses, medallions, and random seed (not being set)
         world.settings.record_overworld(world)
-        if self.options.entrance_shuffle.value != "vanilla":
+        if self.options.entrance_shuffle != "vanilla":
             world.settings.record_entrances(world)
-        if self.options.door_shuffle.value != "vanilla":
+        if self.options.door_shuffle != "vanilla":
             world.settings.record_doors(world)
         if self.options.enemy_shuffle.value != "none":
             world.settings.record_enemies(world)
@@ -297,7 +297,8 @@ class ALttPRWorld(World):
 
 
     def extend_hint_information(self, hint_data: dict[int, dict[int, str]]):
-        if self.options.entrance_shuffle.value == "vanilla":
+        # TODO: Does the hints show vanilla in crosskeys for outdoor locations?
+        if self.options.entrance_shuffle == "vanilla":
             return
 
         hint_data[self.player] = {}
@@ -339,12 +340,12 @@ class ALttPRWorld(World):
         #
         # The world can create a multiworld with many players each with different options, but we only need to
         # generate for one player, hence all the "1"s everywhere.
+        shuffled_doors = self.options.door_shuffle != "vanilla"
         self.door_rando_world = DoorRandoWorld(
-            1, {1: "vanilla"}, {1: False}, {1: "none"}, {1: False}, {1: self.options.entrance_shuffle.value},
-            {1: self.options.door_shuffle.value}, {1: "noglitches"}, {1: self.options.world_mode.current_key}, {1: "random"},
-            {1: "normal"},
-            {1: None}, "none", "on", {1: self.options.goal.current_key}, "balanced", {1: "locations"},
-            {1: True}, False, Items.default_items_dict, {1: False}, "none"
+            1, {1: "vanilla"}, {1: False}, {1: "none"}, {1: False}, {1: self.options.entrance_shuffle.current_key},
+            {1: self.options.door_shuffle.current_key}, {1: "noglitches"}, {1: self.options.world_mode.current_key}, {1: "random"},
+            {1: "normal"}, {1: None}, "none", "on", {1: self.options.goal.current_key},
+            "balanced", {1: "locations"}, {1: True}, False, Items.default_items_dict, {1: False}, "none"
         )
 
         # There are sooo many fields that aren't set in the
@@ -361,22 +362,21 @@ class ALttPRWorld(World):
         self.door_rando_world.crystals_needed_for_ganon = {1: self.options.crystals_needed_for_ganon.value}
         self.door_rando_world.customizer = None
         self.door_rando_world.door_type_mode = {1: self.options.door_type_shuffle.value}
-        self.door_rando_world.dropshuffle = {1: "none" if not (self.options.key_drop_shuffle.value or self.options.door_shuffle.value != "vanilla") else "keys"}
-        self.door_rando_world.dungeon_counters = {
-            1: self.options.dungeon_counters.value if self.options.door_shuffle.value == "vanilla" else "on"}
+        self.door_rando_world.dropshuffle = {1: "none" if not (self.options.key_drop_shuffle.value or shuffled_doors) else "keys"}
+        self.door_rando_world.dungeon_counters = {1: self.options.dungeon_counters.value if not shuffled_doors else "on"}
         self.door_rando_world.enemy_shuffle = {
             1: self.options.enemy_shuffle.value if self.options.enemy_shuffle.value != "logical" else "shuffled"}
         self.door_rando_world.experimental = {
             1: False}  # This makes you a bunny if your spawn point is in the dark world
         self.door_rando_world.flute_mode = {1: "active" if self.options.pre_activated_flute.value else "normal"}
         self.door_rando_world.intensity = {1: 2 if not self.options.lobby_shuffle.value else 3}  # No door shuffle
-        self.door_rando_world.keyshuffle = {1: "none" if not (self.options.small_key_shuffle.value or self.options.door_shuffle.value in ["partitioned", "crossed"]) else "wild"}
+        self.door_rando_world.keyshuffle = {1: "none" if not (self.options.small_key_shuffle.value or self.options.door_shuffle in ["partitioned", "crossed"]) else "wild"}
         self.door_rando_world.linked_drops = {
             1: "unset"}  # In entrance shuffle, whether dropdowns link with their matching exit is determined by the entrance setting
         self.door_rando_world.lock_aga_door_in_escape = True
         self.door_rando_world.mapshuffle = {1: "wild" if self.options.map_shuffle.value else "none"}
-        self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value or self.options.door_shuffle.value != "vanilla"}
-        self.door_rando_world.open_pyramid = {1: self.options.open_pyramid.value}
+        self.door_rando_world.mirrorscroll = {1: self.options.mirror_scroll.value or shuffled_doors}
+        self.door_rando_world.open_pyramid = {1: alttpr_options.open_pyramid_string_from_option(self.options.open_pyramid)}
         self.door_rando_world.override_bomb_check = True  # TODO: Bomb bag
         self.door_rando_world.overworld_map = {1: "default"}
         self.door_rando_world.owFluteShuffle = {1: self.options.flute_shuffle.value}
@@ -384,7 +384,7 @@ class ALttPRWorld(World):
         self.door_rando_world.owKeepSimilar = {1: False}
         self.door_rando_world.owTerrain = {1: False}
         self.door_rando_world.owWhirlpoolShuffle = {1: False}
-        self.door_rando_world.pottery = {1: "none" if not (self.options.key_drop_shuffle.value or self.options.door_shuffle.value != "vanilla") else "keys"}
+        self.door_rando_world.pottery = {1: "none" if not (self.options.key_drop_shuffle.value or shuffled_doors) else "keys"}
         self.door_rando_world.prizeshuffle = {1: "none" if not self.options.prize_shuffle.value else "wild"}
         self.door_rando_world.pseudoboots = {1: self.options.pseudoboots.value}
         self.door_rando_world.rom_seeds = {1: self.random.randint(0, 999999999)}
@@ -569,20 +569,13 @@ class ALttPRWorld(World):
 
     def validate_options(self) -> None:
         errors = []
-        self.check_option("world_mode", ["standard", "open", "inverted"], errors)
-        self.check_option("goal", ["crystals", "ganon", "dungeons",
-                                   "pedestal", "triforcehunt", "ganonhunt",
-                                   "trinity", "completionist"], errors)
-        self.check_option("open_pyramid", ["auto", "yes", "no"], errors)
 
         if self.options.goal in ["triforcehunt", "ganonhunt", "trinity"] and self.options.triforce_hunt_goal.value > self.options.triforce_hunt_total.value:
             errors.append("Triforce Hunt Goal cannot be greater than Triforce Hunt Total.")
 
-        self.check_option("entrance_shuffle", ["vanilla", "dungeonssimple", "dungeonsfull", "crossed"], errors)
         self.check_option("shuffle_links_house", [0, 1, "true", "false"], errors)
         self.check_option("shuffle_tavern", [0, 1, "true", "false"], errors)
         self.check_option("zelgawoods", [0, 1, "true", "false"], errors)
-        self.check_option("door_shuffle", ["vanilla", "basic", "partitioned", "crossed"], errors)
         self.check_option("door_type_shuffle", ["original", "big"], errors)
         self.check_option("enemy_shuffle", ["none", "random", "logical"], errors)
         self.check_option("boss_shuffle", ["none", "simple", "full", "random"], errors)
@@ -609,7 +602,7 @@ class ALttPRWorld(World):
         if len(invalid_items) > 0:
             errors.append("The following items are not allowed in the starting inventory: " + ", ".join(invalid_items))
 
-        if self.options.world_mode.value == "standard" and self.options.door_shuffle.value != "vanilla":
+        if self.options.world_mode == "standard" and self.options.door_shuffle != "vanilla":
             errors.append("Standard world mode is not allowed with door shuffle.")
 
         if len(errors) > 0:

@@ -48,14 +48,25 @@ class Goal(Choice):
     default = "crystals"
 
 
-class OpenPyramid(TextChoice):
+class OpenPyramid(Choice):
     """ Whether the Pyramid hole leading to Ganon should be open at the start. Choosing "auto" will open or close it based on your goal setting;
     it will be open for crystals, trinity, and ganonhunt, and closed for other goals, or if crossed entrance is enabled regardless of the goal."""
     display_name = "Open Pyramid"
-    option_auto = "auto"
-    option_open = "yes"
-    option_closed = "no"
+    option_auto = 0
+    option_open = 1
+    option_closed = 2
     default = "auto"
+
+def open_pyramid_string_from_option(option):
+    # OWR uses "yes" and "no", but "open" and "closed" is what people are used to from the core AP implementation
+    if option == "auto":
+        return "auto"
+    elif option == "open":
+        return "yes"
+    elif option == "closed":
+        return "no"
+    else:
+        raise Exception(f"Invalid option {option} for OpenPyramid")
 
 
 class CrystalsNeededForGanonsTower(Range):
@@ -116,19 +127,18 @@ class KeyDropShuffle(Toggle):
     default = False
 
 
-class EntranceShuffle(TextChoice):
+class EntranceShuffle(Choice):
     """Randomize where each building, cave, and dungeon entrance leads to.
     vanilla: No entrance shuffle.
     dungeonssimple: Dungeon entrances are shuffled amongst each other. The four entrances of Hyrule Castle, Desert Palace, and Turtle Rock remain grouped together.
     dungeonsfull: Dungeon entrances are shuffled amongst each other. Dungeons with multiple entrances can be split apart, but they will either all be in the light world or all in the dark world.
     crossed: All buildings, caves, and dungeon entrances are randomized. Caves and dungeons with multiple entrances can connect the Light and Dark Worlds."""
     display_name = "Entrance Shuffle"
-    option_vanilla = "vanilla"
-    option_dungeonssimple = "dungeonssimple"
-    option_dungeonsfull = "dungeonsfull"
-    option_crossed = "crossed"
+    option_vanilla = 0
+    option_dungeonssimple = 1
+    option_dungeonsfull = 2
+    option_crossed = 3
     default = "vanilla"
-    # TODO: Entrance shuffles other than vanilla and crossed
 
 
 class ShuffleLinksHouse(Toggle):
@@ -151,7 +161,7 @@ class Zelgawoods(Toggle):
     display_name = "Zelgawoods"
 
 
-class DoorShuffle(TextChoice):
+class DoorShuffle(Choice):
     """Randomize the layout of each dungeon. Rooms are rearranged or appear in other dungeons, and doors are randomized.
 
     * Dungeons always have their original boss room, which drops that dungeon's prize.
@@ -169,10 +179,10 @@ class DoorShuffle(TextChoice):
         Mitts-locked dungeons (Ice Palace to Ganons Tower) are shuffled together.
     crossed: Rooms from all dungeons are shuffled together."""
     display_name = "Door Shuffle"
-    option_vanilla = "vanilla"
-    option_basic = "basic"
-    option_partitioned = "partitioned"
-    option_crossed = "crossed"
+    option_vanilla = 0
+    option_basic = 1
+    option_partitioned = 2
+    option_crossed = 3
     default = "vanilla"
 
 
