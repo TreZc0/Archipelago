@@ -187,7 +187,7 @@ class ALttPRWorld(World):
     # Our world class must also have a create_item function that can create any one of our items by name at any time.
     def create_item(self, name: str, classification: ItemClassification = ItemClassification.filler) -> Items.ALttPRItem:
         try:
-            classification = Items.get_classification(name, self.options.door_shuffle.value != "vanilla")
+            classification = Items.get_classification(name, self.options.door_shuffle.value != "vanilla" or self.options.boss_shuffle.value != "none")
         except Exception:
             # Unknown item, should never reach here, but also shouldn't crash if we do
             pass

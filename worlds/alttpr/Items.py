@@ -271,13 +271,13 @@ def get_random_filler_item_name(world: ALttPRWorld) -> str:
     raise NotImplementedError("get_random_filler_item_name is not implemented yet")
 
 
-def get_classification(name: str, door_shuffle: bool) -> ItemClassification:
+def get_classification(name: str, progressive_bug_net: bool) -> ItemClassification:
     if name in progressive_items:
         classification = ItemClassification.progression
     elif name in useful_items:
         classification = ItemClassification.useful
     elif name in filler_items:
-        if door_shuffle and name == "Bug Catching Net":
+        if progressive_bug_net and name == "Bug Catching Net":
             # Bug net can be progression in doors to kill Agahnim
             classification = ItemClassification.progression
         else:
@@ -323,7 +323,7 @@ def create_all_items(world: ALttPRWorld) -> None:
     for item in dr_itempool:
         ap_item_name = item.name if item.name not in dr_ap_different_names else dr_ap_different_names[item.name]
         code = item.code
-        classification = get_classification(ap_item_name, world.options.door_shuffle.value != "vanilla")
+        classification = get_classification(ap_item_name, world.options.door_shuffle.value != "vanilla" or world.options.boss_shuffle.value != "none")
 
         if world.options.shopsanity.value and (ap_item_name == "Bee" or (ap_item_name == "Red Potion" and not item.priority)):
             # Having bees and potions as randomized items is kinda wonky. Usually when you receive them they
