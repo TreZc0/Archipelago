@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from Options import Choice, FreeText, OptionGroup, PerGameCommonOptions, Range, TextChoice, Toggle
+from Options import Choice, FreeText, OptionDict, OptionGroup, PerGameCommonOptions, Range, TextChoice, Toggle, Visibility
 
 
 class WorldMode(Choice):
@@ -410,6 +410,12 @@ class MSUResume(Toggle):
     default = False
 
 
+class TestSlotData(OptionDict):
+    """Optional slot data, used for unit testing ONLY"""
+    visibility = Visibility.none
+    default = {}
+
+
 @dataclass
 class ALttPROptions(PerGameCommonOptions):
     world_mode: WorldMode
@@ -451,6 +457,7 @@ class ALttPROptions(PerGameCommonOptions):
     # shuffle_sfxinstruments: ShuffleSFXInstruments
     # shuffle_songinstruments: ShuffleSongInstruments
     msu_resume: MSUResume
+    test_slot_data: TestSlotData
 
 
 alttpr_option_groups: list[OptionGroup] = [

@@ -139,6 +139,8 @@ class ALttPRWorld(World):
 
 
     def generate_early(self) -> None:
+        if self.options.test_slot_data:
+            self.interpret_slot_data(self.options.test_slot_data.value)
         self.seed_hash = self.random.randbytes(4)
         init_race_random(self.random)
         self.validate_options()
@@ -296,12 +298,15 @@ class ALttPRWorld(World):
 
     def extend_hint_information(self, hint_data: dict[int, dict[int, str]]):
         # TODO: Does the hints show vanilla in crosskeys for outdoor locations?
-        if self.options.entrance_shuffle == "vanilla":
+        if self.options.entrance_shuffle == "vanilla" and self.options.door_shuffle == "vanilla":
             return
 
         hint_data[self.player] = {}
         for region in self.get_regions():
             if region.locations and any([location.address for location in region.locations]):
+                if not region.type.is_indoors or (not region.is_in_dungeon and self.options.entrance_shuffle == "vanilla"):
+                    continue
+
                 outdoor_entrances = region.get_connecting_entrances([])
                 for location in region.locations:
                     if location.address and outdoor_entrances and \

@@ -163,7 +163,7 @@ def create_and_connect_regions(world: ALttPRWorld) -> None:
 
     world.multiworld.regions += list(ap_regions.values())
     handle_ice_cross(world)
-    #find_crystal_switch_paths(world, crystal_switches)
+    handle_big_bomb_logic(world)
 
 
 def handle_ice_cross(world: ALttPRWorld) -> None:
@@ -195,63 +195,33 @@ def handle_ice_cross(world: ALttPRWorld) -> None:
     make_ice_cross_entrance("Ice Cross Top to Right", ice_cross_top_region, ice_cross_right_exit)
 
 
-def find_crystal_switch_paths(world: ALttPRWorld, dungeon_crystal_info):
-    # For each entrance in a dungeon that has crystal logic (orange/blue blocks), find
-    # all possible paths to that entrance with the blocks in the correct position.
-    for dungeon, crystal_switches in dungeon_crystal_info.items():
-        for portal in dungeon_portals[dungeon.name]:  # Dungeon portals are the entrance to a dungeon that works regardless of lobby shuffle
-            portal_region = world.get_region(portal)
-            find_crystal_switch_path(world, portal_region, portal_region, [], [], CrystalBarrier.Orange)
-        for crystal_switch in crystal_switches:
-            find_crystal_switch_path(world, crystal_switch, crystal_switch, [], [], CrystalBarrier.Either)
+def handle_big_bomb_logic(world: ALttPRWorld) -> None:
+    return
+    bomb_shop_region = world.get_entrance("Big Bomb Shop Exit").connected_region
+    pyramid_crack = world.get_location("Pyramid Crack")
+
+    crossed_entrances = world.options.entrance_shuffle == "crossed"
+    flute_shuffle = world.options.flute_shuffle != "vanilla"
+    inverted = world.options.world_mode == "inverted"
+
+    player = world.player
+    pyramid_crack_rule = None
+    # world.door_rando_world.districts[1]["Kakariko"].regions  # list of region names
+
+    if not crossed_entrances and not inverted:
+        pyramid_crack_rule = lambda state: (state.has("Hammer", player) and state.has("Moon Pearl", player)) or \
+                                                  (state.has("Magic Mirror", player) and state.has("Beat Agahnim 1", player))
+    elif not crossed_entrances and inverted:
+        if not flute_shuffle:
+            # To deliver the big bomb without the Hammer or Flute, you need Light World access + Mirror to reach the Pyramid with the bomb
+            pyramid_crack_rule = lambda state: state.has("Hammer", player) or \
+                                                      state.has("Ocarina (Activated)", player) or \
+                                                      (state.has("Magic Mirror", player) and
+                                                       (state.has("Progressive Glove", player, 2) and state.has("Moon Pearl", player)) or
+                                                       (state.has("Ocarina (Activated)", player) and state.has("Lamp", player)))
 
 
-def find_crystal_switch_path(world: ALttPRWorld, start_region: ALttPRRegion, current_region: ALttPRRegion, past_regions: list[str], path: list[ALttPREntrance], color: CrystalBarrier) -> None:
-    # Recursive helper function for finding paths through a dungeon from a crystal switch in start_region, to make sure
-    # the crystal block logic is handled correctly.
-    if current_region.name in past_regions or not current_region.is_in_dungeon:
-        # Only follow new paths through the dungeon
-        return
 
-    if current_region.has_crystal_switch and current_region != start_region:
-        # Found another crystal switch, no need to continue
-        return
-
-    # Hera basement cage is the only location that's blocked by crystal blocks, everything else is an entrance
-    if current_region.name == "Hera Basement Cage":
-        if not current_region.name in world.crystal_paths:
-            world.crystal_paths[current_region.name] = []
-        world.crystal_paths[current_region.name].append(ALttPRCrystalPath(color, start_region, path))
-
-    past_regions.append(current_region.name)
-    for exit in current_region.exits:
-        if exit.blocked:
-            continue
-
-        if not exit.crystal or exit.crystal == CrystalBarrier.Either:
-            find_crystal_switch_path(world, start_region, exit.connected_region, past_regions.copy(), path + [exit], color)
-            continue
-
-        if (exit.crystal == CrystalBarrier.Orange and color == CrystalBarrier.Blue) or \
-           (exit.crystal == CrystalBarrier.Blue and color == CrystalBarrier.Orange):
-            # Blocked by orange/blue blocks
-            continue
-
-        if not current_region.name in world.crystal_paths:
-            world.crystal_paths[current_region.name] = []
-        new_path_info = ALttPRCrystalPath(color, start_region, path)
-
-        # Check if the new and any existing paths overlap, and if so, use the shortest path
-        if not any([new_path_info.issubset(old_path_info) for old_path_info in world.crystal_paths[current_region.name]]):
-            world.crystal_paths[current_region.name].append(new_path_info)
-        else:
-            old_path_infos = [path_info for path_info in world.crystal_paths[current_region.name] if new_path_info.issubset(path_info)]
-            for path_info in old_path_infos:
-                world.crystal_paths[current_region.name].remove(path_info)
-            world.crystal_paths[current_region.name].append(new_path_info)
-
-        world.multiworld.register_indirect_condition(start_region, exit)
-        find_crystal_switch_path(world, start_region, exit.connected_region, past_regions.copy(), path + [exit], exit.crystal)
 
 
 def get_event_locations(world: ALttPRWorld):

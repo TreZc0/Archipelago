@@ -1,4 +1,4 @@
-from .bases import ALttPRTestBase, ALttPRTestBaseNoDefaultTests
+from bases import ALttPRTestBase, ALttPRTestBaseNoDefaultTests
 
 
 class TestRandomSettings(ALttPRTestBase):
