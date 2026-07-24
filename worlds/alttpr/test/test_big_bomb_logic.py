@@ -205,12 +205,12 @@ class TestBigBombInvertedFluteShuffle(ALttPRTestBaseNoDefaultTests):
         self.world_setup()
 
         assert self.can_reach_location("Pyramid")
+        self.assertCanNotReachWith(["Pyramid Fairy - Left", "Pyramid Fairy - Right"], "location", [["Ocarina (Activated)"]])
         self.assertCanReachWith(["Pyramid Fairy - Left", "Pyramid Fairy - Right"], "location",
                                         [["Hammer"],
                                                         ["Ocarina (Activated)", "Progressive Glove"],  # Flute to catfish
                                                         ["Magic Mirror", "Progressive Glove", "Progressive Glove", "Moon Pearl"],
                                                         ])
-        self.assertCanNotReachWith(["Pyramid Fairy - Left", "Pyramid Fairy - Right"], "location", [["Ocarina (Activated)"]])
 
 
     def test_big_bomb_inverted_flute_no_east_dark_world(self):

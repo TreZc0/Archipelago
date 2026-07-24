@@ -197,7 +197,7 @@ def handle_ice_cross(world: ALttPRWorld) -> None:
 
 def handle_big_bomb_logic(world: ALttPRWorld) -> None:
     # Picking up the Big Bomb already requires reaching the bomb shop and having the red crystals
-    bomb_shop_region = world.get_entrance("Big Bomb Shop Exit").connected_region
+    bomb_shop_region = world.get_region("Big Bomb Shop").entrances[0].parent_region  # "Big Bomb Shop Exit" wasn't connected properly
     pyramid_crack = world.get_location("Pyramid Crack")
 
     crossed_entrances = world.options.entrance_shuffle == "crossed"
@@ -213,16 +213,16 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
                                                   (state.has("Magic Mirror", player) and state.has("Beat Agahnim 1", player))
     elif not crossed_entrances and inverted:
         flute_spots = world.door_rando_world.owflutespots
-        if not flute_shuffle or [0x1b, 0x1e, 0x25, 0x2e, 0x2f] in flute_spots:
+        if not flute_shuffle or [True for flute_spot in [0x1b, 0x1e, 0x25, 0x2e, 0x2f] if flute_spot in flute_spots]:
             # To deliver the big bomb without the Hammer or Flute, you need Light World access + Mirror to reach the Pyramid with the bomb
             pyramid_crack_rule = lambda state: state.has("Hammer", player) or \
                                                       state.has("Ocarina (Activated)", player) or \
                                                       (state.has("Magic Mirror", player) and state.has("Progressive Glove", player, 2) and state.has("Moon Pearl", player))
-        elif [0x15, 0x16] in flute_spots:  # Flute to dark potion shop but not east dark world
+        elif [True for flute_spot in [0x15, 0x16] if flute_spot in flute_spots]:  # Flute to dark potion shop but not east dark world
             pyramid_crack_rule = lambda state: state.has("Hammer", player) or \
                                                       (state.has("Ocarina (Activated)", player) and state.has("Progressive Glove", player)) or \
                                                       (state.has("Magic Mirror", player) and state.has("Progressive Glove", player, 2) and state.has("Moon Pearl", player))
-        elif [0x0f, 0x17] in flute_spots:  # Flute to Catfish but not east dark world
+        elif [True for flute_spot in [0x0f, 0x17] if flute_spot in flute_spots]:  # Flute to Catfish but not east dark world
             pyramid_crack_rule = lambda state: state.has("Hammer", player) or \
                                                       (state.has("Ocarina (Activated)", player) and state.has("Progressive Glove", player)) or \
                                                       (state.has("Magic Mirror", player) and state.has("Progressive Glove", player, 2) and state.has("Moon Pearl", player))
@@ -236,7 +236,7 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
         pass
 
 
-    pyramid_crack.access_rule = lambda state: state.has("Pick Up Big Bomb") and pyramid_crack_rule(state)
+    pyramid_crack.access_rule = lambda state: state.has("Pick Up Big Bomb", player) and pyramid_crack_rule(state)
 
 
 
