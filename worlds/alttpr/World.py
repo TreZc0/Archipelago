@@ -293,6 +293,8 @@ class ALttPRWorld(World):
             world.settings.record_doors(world)
         if self.options.enemy_shuffle != "vanilla":
             world.settings.record_enemies(world)
+        print("Slot data")
+        print(world.settings.world_rep)
         return world.settings.world_rep
 
 
