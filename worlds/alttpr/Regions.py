@@ -208,6 +208,7 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
     flute_spots = world.door_rando_world.owflutespots[1]
     player = world.player
     pyramid_crack_rule = None
+    print(f"DEBUG: Setting big bomb logic with crossed_entrances {crossed_entrances} and inverted {inverted} and bomb entrance {bomb_shop_entrance} and district {district.name}")
 
     if not crossed_entrances and not inverted:
         pyramid_crack_rule = lambda state: (state.has("Hammer", player) and state.has("Moon Pearl", player)) or \
@@ -231,27 +232,53 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
             pyramid_crack_rule = lambda state: state.has("Hammer", player) or \
                                                (state.has("Magic Mirror", player) and state.has("Progressive Glove", player, 2) and state.has("Moon Pearl", player))
     elif crossed_entrances and not inverted:
-        # NOTE: Brothers West is basically South Dark World
-        # Graveyard Ledge is basically Northwest Dark World
         # NOTE: King's Tomb is special because you could Mirror without Mitts, you need Mitts or Flute to deliver it
-        if bomb_shop_entrance in ["Capacity Upgrade", "Hyrule Castle Entrance (West)", "Hyrule Castle Entrance (East)", "Agahnims Tower", "Cave 45",
-                                  "Desert Palace Entrance (South)", "Desert Palace Entrance (West)", "Desert Palace Entrance (East)",
-                                  "Desert Palace Entrance (North)", "Checkerboard Cave", "Two Brothers (West)", "Kings Tomb",
-                                  "Graveyard Ledge", "Death Mountain Return Cave (West)", "Dark Potion Shop", "Ice Palace",
-                                  "Dark Lake Hylia Ledge Fairy", "Dark Lake Hylia Ledge Spike Cave", "Dark Lake Hylia Ledge Hint",
-                                  "Skull Woods Final Section", "Bumper Cave (Top)", "Red Shield Shop"]:
-            pyramid_crack_rule = lambda state: True
+        if bomb_shop_entrance in ["Desert Palace Entrance (South)", "Desert Palace Entrance (West)",
+                                  "Desert Palace Entrance (East)", "Desert Palace Entrance (North)"]:
+            # Differs based on whether you got here using connector to Mire + Mirror, or a direct connector
+            world.multiworld.register_indirect_condition(world.get_region("Mire Area"), world.get_entrance(bomb_shop_entrance))
+            pyramid_crack_rule = lambda state: (
+                state.has("Ocarina (Activated)", player) or (state.has("Magic Mirror", player) and state.can_reach_region("Mire Area"))
+            ) and (state.has("Beat Agahnim 1", player) or (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player)))
+        elif bomb_shop_entrance == "Kings Grave":
+            # Whether you reach it with Mitts or DW + Mirror, you have a way to be in the general Light World.
+            # You could leave a Mirror Portal at HC, but that hard requires Mitts.
+            pyramid_crack_rule = lambda state: state.has("Beat Agahnim 1", player) or \
+               (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player)) or \
+               (state.has("Magic Mirror", player) and state.has("Progressive Glove", player, 2))
+        elif bomb_shop_entrance == "Dark Potion Shop":
+            print("Setting the pyramid crack rule for Dark Potion Shop")
+            pyramid_crack_rule = lambda state: state.has("Progressive Glove", player) or state.has("Hammer", player) or \
+               (state.has("Magic Mirror", player) and state.has("Beat Agahnim 1", player))
+        elif bomb_shop_entrance in ["Hyrule Castle Entrance (West)", "Hyrule Castle Entrance (East)", "Agahnims Tower"]:
+            # Can Mirror from Pyramid or Flute to a Dark World portal
+            pyramid_crack_rule = lambda state: state.has("Magic Mirror", player) or \
+                (state.has("Ocarina (Activated)", player) and
+                 (state.has("Beat Agahnim 1", player) or
+                 (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))
+                )
+            )
+        elif bomb_shop_entrance == "Capacity Upgrade":
+            # A Mirror portal at Pyramid can be used, but only with Flippers, otherwise you have to Flute away
+            # TODO: Overworld glitches
+            pyramid_crack_rule = lambda state: (state.has("Magic Mirror", player) and state.has("Flippers", player)) or \
+               (state.has("Ocarina (Activated)", player) and
+                (state.has("Beat Agahnim 1", player) or
+                (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))
+                )
+               )
         elif district.name in ["East Hyrule", "Lake Hylia", "Central Hyrule", "Desert", "Kakariko", "Northwest Hyrule"]:
             # Only Mirror is needed because if we're checking the Pyramid Crack, then you can get to Pyramid, leave a
             # mirror portal outside Hyrule Castle, then walk there with the Big Bomb from most of Light World.
             pyramid_crack_rule = lambda state: state.has("Beaten Agahnim 1", player) or \
                 state.has("Magic Mirror", player) or \
                 (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))
-        elif district.name == "Death Mountain":
-            # TODO: I'm cheating. For my own sanity, if it is hard required to Flute the Big Bomb to the Pyramid,
-            # then also using a Mirror portal placed near Hyrule Castle is out of logic. Otherwise you get nonsense like
-            # leaving a Mirror, then using a connector to go through Turtle Rock to reach the Bomb Shop, but only if the
-            # connector doesn't touch the Dark World or require a Save and Quit. Please, no.
+        elif district.name == "Death Mountain" or bomb_shop_entrance == "Death Mountain Return Cave (West)":
+            # Must Flute away, extra requirements or Mirror shenanigans are possible depending on the exact entrance and Flute spots
+            # TODO: For my own sanity, it is out of logic to both use a Mirror Portal near Hyrule Castle and take a
+            # connector to the Bomb Shop. Otherwise you get nonsense like leaving a Mirror, then using a connector to go
+            # through Turtle Rock to reach the Bomb Shop, but only if the connector doesn't touch the Dark World or
+            # require a Save and Quit. Please, no.
 
             # Optional rule for leaving a Mirror portal at HC and Fluting to DM.
             # Assume we already have the Flute because it's always needed for DM
@@ -289,20 +316,22 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
               (state.has("Beaten Agahnim 1", player) or
               (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))) or \
               mirror_and_flute_rule(state)
-        elif district.name == "Dark Death Mountain":
+        elif district.name == "Dark Death Mountain" or bomb_shop_entrance in ["Ice Palace", "Skull Woods Final Section", "Skull Woods Second Section Door (West)", "Bumper Cave (Top)"]:
             pyramid_crack_rule = lambda state: state.has("Magic Mirror", player) and state.has("Ocarina (Activated)", player) and \
                (state.has("Beaten Agahnim 1", player) or
                (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player)))
         elif district.name == "East Dark World":
             pyramid_crack_rule = lambda state: True
-        elif district.name == "South Dark World":
+        elif district.name == "South Dark World" or bomb_shop_entrance in ["Cave 45", "Two Brothers (West)"]:
             pyramid_crack_rule = lambda state: state.has("Hammer", player) or (state.has("Magic Mirror", player) and state.has("Beaten Agahnim 1", player))
-        elif district.name == "The Mire":
+        elif district.name == "The Mire" or bomb_shop_entrance in ["Checkerboard Cave", "Red Shield Shop", "Dark Lake Hylia Ledge Fairy",
+                                                                   "Dark Lake Hylia Ledge Spike Cave", "Dark Lake Hylia Ledge Hint"]:
+            # Mirror is hard required, but you can walk through LW to another DW portal
             pyramid_crack_rule = lambda state: state.has("Magic Mirror", player) and \
                 (state.has("Beaten Agahnim 1", player) or
                  (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))
                 )
-        elif district.name == "Northwest Dark World":
+        elif district.name == "Northwest Dark World" or bomb_shop_entrance == "Graveyard Cave":
             # You can walk there with Mitts + Hammer + Mearl, or Mirror to Light World and get back into the Dark World near Pyramid
             pyramid_crack_rule = lambda state: (
                 (state.has("Magic Mirror", player) and
