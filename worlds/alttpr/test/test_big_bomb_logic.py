@@ -14,7 +14,7 @@ class TestBigBombDefaultSettings(ALttPRTestBaseNoDefaultTests):
         self.assertCanReachWith(["Pyramid Fairy - Left", "Pyramid Fairy - Right"], "location", [["Hammer"], ["Magic Mirror", "Beat Agahnim 1"]])
 
 
-class TestBigBombEntranceShuffle(ALttPRTestBaseNoDefaultTests):
+class BigBombShopEntranceShuffleBase(ALttPRTestBaseNoDefaultTests):
     auto_construct = False
     options = {
         "prize_shuffle": True,
@@ -23,6 +23,8 @@ class TestBigBombEntranceShuffle(ALttPRTestBaseNoDefaultTests):
         "test_slot_data": {},
     }
 
+
+class TestBigBombShopInKak(BigBombShopEntranceShuffleBase):
     def test_big_bomb_shop_in_kak(self):
         slot_data = slot_data_crossed.slot_data.copy()
         slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Red Shield Shop"
@@ -30,42 +32,138 @@ class TestBigBombEntranceShuffle(ALttPRTestBaseNoDefaultTests):
         self.options["test_slot_data"] = slot_data
         self.world_setup()
 
+        self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Progressive Glove", "Flippers", "Moon Pearl"]])
         self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
             ["Beat Agahnim 1"],
             ["Progressive Glove", "Hammer", "Moon Pearl"],
         ])
-        self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Progressive Glove", "Flippers", "Moon Pearl"]])
 
 
-    def test_big_bomb_shop_in_light_world_needs_flute(self):
-        # Checking light world entrances which require Flute to carry the Big Bomb.
-        # This will have to be rewritten if the slot data changes, so there aren't any duplicate entrances.
-        entrances_to_test = {
-            "Desert Palace Entrance (South)": "Bumper Cave Exit (Top)",
-            "Desert Palace Entrance (West)": "Lake Hylia Fortune Teller",
-            "Capacity Upgrade": "Desert Palace Exit (East)",
-            "Waterfall of Wishing": "Desert Healer Fairy",
-            "Death Mountain Return Cave (West)": "Death Mountain Return Cave Exit (East)",
-            "Old Man Cave (East)": "Hookshot Fairy",  # Only grabbing one example from DM since they all have the same logic
-        }
+class TestBigBombShopAtDesertSouth(BigBombShopEntranceShuffleBase):
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Book of Mudora": 1},
+        "test_slot_data": {},
+    }
 
-        for entrance, connected_region in entrances_to_test.items():
-            with self.subTest(entrance=entrance, connected_region=connected_region):
-                slot_data = slot_data_crossed.slot_data.copy()
-                slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = connected_region
-                slot_data["entrances"][1]["entrances"][entrance] = "Big Bomb Shop"
-                self.options["test_slot_data"] = slot_data
-                self.world_setup()
+    def test_big_bomb_shop_at_desert_south(self):
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["two-way"]["Misery Mire"] = "Elder House Exit (East)"
+        slot_data["entrances"][1]["two-way"]["Bush Covered House"] = "Hookshot Cave Front Exit"
+        del slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"]
+        del slot_data["entrances"][1]["two-way"]["Desert Palace Entrance (South)"]
+        slot_data["entrances"][1]["two-way"]["Dark Lake Hylia Ledge Fairy"] = "Bumper Cave Exit (Top)"
+        slot_data["entrances"][1]["entrances"]["Desert Palace Entrance (South)"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
 
-                self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
-                    ["Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
-                    ["Ocarina (Activated)", "Beat Agahnim 1"],
-                ])
-                self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [
-                    ["Beat Agahnim 1", "Magic Mirror", "Progressive Glove", "Hammer", "Moon Pearl"],
-                ])
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
+            ["Ocarina (Activated)", "Beat Agahnim 1"],
+            ["Magic Mirror", "Progressive Glove", "Hammer", "Moon Pearl"],
+            ["Magic Mirror", "Beat Agahnim 1"],
+        ])
 
 
+class TestBigBombShopOnDesertLedge(BigBombShopEntranceShuffleBase):
+    def test_big_bomb_shop_on_desert_ledge(self):
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["two-way"]["Misery Mire"] = "Elder House Exit (East)"
+        slot_data["entrances"][1]["two-way"]["Bush Covered House"] = "Hookshot Cave Front Exit"
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Lake Hylia Fortune Teller"
+        slot_data["entrances"][1]["entrances"]["Desert Palace Entrance (West)"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"], "entrance", [
+            ["Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
+            ["Ocarina (Activated)", "Beat Agahnim 1"],
+            ["Magic Mirror", "Progressive Glove", "Hammer", "Moon Pearl"],
+            ["Magic Mirror", "Beat Agahnim 1"],
+        ])
+
+
+class TestBigBombShopAtCapacityShop(BigBombShopEntranceShuffleBase):
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Flippers": 1},
+        "test_slot_data": {},
+    }
+
+    def test_big_bomb_shop_at_capacity_shop(self):
+        slot_data = slot_data_crossed.slot_data.copy()
+        del slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"]
+        del slot_data["entrances"][1]["two-way"]["Capacity Upgrade"]
+        slot_data["entrances"][1]["two-way"]["Dark Lake Hylia Ledge Fairy"] = "Desert Palace Exit (East)"
+        slot_data["entrances"][1]["entrances"]["Capacity Upgrade"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"], "entrance", [
+            ["Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
+            ["Ocarina (Activated)", "Beat Agahnim 1"],
+        ])
+
+class TestBigBombShopAtWaterfallFairy(BigBombShopEntranceShuffleBase):
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Flippers": 1},
+        "test_slot_data": {},
+    }
+
+    def test_big_bomb_shop_at_waterfall_fairy(self):
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Desert Healer Fairy"
+        slot_data["entrances"][1]["entrances"]["Waterfall of Wishing"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"], "entrance", [
+            ["Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
+            ["Ocarina (Activated)", "Beat Agahnim 1"],
+        ])
+
+class TestBigBombShopAtDMDWest(BigBombShopEntranceShuffleBase):
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Magic Mirror": 1},
+        "test_slot_data": {},
+    }
+
+    def test_big_bomb_shop_at_capacity_shop(self):
+        slot_data = slot_data_crossed.slot_data.copy()
+        del slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"]
+        del slot_data["entrances"][1]["two-way"]["Death Mountain Return Cave (West)"]
+        slot_data["entrances"][1]["two-way"]["Dark Lake Hylia Ledge Fairy"] = "Death Mountain Return Cave Exit (East)"
+        slot_data["entrances"][1]["entrances"]["Death Mountain Return Cave (West)"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"], "entrance", [
+            ["Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
+            ["Ocarina (Activated)", "Beat Agahnim 1"],
+        ])
+
+
+class TestBigBombShopOnDeathMountain(BigBombShopEntranceShuffleBase):
+    def test_big_bomb_shop_at_capacity_shop(self):
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Hookshot Fairy"
+        slot_data["entrances"][1]["entrances"]["Old Man Cave (East)"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"], "entrance", [
+            ["Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
+            ["Ocarina (Activated)", "Beat Agahnim 1"],
+            ])
+
+
+class TestBigBombShopOnTopOfHyruleCastle(BigBombShopEntranceShuffleBase):
     def test_big_bomb_shop_on_top_of_hyrule_castle(self):
         # There is a sphere one connector to east Dark World
         slot_data = slot_data_crossed.slot_data.copy()
@@ -84,6 +182,7 @@ class TestBigBombEntranceShuffle(ALttPRTestBaseNoDefaultTests):
         ])
 
 
+class TestBigBombShopInEastDarkWorld(BigBombShopEntranceShuffleBase):
     def test_big_bomb_shop_in_east_dark_world(self):
         slot_data = slot_data_crossed.slot_data.copy()
         slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Archery Game"
@@ -94,6 +193,14 @@ class TestBigBombEntranceShuffle(ALttPRTestBaseNoDefaultTests):
         self.can_reach_entrance("Pyramid Crack")
 
 
+class TestBigBombShopInNorthDarkWorld(BigBombShopEntranceShuffleBase):
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Moon Pearl": 1},
+        "test_slot_data": {},
+    }
+
     def test_big_bomb_shop_in_north_dark_world(self):
         slot_data = slot_data_crossed.slot_data.copy()
         slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "20 Rupee Cave"
@@ -101,63 +208,153 @@ class TestBigBombEntranceShuffle(ALttPRTestBaseNoDefaultTests):
         self.options["test_slot_data"] = slot_data
         self.world_setup()
 
+        self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Flippers"]])
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Magic Mirror", "Beat Agahnim 1"],
+            ["Magic Mirror", "Progressive Glove", "Hammer"],
+            ["Progressive Glove", "Progressive Glove", "Hammer"],
+        ])
+
+
+class TestBigBombShopAtCuriosityShop(BigBombShopEntranceShuffleBase):
+    def test_big_bomb_shop_dark_world_mirror_then_walk(self):
+        # You can't jump down the ledge to leave without Mirror
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Mimic Cave"
+        slot_data["entrances"][1]["entrances"]["Red Shield Shop"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Progressive Glove", "Hammer", "Moon Pearl"]])
         self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
             ["Magic Mirror", "Beat Agahnim 1"],
             ["Magic Mirror", "Progressive Glove", "Hammer", "Moon Pearl"],
-            ["Progressive Glove", "Progressive Glove", "Hammer", "Moon Pearl"],
         ])
-        self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Flippers", "Moon Pearl"]])
 
 
-    def test_big_bomb_shop_dark_world_mirror_then_walk(self):
-        # Entrances in the dark world where you must use the Mirror, but can then walk the Big Bomb to another portal
-        entrances_to_test = {
-            "Red Shield Shop": "Mimic Cave",
-            "Dark Lake Hylia Ledge Fairy": "Big Bomb Shop",
-            "Mire Fairy": "Aginahs Cave",
-            "Checkerboard Cave": "Chest Game",  # TODO: Overworld Glitches could also use Flute
-            "Skull Woods Final Section": "Lake Hylia Shop",
-        }
+class TestBigBombShopAtDarkShoppingMall(BigBombShopEntranceShuffleBase):
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Moon Pearl": 1, "Flippers": 1},
+        "test_slot_data": {},
+    }
 
-        for entrance, connected_region in entrances_to_test.items():
-            with self.subTest(entrance=entrance, connected_region=connected_region):
-                slot_data = slot_data_crossed.slot_data.copy()
-                slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = connected_region
-                slot_data["entrances"][1]["entrances"][entrance] = "Big Bomb Shop"
-                self.options["test_slot_data"] = slot_data
-                self.world_setup()
+    def test_big_bomb_shop_at_dark_shopping_mall(self):
+        # You can't jump down the ledge to leave without Mirror
+        slot_data = slot_data_crossed.slot_data.copy()
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
 
-                self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
-                    ["Magic Mirror", "Beat Agahnim 1"],
-                    ["Magic Mirror", "Progressive Glove", "Hammer", "Moon Pearl"],
-                ])
-                self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Progressive Glove", "Hammer", "Moon Pearl"]])
+        self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Progressive Glove", "Hammer"]])
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Magic Mirror", "Beat Agahnim 1"],
+            ["Magic Mirror", "Progressive Glove", "Hammer"],
+        ])
 
 
-    def test_big_bomb_shop_dark_world_mirror_then_flute(self):
-        # Entrances in the dark world where you need both Mirror and Flute to get to the Pyramid
-        entrances_to_test = {
-            "Ice Palace": "Dark Lake Hylia Shop",  # TODO: Overworld Glitch implications?
-            "Bumper Cave (Top)": "Fairy Ascension Cave Exit (Bottom)",
-            "Dark Death Mountain Fairy": "Superbunny Cave Exit (Bottom)",  # Representing any dark Death Mountain entrance
-        }
+class TestBigBombShopInMire(BigBombShopEntranceShuffleBase):
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Ocarina": 1, "Progressive Glove": 2},
+        "test_slot_data": {},
+    }
 
-        for entrance, connected_region in entrances_to_test.items():
-            with self.subTest(entrance=entrance, connected_region=connected_region):
-                slot_data = slot_data_crossed.slot_data.copy()
-                slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = connected_region
-                slot_data["entrances"][1]["entrances"][entrance] = "Big Bomb Shop"
-                self.options["test_slot_data"] = slot_data
-                self.world_setup()
+    def test_big_bomb_shop_in_mire(self):
+        # You can't jump down the ledge to leave without Mirror
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Aginahs Cave"
+        slot_data["entrances"][1]["entrances"]["Mire Fairy"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
 
-                self.assertCanReachWith(["Pyramid Crack"], "entrance", [
-                    ["Magic Mirror", "Ocarina (Activated)", "Beat Agahnim 1"],
-                    ["Magic Mirror", "Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
-                ])
-                self.assertCanNotReachWith(["Pyramid Crack"], "entrance",
-                                           [["Magic Mirror", "Progressive Glove", "Progressive Glove", "Hammer", "Moon Pearl"]])
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Magic Mirror", "Beat Agahnim 1"],
+            ["Magic Mirror", "Hammer", "Moon Pearl"],
+        ])
 
 
+class TestBigBombShopAtCheckerboard(BigBombShopEntranceShuffleBase):
+    # TODO: Overworld glitches could also use Flute
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Ocarina": 1, "Progressive Glove": 2, "Magic Mirror": 1},
+        "test_slot_data": {},
+    }
+
+    def test_big_bomb_shop_in_mire(self):
+        # You can't jump down the ledge to leave without Mirror
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Chest Game"
+        slot_data["entrances"][1]["entrances"]["Checkerboard Cave"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Beat Agahnim 1"],
+            ["Hammer"],
+        ])
+
+
+class TestBigBombShopInBackOfSkull(BigBombShopEntranceShuffleBase):
+    options = {
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Fire Rod": 1, "Moon Pearl": 1},
+        "test_slot_data": {},
+    }
+
+    def test_big_bomb_shop_in_back_of_skull(self):
+        # You can't jump down the ledge to leave without Mirror
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Lake Hylia Shop"
+        slot_data["entrances"][1]["entrances"]["Skull Woods Final Section"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Magic Mirror", "Beat Agahnim 1"],
+            ["Magic Mirror", "Progressive Glove", "Hammer"],
+        ])
+
+
+class TestBigBombShopAtIcePalace(BigBombShopEntranceShuffleBase):
+    def test_big_bomb_shop_at_ice_palace(self):
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Dark Lake Hylia Shop"
+        slot_data["entrances"][1]["entrances"]["Ice Palace"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.collect_by_name(["Progressive Glove", "Flippers"])
+        assert self.can_reach_entrance("Ice Palace"), "Cannot reach the bomb shop"
+        self.assertCanNotReachWith(["Pyramid Crack"], "entrance",
+                                   [["Magic Mirror", "Progressive Glove", "Progressive Glove", "Hammer", "Moon Pearl"]])
+        self.assertCanReachWith(["Pyramid Crack"], "location", [
+            ["Magic Mirror", "Ocarina (Activated)", "Beat Agahnim 1"],
+            ["Magic Mirror", "Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
+        ])
+
+
+class TestBigBombShopOnDarkDeathMountain(BigBombShopEntranceShuffleBase):
+    def test_big_bomb_shop_on_dark_death_mountain(self):
+        slot_data = slot_data_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Bonk Rock Cave"
+        slot_data["entrances"][1]["entrances"]["Spike Cave"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanNotReachWith(["Pyramid Crack"], "entrance",
+                                   [["Magic Mirror", "Progressive Glove", "Progressive Glove", "Hammer", "Moon Pearl"]])
+        self.assertCanReachWith(["Pyramid Crack"], "location", [
+            ["Magic Mirror", "Ocarina (Activated)", "Beat Agahnim 1"],
+            ["Magic Mirror", "Ocarina (Activated)", "Progressive Glove", "Hammer", "Moon Pearl"],
+        ])
+
+
+class TestBigBombShopAtDarkPotionShop(BigBombShopEntranceShuffleBase):
     def test_big_bomb_shop_at_dark_potion_shop(self):
         slot_data = slot_data_crossed.slot_data.copy()
         slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Dam"
@@ -166,8 +363,8 @@ class TestBigBombEntranceShuffle(ALttPRTestBaseNoDefaultTests):
         self.world_setup()
 
         self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
-            ["Progressive Glove"],
-            ["Hammer"],
+            ["Progressive Glove", "Moon Pearl"],
+            ["Hammer", "Moon Pearl"],
             ["Magic Mirror", "Beat Agahnim 1"],
         ])
 
@@ -224,7 +421,7 @@ class TestBigBombInvertedFluteShuffle(ALttPRTestBaseNoDefaultTests):
         self.assertCanNotReachWith(["Pyramid Fairy - Left", "Pyramid Fairy - Right"], "location", [["Ocarina (Activated)", "Progressive Glove"]])
 
 
-class TestBigBombInvertedEntranceShuffle(ALttPRTestBaseNoDefaultTests):
+class BigBombInvertedEntranceShuffleBase(ALttPRTestBaseNoDefaultTests):
     auto_construct = False
     options = {
         "world_mode": "inverted",
@@ -235,7 +432,9 @@ class TestBigBombInvertedEntranceShuffle(ALttPRTestBaseNoDefaultTests):
         "test_slot_data": {},
     }
 
-    def test_big_bomb_shop_in_east_dark_world(self):
+
+class TestBigBombShopInEastDarkWorldInverted(BigBombInvertedEntranceShuffleBase):
+    def test_inverted_big_bomb_shop_in_east_dark_world(self):
         slot_data = slot_data_inverted_crossed.slot_data.copy()
         slot_data["entrances"][1]["entrances"]["Chicken House"] = "Graveyard Cave"
         slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Fairy"] = "Big Bomb Shop"
@@ -245,7 +444,8 @@ class TestBigBombInvertedEntranceShuffle(ALttPRTestBaseNoDefaultTests):
         self.can_reach_entrance("Pyramid Crack")
 
 
-    def test_big_bomb_shop_in_north_dark_world(self):
+class TestBigBombShopInNorthDarkWorldInverted(BigBombInvertedEntranceShuffleBase):
+    def test_inverted_big_bomb_shop_in_north_dark_world(self):
         slot_data = slot_data_inverted_crossed.slot_data.copy()
         slot_data["entrances"][1]["entrances"]["Chicken House"] = "Palace of Darkness Hint"
         slot_data["entrances"][1]["entrances"]["Chest Game"] = "Big Bomb Shop"
@@ -257,60 +457,134 @@ class TestBigBombInvertedEntranceShuffle(ALttPRTestBaseNoDefaultTests):
             ["Ocarina (Activated)"],
             ["Magic Mirror", "Progressive Glove", "Progressive Glove", "Moon Pearl"],
             ["Magic Mirror", "Progressive Glove", "Hammer", "Moon Pearl"],
-            ["Magic Mirror", "Lamp"],  # Connector to DM -> DMD -> Mirror -> Grab Bomb -> Mirror Portal -> Bunnywalk to HC -> Mirror
         ])
 
 
-    def test_big_bomb_shop_dark_world_can_mirror_then_walk(self):
-        # Entrances in the dark world where you can't walk to the Pyramid directly, but you can use a Mirror portal,
-        # walk to Hyrule Castle, then Mirror again.
-        entrances_to_test = {
-            "Red Shield Shop": "Village of Outcasts Shop",
-            "Dark Lake Hylia Ledge Fairy": "Misery Mire Exit",
-            "Mire Fairy": "50 Rupee Cave",
-            "Skull Woods Final Section": "Aginahs Cave",
-            "Dark Death Mountain Fairy": "Dark Death Mountain Healer Fairy",
-        }
+class TestBigBombShopAtCuriosityShopInverted(BigBombInvertedEntranceShuffleBase):
+    def test_inverted_big_bomb_shop_at_curiousity_shop(self):
+        # You can't jump off the ledge with the Big Bomb
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Village of Outcasts Shop"
+        slot_data["entrances"][1]["entrances"]["Red Shield Shop"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
 
-        for entrance, connected_region in entrances_to_test.items():
-            with self.subTest(entrance=entrance, connected_region=connected_region):
-                slot_data = slot_data_inverted_crossed.slot_data.copy()
-                slot_data["entrances"][1]["entrances"]["Chicken House"] = connected_region
-                slot_data["entrances"][1]["entrances"][entrance] = "Big Bomb Shop"
-                self.options["test_slot_data"] = slot_data
-                self.world_setup()
-
-                self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
-                    ["Ocarina (Activated)"],
-                    ["Magic Mirror", "Progressive Glove", "Progressive Glove", "Moon Pearl"],
-                    ["Magic Mirror", "Progressive Glove", "Hammer", "Moon Pearl"],
-                    ["Magic Mirror", "Lamp"],  # Connector to DM -> DMD -> Mirror -> Grab Bomb -> Mirror Portal -> Bunnywalk to HC -> Mirror
-                ])
-                self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Progressive Glove", "Hammer", "Moon Pearl"]])
+        self.assertCanNotReachWith(["Pyramid Crack"], "entrance", [["Progressive Glove", "Progressive Glove", "Hammer", "Moon Pearl"]])
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Ocarina (Activated)"],
+            ["Magic Mirror"],
+        ])
 
 
-    def test_big_bomb_shop_dark_world_must_flute(self):
-        # Entrances in the dark world where you must use Flute to get to the Pyramid
-        entrances_to_test = {
-            "Ice Palace": "Hyrule Castle Exit (South)",  # TODO: Overworld Glitch implications?
-            "Bumper Cave (Top)": "Ice Rod Cave",
-            "Dark Death Mountain Ledge (West)": "Long Fairy Cave",  # Representing any dark Death Mountain entrance other than the two southwest ones
-        }
+class TestBigBombShopInDarkShoppingMallInverted(BigBombInvertedEntranceShuffleBase):
+    options = {
+        "world_mode": "inverted",
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "shuffle_links_house": True,  # Shuffles the Bomb Shop
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Flippers": 1},
+        "test_slot_data": {},
+    }
 
-        for entrance, connected_region in entrances_to_test.items():
-            with self.subTest(entrance=entrance, connected_region=connected_region):
-                slot_data = slot_data_inverted_crossed.slot_data.copy()
-                slot_data["entrances"][1]["entrances"]["Chicken House"] = connected_region
-                slot_data["entrances"][1]["entrances"][entrance] = "Big Bomb Shop"
-                self.options["test_slot_data"] = slot_data
-                self.world_setup()
+    def test_inverted_big_bomb_shop_in_dark_shopping_mall(self):
+        # You can't jump off the ledge with the Big Bomb
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Misery Mire Exit"
+        slot_data["entrances"][1]["entrances"]["Dark Lake Hylia Ledge Fairy"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
 
-                self.assertCanReachWith(["Pyramid Crack"], "entrance", [
-                    ["Ocarina (Activated)"],
-                ])
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Ocarina (Activated)"],
+            ["Magic Mirror"],
+        ])
 
 
-    def test_big_bomb_shop_at_dark_potion_shop(self):
+class TestBigBombShopInMireInverted(BigBombInvertedEntranceShuffleBase):
+    def test_inverted_big_bomb_shop_in_mire(self):
+        # You can't jump off the ledge with the Big Bomb
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "50 Rupee Cave"
+        slot_data["entrances"][1]["entrances"]["Mire Fairy"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Ocarina (Activated)"],
+            ["Magic Mirror"],
+        ])
+
+
+class TestBigBombShopInBackOfSkullInverted(BigBombInvertedEntranceShuffleBase):
+    def test_inverted_big_bomb_shop_in_back_of_skull(self):
+        # You can't jump off the ledge with the Big Bomb
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Aginahs Cave"
+        slot_data["entrances"][1]["entrances"]["Skull Woods Final Section"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [
+            ["Ocarina (Activated)"],
+            ["Magic Mirror"],
+        ])
+
+
+class TestBigBombShopOnDarkDeathMountainInverted(BigBombInvertedEntranceShuffleBase):
+    def test_inverted_big_bomb_shop_on_dark_death_mountain(self):
+        # You can't jump off the ledge with the Big Bomb
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Dark Death Mountain Healer Fairy"
+        slot_data["entrances"][1]["entrances"]["Dark Death Mountain Fairy"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertCanReachWith(["Pyramid Crack"],  "entrance", [["Ocarina (Activated)"]])
+
+
+class TestBigBombShopAtIcePalaceInverted(BigBombInvertedEntranceShuffleBase):
+    def test_inverted_big_bomb_shop_at_ice_palace(self):
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        del slot_data["entrances"][1]["entrances"]["Chicken House"]
+        del slot_data["entrances"][1]["two-way"]["Ice Palace"]
+        slot_data["entrances"][1]["two-way"]["Chicken House"] = "Hyrule Castle Exit (South)"
+        slot_data["entrances"][1]["entrances"]["Ice Palace"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertAccessDependency(["Pyramid Crack"], [["Ocarina (Activated)"]])
+
+
+class TestBigBombShopAtBumperCaveTopInverted(BigBombInvertedEntranceShuffleBase):
+    options = {
+        "world_mode": "inverted",
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "shuffle_links_house": True,  # Shuffles the Bomb Shop
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Moon Pearl": 1},
+        "test_slot_data": {},
+    }
+
+    def test_inverted_big_bomb_shop_at_bumper_cave_top(self):
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Ice Rod Cave"
+        slot_data["entrances"][1]["entrances"]["Bumper Cave (Top)"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertAccessDependency(["Pyramid Crack"], [["Ocarina (Activated)"]])
+
+class TestBigBombShopAtDarkPotionShopInverted(BigBombInvertedEntranceShuffleBase):
+    options = {
+        "world_mode": "inverted",
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "shuffle_links_house": True,  # Shuffles the Bomb Shop
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Flippers": 1},
+        "test_slot_data": {},
+    }
+
+    def test_inverted_big_bomb_shop_at_dark_potion_shop(self):
         slot_data = slot_data_inverted_crossed.slot_data.copy()
         slot_data["entrances"][1]["entrances"]["Chicken House"] = "Checkerboard Cave"
         slot_data["entrances"][1]["entrances"]["Dark Potion Shop"] = "Big Bomb Shop"
@@ -323,7 +597,6 @@ class TestBigBombInvertedEntranceShuffle(ALttPRTestBaseNoDefaultTests):
             ["Ocarina (Activated)"],
             ["Magic Mirror", "Moon Pearl"],  # Mirror from Potion Shop, walk the bomb through the Light World to HC. Mearl is required to reach Potion Shop
         ])
-    # TODO: Connectors to general Light World vs. connnectors only to DM
 
 
     def test_big_bomb_shop_in_kak(self):

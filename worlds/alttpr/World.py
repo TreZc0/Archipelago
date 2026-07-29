@@ -139,8 +139,6 @@ class ALttPRWorld(World):
 
 
     def generate_early(self) -> None:
-        if self.options.test_slot_data:
-            self.interpret_slot_data(self.options.test_slot_data.value)
         self.seed_hash = self.random.randbytes(4)
         init_race_random(self.random)
         self.validate_options()
@@ -293,8 +291,6 @@ class ALttPRWorld(World):
             world.settings.record_doors(world)
         if self.options.enemy_shuffle != "vanilla":
             world.settings.record_enemies(world)
-        print("Slot data")
-        print(world.settings.world_rep)
         return world.settings.world_rep
 
 
@@ -428,8 +424,8 @@ class ALttPRWorld(World):
             race = False
             notes = ""
 
-        if hasattr(self.multiworld, "re_gen_passthrough") and self.game in self.multiworld.re_gen_passthrough:
-            slot_data = self.multiworld.re_gen_passthrough[self.game]
+        if (hasattr(self.multiworld, "re_gen_passthrough") and self.game in self.multiworld.re_gen_passthrough) or self.options.test_slot_data:
+            slot_data = self.options.test_slot_data if self.options.test_slot_data else self.multiworld.re_gen_passthrough[self.game]
             # All the 1's (representing the player) get converted to "1"'s when it's sent as slot data
             for key in slot_data.keys():
                 if "1" in slot_data[key]:

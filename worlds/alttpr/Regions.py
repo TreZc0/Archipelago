@@ -248,7 +248,7 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
                (state.has("Magic Mirror", player) and state.has("Progressive Glove", player, 2))
         elif bomb_shop_entrance == "Dark Potion Shop":
             print("Setting the pyramid crack rule for Dark Potion Shop")
-            pyramid_crack_rule = lambda state: state.has("Progressive Glove", player) or state.has("Hammer", player) or \
+            pyramid_crack_rule = lambda state: (state.has("Moon Pearl", player) and (state.has("Progressive Glove", player) or state.has("Hammer", player))) or \
                (state.has("Magic Mirror", player) and state.has("Beat Agahnim 1", player))
         elif bomb_shop_entrance in ["Hyrule Castle Entrance (West)", "Hyrule Castle Entrance (East)", "Agahnims Tower"]:
             # Can Mirror from Pyramid or Flute to a Dark World portal
@@ -267,10 +267,31 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
                 (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))
                 )
                )
+        elif district.name == "The Mire" or bomb_shop_entrance in ["Checkerboard Cave", "Red Shield Shop", "Dark Lake Hylia Ledge Fairy",
+                                                                   "Dark Lake Hylia Ledge Spike Cave", "Dark Lake Hylia Ledge Hint",
+                                                                   "Skull Woods Final Section", "Skull Woods Second Section Door (West)"]:
+            # Mirror is hard required, but you can walk through LW to another DW portal
+            pyramid_crack_rule = lambda state: state.has("Magic Mirror", player) and \
+                (state.has("Beat Agahnim 1", player) or (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player)))
+        elif district.name == "Dark Death Mountain" or bomb_shop_entrance in ["Ice Palace", "Bumper Cave (Top)"]:
+            pyramid_crack_rule = lambda state: state.has("Magic Mirror", player) and state.has("Ocarina (Activated)", player) and \
+                                                      (state.has("Beat Agahnim 1", player) or
+                                                      (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player)))
+        elif district.name == "South Dark World" or bomb_shop_entrance in ["Cave 45", "Two Brothers (West)"]:
+            pyramid_crack_rule = lambda state: state.has("Hammer", player) or state.has("Magic Mirror", player) and state.has("Beat Agahnim 1", player)
+        elif district.name == "Northwest Dark World" or bomb_shop_entrance == "Graveyard Cave":
+            # You can walk there with Mitts + Hammer + Mearl, or Mirror to Light World and get back into the Dark World near Pyramid
+            pyramid_crack_rule = lambda state: (
+                    (state.has("Magic Mirror", player) and
+                     (state.has("Beat Agahnim 1", player) or
+                      (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has(
+                          "Moon Pearl", player)))
+                     ) or (state.has("Progressive Glove", player, 2) and state.has("Hammer", player) and state.has(
+                "Moon Pearl", player)))
         elif district.name in ["East Hyrule", "Lake Hylia", "Central Hyrule", "Desert", "Kakariko", "Northwest Hyrule"]:
             # Only Mirror is needed because if we're checking the Pyramid Crack, then you can get to Pyramid, leave a
             # mirror portal outside Hyrule Castle, then walk there with the Big Bomb from most of Light World.
-            pyramid_crack_rule = lambda state: state.has("Beaten Agahnim 1", player) or \
+            pyramid_crack_rule = lambda state: state.has("Beat Agahnim 1", player) or \
                 state.has("Magic Mirror", player) or \
                 (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))
         elif district.name == "Death Mountain" or bomb_shop_entrance == "Death Mountain Return Cave (West)":
@@ -313,31 +334,11 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
                     mirror_and_flute_rule = lambda state: state.has("Magic Mirror", player) and state.has("Hammer", player, 2)
 
             pyramid_crack_rule = lambda state: state.has("Ocarina (Activated)", player) and \
-              (state.has("Beaten Agahnim 1", player) or
+              (state.has("Beat Agahnim 1", player) or
               (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))) or \
               mirror_and_flute_rule(state)
-        elif district.name == "Dark Death Mountain" or bomb_shop_entrance in ["Ice Palace", "Skull Woods Final Section", "Skull Woods Second Section Door (West)", "Bumper Cave (Top)"]:
-            pyramid_crack_rule = lambda state: state.has("Magic Mirror", player) and state.has("Ocarina (Activated)", player) and \
-               (state.has("Beaten Agahnim 1", player) or
-               (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player)))
         elif district.name == "East Dark World":
             pyramid_crack_rule = lambda state: True
-        elif district.name == "South Dark World" or bomb_shop_entrance in ["Cave 45", "Two Brothers (West)"]:
-            pyramid_crack_rule = lambda state: state.has("Hammer", player) or (state.has("Magic Mirror", player) and state.has("Beaten Agahnim 1", player))
-        elif district.name == "The Mire" or bomb_shop_entrance in ["Checkerboard Cave", "Red Shield Shop", "Dark Lake Hylia Ledge Fairy",
-                                                                   "Dark Lake Hylia Ledge Spike Cave", "Dark Lake Hylia Ledge Hint"]:
-            # Mirror is hard required, but you can walk through LW to another DW portal
-            pyramid_crack_rule = lambda state: state.has("Magic Mirror", player) and \
-                (state.has("Beaten Agahnim 1", player) or
-                 (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player))
-                )
-        elif district.name == "Northwest Dark World" or bomb_shop_entrance == "Graveyard Cave":
-            # You can walk there with Mitts + Hammer + Mearl, or Mirror to Light World and get back into the Dark World near Pyramid
-            pyramid_crack_rule = lambda state: (
-                (state.has("Magic Mirror", player) and
-                    (state.has("Beaten Agahnim 1", player) or
-                    (state.has("Progressive Glove", player) and state.has("Hammer", player) and state.has("Moon Pearl", player)))
-                ) or (state.has("Progressive Glove", player, 2) and state.has("Hammer", player) and state.has("Moon Pearl", player)))
         else:
             pyramid_crack_rule = lambda state: True
 
