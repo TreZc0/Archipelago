@@ -209,7 +209,6 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
     flute_spots = world.door_rando_world.owflutespots[1]
     player = world.player
     pyramid_crack_rule = None
-    print(f"DEBUG: Setting big bomb logic with crossed_entrances {crossed_entrances} and inverted {inverted} and bomb entrance {bomb_shop_entrance} and district {district.name}")
 
     if not crossed_entrances and not inverted:
         pyramid_crack_rule = lambda state: (state.has("Hammer", player) and state.has("Moon Pearl", player)) or \
@@ -376,14 +375,14 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
         must_flute_or_mirror_entrances = ["Dark Lake Hylia Ledge Fairy", "Dark Lake Hylia Ledge Hint", "Dark Lake Hylia Ledge Spike Cave",
                                      "Skull Woods Final Section", "Skull Woods Second Section Door (West)", "Red Shield Shop"]
         must_flute_and_mirror_entrances = ["Desert Palace Entrance (South)", "Desert Palace Entrance (East)", "Desert Palace Entrance (West)",
-                                           "Desert Palace Entrance (North)", "Death Mountain Return Cave (West)", "Capacity Upgrade"]
+                                           "Desert Palace Entrance (North)", "Death Mountain Return Cave (West)", "Capacity Upgrade", "Waterfall of Wishing"]
 
         if bomb_shop_entrance == "Dark Potion Shop":
             pyramid_crack_rule = lambda state: state.has("Progressive Glove", player) or state.has("Hammer", player) or can_reach_with_flute(state)
         elif bomb_shop_entrance in must_flute_or_mirror_entrances or district.name == "The Mire":
             # Can Flute or do Mirror shenanigans from almost anywhere in the Light World
             world.multiworld.register_indirect_condition(world.get_region("Kakariko Village"), world.get_entrance("Pyramid Crack"))
-            pyramid_crack_rule = lambda state: can_reach_with_flute(state) or (state.can_reach_region("Kakariko Village") and state.has("Magic Mirror", player))
+            pyramid_crack_rule = lambda state: can_reach_with_flute(state) or (state.can_reach_region("Kakariko Village", player) and state.has("Magic Mirror", player))
         elif bomb_shop_entrance in must_flute_entrances or district.name == "Dark Death Mountain":
             pyramid_crack_rule = can_reach_with_flute
         elif bomb_shop_entrance in must_flute_and_mirror_entrances or district.name == "Death Mountain":

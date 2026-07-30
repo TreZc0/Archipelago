@@ -301,7 +301,7 @@ def create_all_items(world: ALttPRWorld) -> None:
     # If we're playing Standard mode with keysanity, we need to manually place the escape keys to prevent
     # getting BK'd in the escape sequence. This key is placed later in the pre_fill() stage of generation.
     dr_itempool = world.door_rando_world.itempool.copy()
-    if world.options.world_mode.value == "standard" and world.options.door_shuffle == "vanilla":
+    if world.options.world_mode == "standard" and world.options.door_shuffle == "vanilla":
         if world.door_rando_world.keyshuffle == "wild":
             escape_keys = [item for item in dr_itempool if item.name == "Small Key (Escape)"]
             for key in escape_keys:
@@ -313,7 +313,7 @@ def create_all_items(world: ALttPRWorld) -> None:
 
     # Remove bomb and arrow capacity upgrades from the item pool for shopsanity. They will be added
     # to a random shop in the pre_fill() stage of generation.
-    if world.options.shopsanity.value:
+    if world.options.shopsanity:
         for upgrade in [item for item in dr_itempool if "Arrow Upgrade" in item.name or "Bomb Upgrade" in item.name]:
             dr_itempool.remove(upgrade)
 
@@ -347,7 +347,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
         event_location = world.multiworld.get_location(event_location_name, world.player)
         event_location.place_locked_item(ap_item)
 
-    if not world.options.prize_shuffle.value:
+    if not world.options.prize_shuffle:
         prize_locations = [location for location in world.multiworld.get_unfilled_locations(world.player) if " - Prize" in location.name]
         for prize_location in prize_locations:
             dr_prize_location = world.door_rando_world.get_location(prize_location.name, 1)
@@ -377,7 +377,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
             target_location.place_locked_item(ap_item)
 
     # Standard mode requires a weapon and enough keys to be available early
-    if world.options.world_mode.value == "standard":
+    if world.options.world_mode == "standard":
         # In Standard mode, Link's Uncle will always have a weapon which was not added to the multiworld itempool,
         # unless the player starts with a sword or hammer.
         uncle_item = world.door_rando_world.get_location("Link's Uncle", 1).item
@@ -421,7 +421,7 @@ def place_pre_fill_items(world: ALttPRWorld) -> None:
                 place_escape_key(big_key_locations, world, "Big")
 
     # If Shopsanity is enabled, there should be one each of Red/Green/Blue Potions that can be repeatedly purchased
-    if world.options.shopsanity.value:
+    if world.options.shopsanity:
         shop_locations = [location for location in world.door_rando_world.get_locations() if location.type == LocationType.Shop]
         for shop_item in ["Red Potion", "Green Potion", "Blue Potion"]:
             location = world.door_rando_world.find_items(shop_item, 1)[0]
