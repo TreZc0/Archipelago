@@ -599,6 +599,7 @@ class TestBigBombShopAtDarkPotionShopInverted(BigBombInvertedEntranceShuffleBase
         ])
 
 
+class TestBigBombShopInKakInverted(BigBombInvertedEntranceShuffleBase):
     def test_big_bomb_shop_in_kak(self):
         # Big bomb shop is in Kak with the slot data
         slot_data = slot_data_inverted_crossed.slot_data.copy()
@@ -608,6 +609,7 @@ class TestBigBombShopAtDarkPotionShopInverted(BigBombInvertedEntranceShuffleBase
         self.assertCanReachWith(["Pyramid Crack"],  "entrance", [["Magic Mirror"]])
 
 
+class TestBigBombShopOnTopOfHyruleCastleInverted(BigBombInvertedEntranceShuffleBase):
     def test_big_bomb_shop_on_top_of_hyrule_castle(self):
         # This will have to be rewritten if the slot data changes, so there aren't any duplicate entrances.
         slot_data = slot_data_inverted_crossed.slot_data.copy()
@@ -621,60 +623,106 @@ class TestBigBombShopAtDarkPotionShopInverted(BigBombInvertedEntranceShuffleBase
         ])
 
 
-    def test_big_bomb_shop_light_world_must_mirror_and_flute(self):
-        entrances_to_test = {
-            "Desert Palace Entrance (South)": "Palace of Darkness Exit",
-            "Desert Palace Entrance (West)": "Old Man House Exit (Top)",
-            "Capacity Upgrade": "Eastern Palace",
-            "Waterfall of Wishing": "Dark Lake Hylia Shop",
-            "Death Mountain Return Cave (West)": "Spiral Cave Exith",
-            "Tower of Hera": "Capacity Upgrade",  # Only grabbing one example from upper DM since they all have the same logic
-        }
+class TestBigBombShopAtDesertSouthInverted(BigBombInvertedEntranceShuffleBase):
+    def test_inverted_big_bomb_shop_at_desert_south(self):
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Palace of Darkness Exit"
+        slot_data["entrances"][1]["entrances"]["Desert Palace Entrance (South)"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
 
-        for entrance, connected_region in entrances_to_test.items():
-            with self.subTest(entrance=entrance, connected_region=connected_region):
-                slot_data = slot_data_inverted_crossed.slot_data.copy()
-                slot_data["entrances"][1]["entrances"]["Chicken House"] = connected_region
-                slot_data["entrances"][1]["entrances"][entrance] = "Big Bomb Shop"
-                self.options["test_slot_data"] = slot_data
-                self.world_setup()
-
-                self.assertCanReachWith(["Pyramid Crack"], "entrance", [
-                    ["Magic Mirror", "Ocarina (Activated)"],
-                ])
+        self.assertAccessDependency(["Pyramid Crack"], [["Magic Mirror", "Ocarina (Activated)"]])
 
 
+class TestBigBombShopAtDesertLedgeInverted(BigBombInvertedEntranceShuffleBase):
+    # Desert West is a connector
+    options = {
+        "world_mode": "inverted",
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "shuffle_links_house": True,  # Shuffles the Bomb Shop
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Progressive Glove": 1},
+        "test_slot_data": {},
+    }
+
+    def test_inverted_big_bomb_shop_at_desert_ledge(self):
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Skull Woods Final Section Exit"
+        slot_data["entrances"][1]["entrances"]["Desert Palace Entrance (North)"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertAccessDependency(["Pyramid Crack"], [["Magic Mirror", "Ocarina (Activated)"]])
+
+
+class TestBigBombShopAtCapacityShopInverted(BigBombInvertedEntranceShuffleBase):
+    options = {
+        "world_mode": "inverted",
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "shuffle_links_house": True,  # Shuffles the Bomb Shop
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Flippers": 1, "Moon Pearl": 1},
+        "test_slot_data": {},
+    }
+
+    def test_inverted_big_bomb_shop_at_capacity_shop(self):
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Eastern Palace"
+        slot_data["entrances"][1]["entrances"]["Capacity Upgrade"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertAccessDependency(["Pyramid Crack"], [["Magic Mirror", "Ocarina (Activated)"]])
+
+
+class TestBigBombShopAtWaterfallInverted(BigBombInvertedEntranceShuffleBase):
+    options = {
+        "world_mode": "inverted",
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "shuffle_links_house": True,  # Shuffles the Bomb Shop
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Flippers": 1, "Moon Pearl": 1},
+        "test_slot_data": {},
+    }
+
+    def test_inverted_big_bomb_shop_at_waterfall_shop(self):
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Dark Lake Hylia Shop"
+        slot_data["entrances"][1]["entrances"]["Waterfall of Wishing"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertAccessDependency(["Pyramid Crack"], [["Magic Mirror", "Ocarina (Activated)"]])
+
+
+class TestBigBombShopAtLightWorldTopOfDeathMountainInverted(BigBombInvertedEntranceShuffleBase):
+    # Paradox Top is a connector
+    options = {
+        "world_mode": "inverted",
+        "prize_shuffle": True,
+        "entrance_shuffle": "crossed",
+        "shuffle_links_house": True,  # Shuffles the Bomb Shop
+        "start_inventory": {"Crystal 5": 1, "Crystal 6": 1, "Hammer": 1, "Moon Pearl": 1},
+        "test_slot_data": {},
+    }
+
+    def test_inverted_big_bomb_shop_at_waterfall_shop(self):
+        slot_data = slot_data_inverted_crossed.slot_data.copy()
+        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Capacity Upgrade"
+        slot_data["entrances"][1]["entrances"]["Tower of Hera"] = "Big Bomb Shop"
+        self.options["test_slot_data"] = slot_data
+        self.world_setup()
+
+        self.assertAccessDependency(["Pyramid Crack"], [["Magic Mirror", "Ocarina (Activated)"]])
+
+
+class TestBigBombShopAtLightWorldSouthwestDeathMountainInverted(BigBombInvertedEntranceShuffleBase):
+    # There is a series of connectors to floating island
     def test_big_bomb_shop_southwest_light_death_mountain(self):
         # This will have to be rewritten if the slot data changes, so there aren't any duplicate entrances.
         slot_data = slot_data_inverted_crossed.slot_data.copy()
         slot_data["entrances"][1]["entrances"]["Chicken House"] = "Fortune Teller (Light)"
         slot_data["entrances"][1]["entrances"]["Old Man Cave (East)"] = "Big Bomb Shop"
-        self.options["test_slot_data"] = slot_data
-        self.world_setup()
-
-        self.assertCanReachWith(["Pyramid Crack"], "entrance", [
-            ["Magic Mirror", "Ocarina (Activated)"],
-        ])
-
-
-    def test_big_bomb_shop_southeast_light_death_mountain(self):
-        # This will have to be rewritten if the slot data changes, so there aren't any duplicate entrances.
-        slot_data = slot_data_inverted_crossed.slot_data.copy()
-        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Waterfall of Wishing"
-        slot_data["entrances"][1]["entrances"]["Paradox Cave (Middle)"] = "Big Bomb Shop"
-        self.options["test_slot_data"] = slot_data
-        self.world_setup()
-
-        self.assertCanReachWith(["Pyramid Crack"], "entrance", [
-            ["Magic Mirror", "Ocarina (Activated)"],
-        ])
-
-
-    def test_big_bomb_shop_hookshot_fairy_bottom(self):
-        # This will have to be rewritten if the slot data changes, so there aren't any duplicate entrances.
-        slot_data = slot_data_inverted_crossed.slot_data.copy()
-        slot_data["entrances"][1]["entrances"]["Chicken House"] = "Paradox Cave Exit (Bottom)"
-        slot_data["entrances"][1]["entrances"]["Fairy Ascension Cave (Bottom)"] = "Big Bomb Shop"
         self.options["test_slot_data"] = slot_data
         self.world_setup()
 

@@ -196,6 +196,7 @@ def handle_ice_cross(world: ALttPRWorld) -> None:
 
 
 def handle_big_bomb_logic(world: ALttPRWorld) -> None:
+    # TODO: Everything about this code is awful, it desperately needs a rewrite, and I haven't even finished writing it <_< (but also this is taking too long as is)
     # Picking up the Big Bomb already requires reaching the bomb shop and having the red crystals
     bomb_shop_entrance = world.get_region("Big Bomb Shop").entrances[-1].name
     pyramid_crack = world.get_location("Pyramid Crack")
@@ -343,12 +344,61 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
             pyramid_crack_rule = lambda state: True
 
     elif crossed_entrances and inverted:
-        # TODO: Send help
-        pyramid_crack_rule = lambda state: True
+        can_reach_from_north_dark_world = lambda state: state.has("Progressive Glove", player, 2) and state.has("Hammer", player)
 
+        # Create a rule for using the Flute to reach the Pyramid, based on Flute Shuffle results
+        can_reach_with_flute = None
+        if world.options.flute_shuffle == "vanilla" or any([True for flute_spot in flute_spots if flute_spot in [0x1b, 0x1e, 0x25, 0x2e, 0x2f]]):
+            can_reach_with_flute = lambda state: state.has("Ocarina (Activated)", player)
+        elif 0x15 in flute_spots or 0x16 in flute_spots:  # Can't Flute to the East but can Flute near Dark Potion Shop
+            can_reach_with_flute = lambda state: state.has("Ocarina (Activated)", player) and (state.has("Progressive Glove", player) or state.has("Hammer", player))
+        else:
+            can_use_glove = False
+            can_use_hammer = False
+            if 0x0f in flute_spots or 0x17 in flute_spots:
+                # Only Flute spots in the East are near Catfish
+                can_use_glove = True
+            if any([True for flute_spot in flute_spots if flute_spot in [0x28, 0x2a, 0x2b, 0x2c, 0x2d, 0x32, 0x33, 0x34, 0x3a, 0x3b, 0x3c]]):
+                # Can Flute to South Dark World
+                can_use_hammer = True
+
+            if can_use_glove and can_use_hammer:
+                can_reach_with_flute = lambda state: state.has("Ocarina (Activated)", player) and (state.has("Progressive Glove", player) or state.has("Hammer", player))
+            elif can_use_glove and not can_use_hammer:
+                can_reach_with_flute = lambda state: state.has("Ocarina (Activated)", player) and state.has("Progressive Glove", player)
+            elif not can_use_glove and can_use_hammer:
+                can_reach_with_flute = lambda state: state.has("Ocarina (Activated)", player) and state.has("Hammer", player)
+            else:
+                # The only usable Flute spots are in northwest Dark World
+                can_reach_with_flute = lambda state: state.has("Ocarina (Activated)", player) and can_reach_from_north_dark_world(state)
+
+        must_flute_entrances = ["Ice Palace", "Bumper Cave (Top)"]
+        must_flute_or_mirror_entrances = ["Dark Lake Hylia Ledge Fairy", "Dark Lake Hylia Ledge Hint", "Dark Lake Hylia Ledge Spike Cave",
+                                     "Skull Woods Final Section", "Skull Woods Second Section Door (West)", "Red Shield Shop"]
+        must_flute_and_mirror_entrances = ["Desert Palace Entrance (South)", "Desert Palace Entrance (East)", "Desert Palace Entrance (West)",
+                                           "Desert Palace Entrance (North)", "Death Mountain Return Cave (West)", "Capacity Upgrade"]
+
+        if bomb_shop_entrance == "Dark Potion Shop":
+            pyramid_crack_rule = lambda state: state.has("Progressive Glove", player) or state.has("Hammer", player) or can_reach_with_flute(state)
+        elif bomb_shop_entrance in must_flute_or_mirror_entrances or district.name == "The Mire":
+            # Can Flute or do Mirror shenanigans from almost anywhere in the Light World
+            world.multiworld.register_indirect_condition(world.get_region("Kakariko Village"), world.get_entrance("Pyramid Crack"))
+            pyramid_crack_rule = lambda state: can_reach_with_flute(state) or (state.can_reach_region("Kakariko Village") and state.has("Magic Mirror", player))
+        elif bomb_shop_entrance in must_flute_entrances or district.name == "Dark Death Mountain":
+            pyramid_crack_rule = can_reach_with_flute
+        elif bomb_shop_entrance in must_flute_and_mirror_entrances or district.name == "Death Mountain":
+            pyramid_crack_rule = lambda state: state.has("Magic Mirror", player) and can_reach_with_flute(state)
+        elif district.name == "East Dark World":
+            pyramid_crack_rule = lambda state: True
+        elif district.name == "South Dark World":
+            pyramid_crack_rule = lambda state: state.has("Hammer", player) or can_reach_with_flute(state)
+        elif district.name == "Northwest Dark World":
+            pyramid_crack_rule = lambda state: can_reach_from_north_dark_world(state) or can_reach_with_flute(state)
+        elif district.name in ["Northwest Hyrule", "Kakariko", "Central Hyrule", "East Hyrule", "Lake Hylia", "Desert"]:
+            pyramid_crack_rule = lambda state: state.has("Magic Mirror", player)
+        # TODO: Overworld glitches, what if bomb shop at brothers west
 
     pyramid_crack.access_rule = lambda state: state.has("Pick Up Big Bomb", player) and pyramid_crack_rule(state)
-
 
 
 def get_event_locations(world: ALttPRWorld):
