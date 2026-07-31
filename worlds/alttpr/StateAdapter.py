@@ -145,7 +145,7 @@ class StateAdapter:
 
 
     def can_flute(self, player) -> bool:
-        if self.world.mode == 'standard' and not self.has_item('Zelda Delivered'):
+        if self.world.mode[1] == 'standard' and not self.has_item('Zelda Delivered'):
             return False  # can't flute in rain state
         return self.has_item("Ocarina (Activated)")
 
