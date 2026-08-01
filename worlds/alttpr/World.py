@@ -245,9 +245,10 @@ class ALttPRWorld(World):
         hint_text = {}
         if self.options.prize_shuffle.value:
             for item_name in ["Crystal 5", "Crystal 6", "Green Pendant"]:
-                item_location = self.multiworld.find_item(item_name, self.player)
-                if item_location.player != self.player:
-                    hint_text[item_name] = f"at {self.multiworld.player_name[item_location.player]}'s {item_location.name}"
+                if item_name not in self.options.start_inventory:
+                    item_location = self.multiworld.find_item(item_name, self.player)
+                    if item_location.player != self.player:
+                        hint_text[item_name] = f"at {self.multiworld.player_name[item_location.player]}'s {item_location.name}"
         bow_locations = self.multiworld.find_item_locations("Progressive Bow", self.player)
         if any([location.player != self.player for location in bow_locations]):
             bow_location_names = [location.name if location.player == self.player else f"{self.multiworld.player_name[location.player]}'s {location.name}" for location in bow_locations]
@@ -580,7 +581,7 @@ class ALttPRWorld(World):
             self.options.start_inventory.value["Ocarina (Activated)"] = 1
             del self.options.start_inventory.value["Ocarina"]
         always_invalid_starting_items = ["Triforce Piece", "Green Clock", "Blue Clock", "Red Clock"]
-        #always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
+        always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
         invalid_items = []
         for item in start_inventory:
             if item in always_invalid_starting_items or item not in self.item_name_to_id:
