@@ -98,7 +98,8 @@ class ALttPRWorld(World):
     item_name_to_id = Items.item_name_to_id
     location_name_to_id = Regions.lookup_name_to_id
     item_name_groups = {
-        "Bottles": {"Bottle", "Bottle (Green Potion)", "Bottle (Red Potion)", "Bottle (Blue Potion)", "Bottle (Bee)", "Bottle (Good Bee)", "Bottle (Fairy)"}
+        "Bottles": {"Bottle", "Bottle (Green Potion)", "Bottle (Red Potion)", "Bottle (Blue Potion)", "Bottle (Bee)", "Bottle (Good Bee)", "Bottle (Fairy)"},
+        "Ocarina": {"Ocarina", "Ocarina (Activated)"},
     }
 
     # There is always one region that the generator starts from & assumes you can always go back to.
@@ -579,7 +580,7 @@ class ALttPRWorld(World):
             self.options.start_inventory.value["Ocarina (Activated)"] = 1
             del self.options.start_inventory.value["Ocarina"]
         always_invalid_starting_items = ["Triforce Piece", "Green Clock", "Blue Clock", "Red Clock"]
-        always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
+        #always_invalid_starting_items.extend([item for item in Items.progressive_items if item.startswith("Small Key")])
         invalid_items = []
         for item in start_inventory:
             if item in always_invalid_starting_items or item not in self.item_name_to_id:

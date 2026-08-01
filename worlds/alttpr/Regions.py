@@ -288,7 +288,7 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
                           "Moon Pearl", player)))
                      ) or (state.has("Progressive Glove", player, 2) and state.has("Hammer", player) and state.has(
                 "Moon Pearl", player)))
-        elif district.name in ["East Hyrule", "Lake Hylia", "Central Hyrule", "Desert", "Kakariko", "Northwest Hyrule"]:
+        elif district.name in ["Eastern Hyrule", "Lake Hylia", "Central Hyrule", "Desert", "Kakariko", "Northwest Hyrule"]:
             # Only Mirror is needed because if we're checking the Pyramid Crack, then you can get to Pyramid, leave a
             # mirror portal outside Hyrule Castle, then walk there with the Big Bomb from most of Light World.
             pyramid_crack_rule = lambda state: state.has("Beat Agahnim 1", player) or \
@@ -393,7 +393,7 @@ def handle_big_bomb_logic(world: ALttPRWorld) -> None:
             pyramid_crack_rule = lambda state: state.has("Hammer", player) or can_reach_with_flute(state)
         elif district.name == "Northwest Dark World":
             pyramid_crack_rule = lambda state: can_reach_from_north_dark_world(state) or can_reach_with_flute(state)
-        elif district.name in ["Northwest Hyrule", "Kakariko", "Central Hyrule", "East Hyrule", "Lake Hylia", "Desert"]:
+        elif district.name in ["Northwest Hyrule", "Kakariko", "Central Hyrule", "Eastern Hyrule", "Lake Hylia", "Desert"]:
             pyramid_crack_rule = lambda state: state.has("Magic Mirror", player)
         # TODO: Overworld glitches, what if bomb shop at brothers west
 

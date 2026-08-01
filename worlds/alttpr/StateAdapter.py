@@ -106,7 +106,7 @@ class StateAdapter:
 
     def can_buy_unlimited(self, item, player):
         for shop in self.world.shops[1]:
-            if shop.has_unlimited(item) and shop.region.can_reach(self):
+            if shop.has_unlimited(item) and self.can_reach(shop.region.name):
                 return True
         return False
 
