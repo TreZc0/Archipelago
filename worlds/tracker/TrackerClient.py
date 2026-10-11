@@ -1349,20 +1349,20 @@ class TrackerGameContext(CommonContext):
                             if "img" in items[pop_name].keys():
                                 icon = ApItemToggleIcon(size=layout_config.item_size,
                                                         grid=grid, id=pool_item.code, name=item,
-                                                        source=f"{ctx.root_pack_path}/{items[pop_name]["img"]}")
+                                                        source=f"{ctx.root_pack_path}/{items[pop_name]['img']}")
                         elif items[pop_name]["type"] == "consumable":
                             if "img" in items[pop_name].keys():
                                 occurences_in_pool = sum(pool_item.name == item for pool_item in itempool)
                                 icon = ApItemCounterIcon(size=layout_config.item_size,
                                                         grid=grid, id=pool_item.code, name=item,
-                                                        source=f"{ctx.root_pack_path}/{items[pop_name]["img"]}", max=occurences_in_pool)
+                                                        source=f"{ctx.root_pack_path}/{items[pop_name]['img']}", max=occurences_in_pool)
                         elif items[pop_name]["type"] == "progressive":
                             if "stages" in items[pop_name].keys():
                                 occurences_in_pool = sum(pool_item.name == item for pool_item in itempool)
                                 sources: list[str] = []
                                 for stage in items[pop_name]["stages"]:
                                     if "img" in stage.keys():
-                                        sources.append(f"{ctx.root_pack_path}/{stage["img"]}")
+                                        sources.append(f"{ctx.root_pack_path}/{stage['img']}")
                                 icon = ApItemProgressiveIcon(size=layout_config.item_size,
                                                             grid=grid, id=pool_item.code, name=item,
                                                             sources=sources, max=occurences_in_pool)
